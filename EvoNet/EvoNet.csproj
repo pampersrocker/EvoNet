@@ -39,6 +39,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Game1.cs" />
+    <Compile Include="NeuronalNetwork\Connection.cs" />
+    <Compile Include="NeuronalNetwork\InputNeuron.cs" />
+    <Compile Include="NeuronalNetwork\Neuron.cs" />
+    <Compile Include="NeuronalNetwork\NeuronalNetwork.cs" />
+    <Compile Include="NeuronalNetwork\WorkingNeuron.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
