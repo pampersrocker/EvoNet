@@ -1,6 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using EvoNet.Map;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace EvoNet
 {
@@ -12,9 +14,18 @@ namespace EvoNet
     GraphicsDeviceManager graphics;
     SpriteBatch spriteBatch;
 
+    TileMap tileMap;
+
+    /// <summary>
+    /// Default 1x1 white Texture, can be used to draw shapes in any color
+    /// </summary>
+    public static Texture2D WhiteTexture { get; private set; }
+
     public EvoGame()
     {
       graphics = new GraphicsDeviceManager(this);
+      graphics.PreferredBackBufferWidth = 1280;
+      graphics.PreferredBackBufferHeight = 720;
       Content.RootDirectory = "Content";
     }
 
@@ -26,7 +37,13 @@ namespace EvoNet
     /// </summary>
     protected override void Initialize()
     {
-      // TODO: Add your initialization logic here
+      // Create default white texture
+      WhiteTexture = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+      Color[] colorData = new Color[1];
+      colorData[0] = Color.White;
+      WhiteTexture.SetData(colorData);
+      tileMap = new TileMap(10, 10, 50.0f);
+      tileMap.Initialize(this);
 
       base.Initialize();
     }
@@ -39,6 +56,17 @@ namespace EvoNet
     {
       // Create a new SpriteBatch, which can be used to draw textures.
       spriteBatch = new SpriteBatch(GraphicsDevice);
+
+      // Fill the tilemap with some random values
+      // TODO: Replace with terrain generation
+      Random rand = new Random();
+      for (int x = 0; x < tileMap.Width; x++)
+      {
+        for (int y = 0; y < tileMap.Height; y++)
+        {
+          tileMap.Types[x, y] = rand.NextDouble() > 0.5 ? TileType.Land : TileType.Water;
+        }
+      }
 
       // TODO: use this.Content to load your game content here
     }
@@ -62,7 +90,7 @@ namespace EvoNet
       if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
         Exit();
 
-      // TODO: Add your update logic here
+      tileMap.Update(gameTime);
 
       base.Update(gameTime);
     }
@@ -75,8 +103,9 @@ namespace EvoNet
     {
       GraphicsDevice.Clear(Color.CornflowerBlue);
 
-      // TODO: Add your drawing code here
+      tileMap.Draw(gameTime);
 
+  
       base.Draw(gameTime);
     }
   }
