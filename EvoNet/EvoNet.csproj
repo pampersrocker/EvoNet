@@ -58,7 +58,11 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Camera.cs" />
+    <Compile Include="Configuration\GameConfig.cs" />
     <Compile Include="EvoGame.cs" />
+    <Compile Include="Input\InputManager.cs" />
+    <Compile Include="Mathf.cs" />
     <Compile Include="NeuronalNetwork\Connection.cs" />
     <Compile Include="NeuronalNetwork\InputNeuron.cs" />
     <Compile Include="NeuronalNetwork\Neuron.cs" />

@@ -17,6 +17,7 @@ namespace EvoNet.Map
     float tileSize;
 
     SpriteBatch spriteBatch;
+    public Camera Camera { get; set; }
 
     public int Width { get; private set; }
     public int Height { get; private set; }
@@ -93,7 +94,12 @@ namespace EvoNet.Map
     public void Draw(GameTime deltaTime)
     {
       // Todo Camera
-      spriteBatch.Begin();
+      Matrix? UsedMatrix = null;
+      if (Camera != null)
+      {
+        UsedMatrix = Camera.Matrix;
+      }
+      spriteBatch.Begin(transformMatrix: UsedMatrix);
       for (int x = 0; x < Width; x++)
       {
         for (int y = 0; y < Height; y++)

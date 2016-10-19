@@ -1,4 +1,6 @@
-﻿using EvoNet.Map;
+﻿using EvoNet.Configuration;
+using EvoNet.Input;
+using EvoNet.Map;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -15,6 +17,9 @@ namespace EvoNet
     SpriteBatch spriteBatch;
 
     TileMap tileMap;
+    Camera camera;
+    GameConfig gameConfiguration;
+    InputManager inputManager;
 
     /// <summary>
     /// Default 1x1 white Texture, can be used to draw shapes in any color
@@ -37,13 +42,22 @@ namespace EvoNet
     /// </summary>
     protected override void Initialize()
     {
+      gameConfiguration = GameConfig.LoadConfigOrDefault();
+
       // Create default white texture
       WhiteTexture = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
       Color[] colorData = new Color[1];
       colorData[0] = Color.White;
       WhiteTexture.SetData(colorData);
+
+      camera = new Camera();
+
       tileMap = new TileMap(10, 10, 50.0f);
       tileMap.Initialize(this);
+      tileMap.Camera = camera;
+
+      inputManager = new InputManager();
+      inputManager.Initialize(gameConfiguration, camera);
 
       base.Initialize();
     }
@@ -89,6 +103,8 @@ namespace EvoNet
     {
       if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
         Exit();
+
+      inputManager.Update(gameTime);
 
       tileMap.Update(gameTime);
 

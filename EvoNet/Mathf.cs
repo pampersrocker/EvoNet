@@ -4,6 +4,10 @@ namespace EvoNet
 {
   public class Mathf
   {
+    public const float PI = 3.1415926535f;
+    public const float DegreeToRad = PI / 180.0f;
+    public const float RadToDegree = 180.0f / PI;
+
     public static float Sin(float Value)
     {
       return (float)Math.Sin(Value);
