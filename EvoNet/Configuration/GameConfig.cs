@@ -26,7 +26,7 @@ namespace EvoNet.Configuration
         config.MoveLeftKeys = new List<Keys> { Keys.A, Keys.Left };
         config.MoveRightKeys = new List<Keys> { Keys.D, Keys.Right };
         config.MovementSensitivity = 100.0f;
-        config.ScaleFactor = 2.0f;
+        config.ScaleFactor = 0.1f;
         return config;
       }
     }
@@ -42,8 +42,8 @@ namespace EvoNet.Configuration
       }
       else
       {
-        Serializer yamlSerializer = new Serializer();
         // Write out default config if there is no config for easier adjustment
+        Serializer yamlSerializer = new Serializer();
         string serialized = yamlSerializer.Serialize(DefaultConfig);
         File.WriteAllText("Config.cfg", serialized);
         return DefaultConfig;

@@ -8,6 +8,11 @@ namespace EvoNet
     public const float DegreeToRad = PI / 180.0f;
     public const float RadToDegree = 180.0f / PI;
 
+    public static float Abs(float Value)
+    {
+      return (float)Math.Abs(Value);
+    }
+
     public static float Sin(float Value)
     {
       return (float)Math.Sin(Value);
