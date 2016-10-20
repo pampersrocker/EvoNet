@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using System.IO;
+using YamlDotNet.Serialization;
 
 namespace EvoNet.Configuration
 {
@@ -35,11 +36,16 @@ namespace EvoNet.Configuration
       if (File.Exists("Config.cfg"))
       {
         string sourceText = File.ReadAllText("Config.cfg");
-        // TODO: Deserialize
-        return DefaultConfig;
+        Deserializer yamlDeserializer = new Deserializer();
+        GameConfig deserialized = yamlDeserializer.Deserialize<GameConfig>(sourceText);
+        return deserialized;
       }
       else
       {
+        Serializer yamlSerializer = new Serializer();
+        // Write out default config if there is no config for easier adjustment
+        string serialized = yamlSerializer.Serialize(DefaultConfig);
+        File.WriteAllText("Config.cfg", serialized);
         return DefaultConfig;
       }
     }
