@@ -17,5 +17,12 @@ namespace EvoNet.NeuronalNetwork
         {
             return this.value;
         }
+
+        public override Neuron NameCopy()
+        {
+            InputNeuron clone = new InputNeuron();
+            clone.SetName(GetName());
+            return clone;
+        }
     }
 }

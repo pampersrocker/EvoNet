@@ -8,6 +8,20 @@ namespace EvoNet.NeuronalNetwork
 {
     abstract class Neuron
     {
+        private String name = "NO NAME";
         public abstract float GetValue();
+        public abstract Neuron NameCopy();
+
+
+
+        public string GetName()
+        {
+            return name;
+        }
+
+        public void SetName(string name)
+        {
+            this.name = name;
+        }
     }
 }

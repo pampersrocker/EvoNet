@@ -26,6 +26,11 @@ namespace EvoNet.NeuronalNetwork
             this.value = null;
         }
 
+        public List<Connection> GetConnections()
+        {
+            return connections;
+        }
+
         private void Calculate()
         {
             float value = 0;
@@ -33,7 +38,7 @@ namespace EvoNet.NeuronalNetwork
             {
                 value += c.GetValue();
             }
-            value = Neuron.Sigmoid(value);
+            value = Mathf.Sigmoid(value);
             this.value = value;
         }
 
@@ -44,6 +49,13 @@ namespace EvoNet.NeuronalNetwork
                 Calculate();
             }
             return (float)value;
+        }
+
+        public override Neuron NameCopy()
+        {
+            WorkingNeuron clone = new WorkingNeuron();
+            clone.SetName(GetName());
+            return clone;
         }
     }
 }

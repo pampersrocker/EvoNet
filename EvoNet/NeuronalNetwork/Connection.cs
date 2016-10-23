@@ -9,17 +9,17 @@ namespace EvoNet.NeuronalNetwork
     class Connection
     {
         public float weight = 1;
-        public Neuron entrieNeuron;
+        public Neuron entryNeuron;
 
         public Connection(Neuron n, float weight)
         {
             this.weight = weight;
-            this.entrieNeuron = n;
+            this.entryNeuron = n;
         }
 
         public float GetValue()
         {
-            return weight * entrieNeuron.GetValue();
+            return weight * entryNeuron.GetValue();
         }
     }
 }

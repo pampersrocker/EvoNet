@@ -67,6 +67,8 @@
     <Compile Include="NeuronalNetwork\InputNeuron.cs" />
     <Compile Include="NeuronalNetwork\Neuron.cs" />
     <Compile Include="NeuronalNetwork\NeuronalNetwork.cs" />
+    <Compile Include="NeuronalNetwork\NeuronalNetworkNotFullmeshedException.cs" />
+    <Compile Include="NeuronalNetwork\NotSameAmountOfNeuronsException.cs" />
     <Compile Include="NeuronalNetwork\WorkingNeuron.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
