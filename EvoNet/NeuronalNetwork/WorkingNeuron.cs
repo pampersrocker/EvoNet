@@ -31,6 +31,14 @@ namespace EvoNet.NeuronalNetwork
             return connections;
         }
 
+        public void RandomizeWeights()
+        {
+            foreach(Connection c in connections)
+            {
+                c.weight = (float)EvoGame.GlobalRandom.NextDouble() * 2 - 1;
+            }
+        }
+
         private void Calculate()
         {
             float value = 0;

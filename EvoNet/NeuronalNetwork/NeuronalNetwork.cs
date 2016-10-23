@@ -118,6 +118,18 @@ namespace EvoNet.NeuronalNetwork
             }
         }
 
+        public void RandomizeAllWeights()
+        {
+            foreach (WorkingNeuron wn in hiddenNeurons)
+            {
+                wn.RandomizeWeights();
+            }
+            foreach (WorkingNeuron wn in outputNeurons)
+            {
+                wn.RandomizeWeights();
+            }
+        }
+        
         public NeuronalNetwork CloneFullMesh()
         {
             //TODO make this mess pretty

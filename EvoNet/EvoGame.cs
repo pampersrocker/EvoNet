@@ -1,10 +1,12 @@
 ﻿using EvoNet.Configuration;
 using EvoNet.Input;
 using EvoNet.Map;
+using EvoNet.ProceduralGeneration;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Diagnostics;
 
 namespace EvoNet
 {
@@ -13,6 +15,8 @@ namespace EvoNet
     /// </summary>
     public class EvoGame : Game
     {
+
+        public static Random GlobalRandom = new Random();
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
@@ -53,7 +57,7 @@ namespace EvoNet
 
             camera = new Camera();
 
-            tileMap = new TileMap(10, 10, 50.0f);
+            tileMap = new TileMap(100, 100, 5.0f);
             tileMap.Initialize(this);
             tileMap.Camera = camera;
 
@@ -75,11 +79,16 @@ namespace EvoNet
             // Fill the tilemap with some random values
             // TODO: Replace with terrain generation
             Random rand = new Random();
+            ValueNoise2D vn = new ValueNoise2D(tileMap.Width, tileMap.Height);
+            vn.startFrequencyX = 10;
+            vn.startFrequencyY = 10;
+            vn.calculate();
+            float[,] heightMap = vn.getHeightMap();
             for (int x = 0; x < tileMap.Width; x++)
             {
                 for (int y = 0; y < tileMap.Height; y++)
                 {
-                    tileMap.Types[x, y] = rand.NextDouble() > 0.5 ? TileType.Land : TileType.Water;
+                    tileMap.Types[x, y] = heightMap[x,y] > 0.5 ? TileType.Land : TileType.Water;
                 }
             }
 

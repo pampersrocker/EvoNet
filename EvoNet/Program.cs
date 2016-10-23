@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EvoNet.NeuronalNetwork;
+using System;
 
 namespace EvoNet
 {
@@ -13,6 +14,7 @@ namespace EvoNet
         [STAThread]
         static void Main()
         {
+            NeuronalNetworkTest.Test();
             using (var game = new EvoGame())
                 game.Run();
         }

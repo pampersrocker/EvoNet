@@ -68,8 +68,10 @@
     <Compile Include="NeuronalNetwork\Neuron.cs" />
     <Compile Include="NeuronalNetwork\NeuronalNetwork.cs" />
     <Compile Include="NeuronalNetwork\NeuronalNetworkNotFullmeshedException.cs" />
+    <Compile Include="NeuronalNetwork\NeuronalNetworkTest.cs" />
     <Compile Include="NeuronalNetwork\NotSameAmountOfNeuronsException.cs" />
     <Compile Include="NeuronalNetwork\WorkingNeuron.cs" />
+    <Compile Include="ProceduralGeneration\ValueNoise2D.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Map\Tile.cs" />

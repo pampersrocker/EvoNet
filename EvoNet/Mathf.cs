@@ -46,5 +46,11 @@ namespace EvoNet
             float et = (float)Math.Pow(Math.E, x);
             return et / (1 + et);
         }
+
+        public static float InterpolateCosine(float a, float b, float t)
+        {
+            float t2 = (1 - Cos(t * PI)) / 2;
+            return (a * (1 - t2) + b * t2);
+        }
     }
 }
