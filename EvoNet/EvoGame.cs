@@ -57,7 +57,7 @@ namespace EvoNet
 
             camera = new Camera();
 
-            tileMap = new TileMap(100, 100, 5.0f);
+            tileMap = new TileMap(100, 100, 100.0f);
             tileMap.Initialize(this);
             tileMap.Camera = camera;
 

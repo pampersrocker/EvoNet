@@ -1,10 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvoNet.Map
 {
@@ -13,6 +8,15 @@ namespace EvoNet.Map
         float[,] foodValues;
         TileType[,] types;
         Rectangle[,] renderRectangles;
+        Rectangle[,] rendersourceRectangles;
+
+        Texture2D Water1Texture { get; set; }
+        Texture2D Water2Texture { get; set; }
+        Texture2D GrassTexture { get; set; }
+        Texture2D SandTexture { get; set; }
+        Texture2D BlendMap { get; set; }
+        Effect LandShader { get; set; }
+        Effect WaterShader { get; set; }
 
         float tileSize;
 
@@ -48,18 +52,40 @@ namespace EvoNet.Map
             }
         }
 
-        public TileMap(int width, int height, float inTileSize)
+        /// <summary>
+        /// Creates a new tilemap
+        /// </summary>
+        /// <param name="width">Number of tiles in horizontal direction</param>
+        /// <param name="height">Number of tiles in vertical direction</param>
+        /// <param name="inTileSize">Width and Height of a Tile</param>
+        /// <param name="renderTextureTileFactor">How many tiles use a single texture until it wraps?
+        /// Setting this to a higher value reduces tiled look</param>
+        public TileMap(int width, int height, float inTileSize, int renderTextureTileFactor = 5)
         {
             Width = width;
             Height = height;
             foodValues = new float[width, height];
             types = new TileType[width, height];
             renderRectangles = new Rectangle[width, height];
+            rendersourceRectangles = new Rectangle[width, height];
+
+            int textureSize = 512; // Assume we have a 512x512 texture
+            int sourceSize = textureSize / renderTextureTileFactor;
+
             for (int x = 0; x < Width; x++)
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    renderRectangles[x, y] = new Rectangle((int)(x * inTileSize), (int)(y * inTileSize), (int)inTileSize, (int)inTileSize);
+                    renderRectangles[x, y] = new Rectangle(
+                        (int)(x * inTileSize),
+                        (int)(y * inTileSize),
+                        (int)inTileSize,
+                        (int)inTileSize);
+                    rendersourceRectangles[x, y] = new Rectangle(
+                        x * textureSize / renderTextureTileFactor,
+                        y * textureSize / renderTextureTileFactor,
+                        sourceSize,
+                        sourceSize);
                 }
             }
             tileSize = inTileSize;
@@ -84,15 +110,29 @@ namespace EvoNet.Map
         public void Initialize(EvoGame game)
         {
             spriteBatch = new SpriteBatch(game.GraphicsDevice);
+
+            SandTexture = game.Content.Load<Texture2D>("Map/SandTexture");
+            GrassTexture = game.Content.Load<Texture2D>("Map/GrassTexture");
+            BlendMap = game.Content.Load<Texture2D>("Map/BlendMap");
+            Water1Texture = game.Content.Load<Texture2D>("Map/Water1");
+            Water2Texture = game.Content.Load<Texture2D>("Map/Water2");
+            BlendMap = game.Content.Load<Texture2D>("Map/BlendMap");
+            LandShader = game.Content.Load<Effect>("Map/GrassDisplay");
+            WaterShader = game.Content.Load<Effect>("Map/WaterEffect");
+
+            LandShader.Parameters["GrassTexture"].SetValue(GrassTexture);
+            LandShader.Parameters["SandTexture"].SetValue(SandTexture);
+            LandShader.Parameters["BlendMap"].SetValue(BlendMap);
+            WaterShader.Parameters["Water2"].SetValue(Water2Texture);
         }
 
         public void Update(GameTime deltaTime)
         {
-            for(int i = 0; i<Width; i++)
+            for (int i = 0; i < Width; i++)
             {
-                for(int k = 0; k<Height; k++)
+                for (int k = 0; k < Height; k++)
                 {
-                    if(IsFertile(i, k))
+                    if (IsFertile(i, k))
                     {
                         Grow(i, k);
                     }
@@ -108,15 +148,15 @@ namespace EvoNet.Map
 
         public bool IsFertileToNeighbors(int x, int y)
         {
-            if(x < 0 || y < 0 || x >= Width || y >= Height)
+            if (x < 0 || y < 0 || x >= Width || y >= Height)
             {
                 return false; //If out of bounds
             }
-            if(types[x, y] == TileType.Water)
+            if (types[x, y] == TileType.Water)
             {
                 return true;
             }
-            if(types[x, y] == TileType.Land && foodValues[x, y] > 50)
+            if (types[x, y] == TileType.Land && foodValues[x, y] > 50)
             {
                 return true;
             }
@@ -125,9 +165,9 @@ namespace EvoNet.Map
 
         public bool IsFertile(int x, int y)
         {
-            if(types[x, y] == TileType.Land)
+            if (types[x, y] == TileType.Land)
             {
-                if(foodValues[x, y] > 50)
+                if (foodValues[x, y] > 50)
                 {
                     return true;
                 }
@@ -154,33 +194,42 @@ namespace EvoNet.Map
 
         public void Draw(GameTime deltaTime)
         {
-            // Todo Camera
             Matrix? UsedMatrix = null;
             if (Camera != null)
             {
                 UsedMatrix = Camera.Matrix;
             }
-            spriteBatch.Begin(transformMatrix: UsedMatrix);
+
+            // Render land tiles with shader effect to blend between sand and grass
+            spriteBatch.Begin(transformMatrix: UsedMatrix, effect: LandShader);
             for (int x = 0; x < Width; x++)
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    Color color = new Color();
-                    if(types[x, y] == TileType.Water)
+                    if (types[x, y] == TileType.Land)
                     {
-                        color = Color.Blue;
-                    }else if(types[x, y] == TileType.Land)
-                    {
-                        float bleach = 1 - foodValues[x, y] / 100f;
-                        color = new Color(bleach, 1, bleach);
-                    }else if(types[x, y] == TileType.None)
-                    {
-                        color = Color.Black;
+                        Color color = new Color(0.0f, 0.0f, 1.0f, 1 - foodValues[x, y] / 100.0f);
+                        spriteBatch.Draw(SandTexture, renderRectangles[x, y], rendersourceRectangles[x, y], color);
                     }
-                    spriteBatch.Draw(EvoGame.WhiteTexture, renderRectangles[x, y], color);
                 }
             }
             spriteBatch.End();
+
+            // Render water tiles with animated "water" shader
+            spriteBatch.Begin(transformMatrix: UsedMatrix, effect: WaterShader);
+            WaterShader.Parameters["Time"].SetValue((float)deltaTime.TotalGameTime.TotalSeconds / 3);
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    if (types[x, y] == TileType.Water)
+                    {
+                        spriteBatch.Draw(Water1Texture, renderRectangles[x, y], rendersourceRectangles[x, y], Color.White);
+                    }
+                }
+            }
+            spriteBatch.End();
+
         }
 
 
