@@ -8,108 +8,108 @@ using System.Threading.Tasks;
 
 namespace EvoNet.Map
 {
-  public class TileMap
-  {
-    float[,] foodValues;
-    TileType[,] types;
-    Rectangle[,] renderRectangles;
-
-    float tileSize;
-
-    SpriteBatch spriteBatch;
-    public Camera Camera { get; set; }
-
-    public int Width { get; private set; }
-    public int Height { get; private set; }
-
-    public float[,] FoodValues
+    public class TileMap
     {
-      get
-      {
-        return foodValues;
-      }
+        float[,] foodValues;
+        TileType[,] types;
+        Rectangle[,] renderRectangles;
 
-      set
-      {
-        foodValues = value;
-      }
-    }
+        float tileSize;
 
-    public TileType[,] Types
-    {
-      get
-      {
-        return types;
-      }
+        SpriteBatch spriteBatch;
+        public Camera Camera { get; set; }
 
-      set
-      {
-        types = value;
-      }
-    }
+        public int Width { get; private set; }
+        public int Height { get; private set; }
 
-    public TileMap(int width, int height, float inTileSize)
-    {
-      Width = width;
-      Height = height;
-      foodValues = new float[width, height];
-      types = new TileType[width, height];
-      renderRectangles = new Rectangle[width, height];
-      for (int x = 0; x < Width; x++)
-      {
-        for (int y = 0; y < Height; y++)
+        public float[,] FoodValues
         {
-          renderRectangles[x, y] = new Rectangle((int)(x * inTileSize),(int) (y * inTileSize), (int)inTileSize, (int)inTileSize);
+            get
+            {
+                return foodValues;
+            }
+
+            set
+            {
+                foodValues = value;
+            }
         }
-      }
-          tileSize = inTileSize;
-    }
 
-    public Tile GetTileInfo(int x, int y)
-    {
-      return new Tile(new Point(x, y), types[x, y], foodValues[x, y]);
-    }
-
-    public Tile GetTileInfo(Point position)
-    {
-      return new Tile(position, types[position.X, position.Y], foodValues[position.X, position.Y]);
-    }
-
-    public Tile GetTileAtWorldPosition(Vector2 position)
-    {
-      position /= tileSize;
-      return GetTileInfo(position.ToPoint());
-    }
-
-    public void Initialize(EvoGame game)
-    {
-      spriteBatch = new SpriteBatch(game.GraphicsDevice);
-    }
-
-    public void Update(GameTime deltaTime)
-    {
-
-    }
-
-    public void Draw(GameTime deltaTime)
-    {
-      // Todo Camera
-      Matrix? UsedMatrix = null;
-      if (Camera != null)
-      {
-        UsedMatrix = Camera.Matrix;
-      }
-      spriteBatch.Begin(transformMatrix: UsedMatrix);
-      for (int x = 0; x < Width; x++)
-      {
-        for (int y = 0; y < Height; y++)
+        public TileType[,] Types
         {
-          spriteBatch.Draw(EvoGame.WhiteTexture, renderRectangles[x, y], types[x, y] == TileType.Land ? Color.Brown : Color.Blue);
+            get
+            {
+                return types;
+            }
+
+            set
+            {
+                types = value;
+            }
         }
-      }
-      spriteBatch.End();
+
+        public TileMap(int width, int height, float inTileSize)
+        {
+            Width = width;
+            Height = height;
+            foodValues = new float[width, height];
+            types = new TileType[width, height];
+            renderRectangles = new Rectangle[width, height];
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    renderRectangles[x, y] = new Rectangle((int)(x * inTileSize), (int)(y * inTileSize), (int)inTileSize, (int)inTileSize);
+                }
+            }
+            tileSize = inTileSize;
+        }
+
+        public Tile GetTileInfo(int x, int y)
+        {
+            return new Tile(new Point(x, y), types[x, y], foodValues[x, y]);
+        }
+
+        public Tile GetTileInfo(Point position)
+        {
+            return new Tile(position, types[position.X, position.Y], foodValues[position.X, position.Y]);
+        }
+
+        public Tile GetTileAtWorldPosition(Vector2 position)
+        {
+            position /= tileSize;
+            return GetTileInfo(position.ToPoint());
+        }
+
+        public void Initialize(EvoGame game)
+        {
+            spriteBatch = new SpriteBatch(game.GraphicsDevice);
+        }
+
+        public void Update(GameTime deltaTime)
+        {
+
+        }
+
+        public void Draw(GameTime deltaTime)
+        {
+            // Todo Camera
+            Matrix? UsedMatrix = null;
+            if (Camera != null)
+            {
+                UsedMatrix = Camera.Matrix;
+            }
+            spriteBatch.Begin(transformMatrix: UsedMatrix);
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    spriteBatch.Draw(EvoGame.WhiteTexture, renderRectangles[x, y], types[x, y] == TileType.Land ? Color.Brown : Color.Blue);
+                }
+            }
+            spriteBatch.End();
+        }
+
+
     }
-
-
-  }
 }
