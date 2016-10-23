@@ -111,7 +111,17 @@ namespace EvoNet.Input
 
             int deltaScrollWheelValue = mouseState.ScrollWheelValue - scrollWheelValue;
 
+            // Track where we are before scale
+            Vector2 mousePositionBeforeScale = Vector2.Transform(mouseState.Position.ToVector2(), Matrix.Invert(camera.Matrix));
+
             camera.Scale += (gameConfiguration.ScaleFactor * (deltaScrollWheelValue / 120.0f)) / (camera.Scale < 1 ? 1 / camera.Scale : camera.Scale);
+
+            // Track where we are after scale
+            Vector2 mousePositionAfterScale = Vector2.Transform(mouseState.Position.ToVector2(), Matrix.Invert(camera.Matrix));
+
+            // Adjust screen position with respect to scale to achieve zoom to Mouse cursor functionality
+            camera.Move((mousePositionAfterScale- mousePositionBeforeScale)*camera.Scale);
+
 
             scrollWheelValue = mouseState.ScrollWheelValue;
 
