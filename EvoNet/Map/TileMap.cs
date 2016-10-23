@@ -88,7 +88,68 @@ namespace EvoNet.Map
 
         public void Update(GameTime deltaTime)
         {
+            for(int i = 0; i<Width; i++)
+            {
+                for(int k = 0; k<Height; k++)
+                {
+                    if(IsFertile(i, k))
+                    {
+                        Grow(i, k);
+                    }
+                }
+            }
+        }
 
+        public void Grow(int x, int y)
+        {
+            foodValues[x, y] += 0.3f;
+            if (foodValues[x, y] > 100) foodValues[x, y] = 100;
+        }
+
+        public bool IsFertileToNeighbors(int x, int y)
+        {
+            if(x < 0 || y < 0 || x >= Width || y >= Height)
+            {
+                return false; //If out of bounds
+            }
+            if(types[x, y] == TileType.Water)
+            {
+                return true;
+            }
+            if(types[x, y] == TileType.Land && foodValues[x, y] > 50)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool IsFertile(int x, int y)
+        {
+            if(types[x, y] == TileType.Land)
+            {
+                if(foodValues[x, y] > 50)
+                {
+                    return true;
+                }
+                if (IsFertileToNeighbors(x - 1, y))
+                {
+                    return true;
+                }
+                if (IsFertileToNeighbors(x + 1, y))
+                {
+                    return true;
+                }
+                if (IsFertileToNeighbors(x, y - 1))
+                {
+                    return true;
+                }
+                if (IsFertileToNeighbors(x, y + 1))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public void Draw(GameTime deltaTime)
@@ -104,7 +165,19 @@ namespace EvoNet.Map
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    spriteBatch.Draw(EvoGame.WhiteTexture, renderRectangles[x, y], types[x, y] == TileType.Land ? Color.Brown : Color.Blue);
+                    Color color = new Color();
+                    if(types[x, y] == TileType.Water)
+                    {
+                        color = Color.Blue;
+                    }else if(types[x, y] == TileType.Land)
+                    {
+                        float bleach = 1 - foodValues[x, y] / 100f;
+                        color = new Color(bleach, 1, bleach);
+                    }else if(types[x, y] == TileType.None)
+                    {
+                        color = Color.Black;
+                    }
+                    spriteBatch.Draw(EvoGame.WhiteTexture, renderRectangles[x, y], color);
                 }
             }
             spriteBatch.End();
