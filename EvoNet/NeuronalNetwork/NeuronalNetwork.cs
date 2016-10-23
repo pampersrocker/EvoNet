@@ -53,7 +53,19 @@ namespace EvoNet.NeuronalNetwork
             }
         }
 
-        public NeuronalNetwork clone()
+        public void Invalidate()
+        {
+            foreach(WorkingNeuron wn in hiddenNeurons)
+            {
+                wn.Invalidate();
+            }
+            foreach(WorkingNeuron wn in outputNeurons)
+            {
+                wn.Invalidate();
+            }
+        }
+
+        public NeuronalNetwork Clone()
         {
             //TODO
             return null;

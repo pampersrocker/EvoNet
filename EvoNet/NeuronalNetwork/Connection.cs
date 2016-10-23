@@ -19,7 +19,7 @@ namespace EvoNet.NeuronalNetwork
 
         public float GetValue()
         {
-            return weight * GetValue();
+            return weight * entrieNeuron.GetValue();
         }
     }
 }
