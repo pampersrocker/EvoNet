@@ -68,7 +68,7 @@ namespace EvoNet.AI
 
         public WorkingNeuron GetOutputNeuronFromName(String name)
         {
-            foreach (WorkingNeuron wn in hiddenNeurons)
+            foreach (WorkingNeuron wn in outputNeurons)
             {
                 if (name == wn.GetName())
                 {
@@ -127,6 +127,19 @@ namespace EvoNet.AI
             foreach (WorkingNeuron wn in outputNeurons)
             {
                 wn.RandomizeWeights();
+            }
+        }
+
+        public void RandomMutation(float MutationRate)
+        {
+            int index = EvoGame.GlobalRandom.Next(hiddenNeurons.Count + outputNeurons.Count);
+            if(index < hiddenNeurons.Count)
+            {
+                hiddenNeurons[index].RandomMutation(MutationRate);
+            }
+            else
+            {
+                outputNeurons[index - hiddenNeurons.Count].RandomMutation(MutationRate);
             }
         }
         

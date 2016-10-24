@@ -6,11 +6,22 @@ using System.Threading.Tasks;
 using EvoNet.AI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using EvoNet.Map;
+using System.Diagnostics;
 
 namespace EvoNet.Objects
 {
     public class Creature
     {
+        private const float COST_EAT = 0.1f;
+        private const float GAIN_EAT = 1f;
+        private const float COST_PERMANENT = 0.01f;
+        private const float COST_WALK = 0.05f;
+        private const float COST_ROTATE = 0.05f;
+        private const float AGEPERTICK = 0.01f;
+
+        private const float MOVESPEED = 10f;
+
         private const float STARTENERGY = 150;
         private const float MINIMUMSURVIVALENERGY = 100;
 
@@ -64,6 +75,8 @@ namespace EvoNet.Objects
         private WorkingNeuron outFeelerAngle = new WorkingNeuron();
         private WorkingNeuron outAttack      = new WorkingNeuron();
         private WorkingNeuron outEat         = new WorkingNeuron();
+
+        private Color color;
 
         public Creature(Vector2 pos, float viewAngle)
         {
@@ -120,6 +133,7 @@ namespace EvoNet.Objects
             brain.RandomizeAllWeights();
             CalculateFeelerPos();
 
+            color = new Color((float)EvoGame.GlobalRandom.NextDouble(), (float)EvoGame.GlobalRandom.NextDouble(), (float)EvoGame.GlobalRandom.NextDouble());
         }
 
         public Creature(Creature mother)
@@ -147,44 +161,137 @@ namespace EvoNet.Objects
             outEat         = brain.GetOutputNeuronFromName(NAME_OUT_EAT);
 
             CalculateFeelerPos();
-            //TODO mutate
+            for (int i = 0; i < 10; i++)
+            {
+                brain.RandomMutation(0.1f);
+            }
+
+            float r = mother.color.R / 255f;
+            float g = mother.color.G / 255f;
+            float b = mother.color.B / 255f;
+
+            r += (float)EvoGame.GlobalRandom.NextDouble() * 0.1f - 0.05f;
+            g += (float)EvoGame.GlobalRandom.NextDouble() * 0.1f - 0.05f;
+            b += (float)EvoGame.GlobalRandom.NextDouble() * 0.1f - 0.05f;
+
+            r = Mathf.Clamp01(r);
+            g = Mathf.Clamp01(g);
+            b = Mathf.Clamp01(b);
+
+            color = new Color(r, g, b);
         }
 
         public void ReadSensors()
         {
             brain.Invalidate();
 
+            Tile creatureTile = EvoGame.Instance.tileMap.GetTileAtWorldPosition(pos);
+            Tile feelerTile   = EvoGame.Instance.tileMap.GetTileAtWorldPosition(feelerPos);
+
             inBias.SetValue(1);
-            inFoodValuePosition.SetValue(0); //TODO find real value
-            inFoodValueFeeler.SetValue(0); //TODO find real value
+            inFoodValuePosition.SetValue(creatureTile.food / TileMap.MAXIMUMFOODPERTILE);
+            inFoodValueFeeler.SetValue(feelerTile.food / TileMap.MAXIMUMFOODPERTILE);
             inOcclusionFeeler.SetValue(0); //TODO find real value
             inEnergy.SetValue((energy - MINIMUMSURVIVALENERGY) / (STARTENERGY - MINIMUMSURVIVALENERGY));
             inAge.SetValue(age);
             inGeneticDifference.SetValue(0); //TODO find real value
             inWasAttacked.SetValue(0); //TODO find real value
-            inWaterOnFeeler.SetValue(0); //TODO find real value
-            inWaterOnCreature.SetValue(0); //TODO find real value
+            inWaterOnFeeler.SetValue(feelerTile.IsLand() ? 0 : 1);
+            inWaterOnCreature.SetValue(creatureTile.IsLand() ? 0 : 1);
         }
 
         public void Act()
         {
+            Tile t = EvoGame.Instance.tileMap.GetTileAtWorldPosition(pos);
+            float costMult = CalculateCostMultiplier(t);
+            ActRotate(costMult);
+            ActMove(costMult);
+            ActBirth();
+            ActFeelerRotate();
+            ActEat(costMult, t);
+
+            age += AGEPERTICK;
+
+            //TODO implement Attack
+
+            if(energy < 100)
+            {
+                Kill(t);
+            }
+        }
+
+        private void Kill(Tile t)
+        {
+            if (t.IsLand())
+            {
+                EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] += energy;
+            }
+            EvoGame.CreaturesToKill.Add(this);
+        }
+
+        private void ActRotate(float costMult)
+        {
             float rotateForce = Mathf.ClampNegPos(outRotate.GetValue());
             this.viewAngle += rotateForce / 10;
+            energy -= Mathf.Abs(rotateForce * COST_ROTATE * costMult);
+        }
 
-            Vector2 forwardVector = new Vector2(Mathf.Sin(viewAngle), Mathf.Cos(viewAngle));
+        private void ActMove(float costMult)
+        {
+            Vector2 forwardVector = new Vector2(Mathf.Sin(viewAngle), Mathf.Cos(viewAngle)) * MOVESPEED;
             float forwardForce = Mathf.ClampNegPos(outForward.GetValue());
             forwardVector *= forwardForce;
             this.pos += forwardVector;
+            energy -= Mathf.Abs(forwardForce * COST_WALK * costMult);
+        }
 
+        private void ActBirth()
+        {
             float birthWish = outBirth.GetValue();
             if (birthWish > 0) TryToGiveBirth();
+        }
 
+        private void ActFeelerRotate()
+        {
             feelerAngle = Mathf.ClampNegPos(outFeelerAngle.GetValue()) * Mathf.PI;
             CalculateFeelerPos();
-            //TODO implement Attack
-            //TODO implement Eat
-            //TODO implement Action Costs
-            //TODO increase Age
+        }
+
+        private void ActEat(float costMult, Tile creatureTile)
+        {
+            float eatWish = Mathf.Clamp01(outEat.GetValue());
+            if (eatWish > 0)
+            {
+                Eat(eatWish, creatureTile);
+                energy -= eatWish * COST_EAT * costMult;
+            }
+        }
+
+        private void Eat(float eatWish, Tile t)
+        {
+            if(t.type != TileType.None)
+            {
+                float foodVal = EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y];
+                if (foodVal > 0)
+                {
+                    if (foodVal > GAIN_EAT * eatWish)
+                    {
+                        energy += GAIN_EAT * eatWish;
+                        EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] -= GAIN_EAT;
+                    }
+                    else
+                    {
+                        energy += foodVal;
+                        EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] = 0;
+                    }
+                }
+            }
+           
+        }
+
+        private float CalculateCostMultiplier(Tile CreatureTile)
+        {
+            return age * (CreatureTile.IsLand() ? 1 : 2);
         }
 
         public void TryToGiveBirth()
@@ -197,7 +304,7 @@ namespace EvoNet.Objects
 
         public void GiveBirth()
         {
-            EvoGame.Creatures.Add(new Creature(this));
+            EvoGame.CreaturesToSpawn.Add(new Creature(this));
             energy -= STARTENERGY;
         }
 
@@ -217,7 +324,7 @@ namespace EvoNet.Objects
         {
             //TODO change that quick and dirty solution
             spriteBatch.Begin(transformMatrix: Camera.instanceGameWorld.Matrix);
-            spriteBatch.Draw(bodyTex, new Rectangle((int)pos.X - 25, (int)pos.Y - 25, 50, 50), Color.Red);
+            spriteBatch.Draw(bodyTex, new Rectangle((int)pos.X - 25, (int)pos.Y - 25, 50, 50), color);
             spriteBatch.Draw(feelerTex, new Rectangle((int)feelerPos.X - 5, (int)feelerPos.Y - 5, 10, 10), Color.Blue);
             //TODO draw line between body and feelerpos
             spriteBatch.End();

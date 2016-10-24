@@ -20,11 +20,13 @@ namespace EvoNet
 
         public static Random GlobalRandom = new Random();
         public static List<Creature> Creatures = new List<Creature>();
+        public static List<Creature> CreaturesToKill = new List<Creature>();
+        public static List<Creature> CreaturesToSpawn = new List<Creature>();
         public static EvoGame Instance;
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        TileMap tileMap;
+        public TileMap tileMap;
         GameConfig gameConfiguration;
         InputManager inputManager;
 
@@ -132,6 +134,16 @@ namespace EvoNet
             {
                 c.Act();
             }
+            foreach(Creature c in CreaturesToKill)
+            {
+                Creatures.Remove(c);
+            }
+            CreaturesToKill.Clear();
+            foreach(Creature c in CreaturesToSpawn)
+            {
+                Creatures.Add(c);
+            }
+            CreaturesToSpawn.Clear();
 
             base.Update(gameTime);
         }

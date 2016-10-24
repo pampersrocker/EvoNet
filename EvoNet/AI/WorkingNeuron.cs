@@ -11,6 +11,12 @@ namespace EvoNet.AI
         private float? value = null;
         private List<Connection> connections = new List<Connection>();
 
+        public void RandomMutation(float MutationRate)
+        {
+            Connection c = connections[EvoGame.GlobalRandom.Next(connections.Count)];
+            c.weight += (float)EvoGame.GlobalRandom.NextDouble() * 2 * MutationRate - MutationRate;
+        }
+
         public void AddNeuronConnection(Neuron n, float weight)
         {
             AddNeuronConnection(new Connection(n, weight));

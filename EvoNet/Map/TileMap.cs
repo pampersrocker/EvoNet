@@ -5,6 +5,8 @@ namespace EvoNet.Map
 {
     public class TileMap
     {
+        public const float MAXIMUMFOODPERTILE = 100;
+
         float[,] foodValues;
         TileType[,] types;
         Rectangle[,] renderRectangles;
@@ -97,6 +99,10 @@ namespace EvoNet.Map
 
         public Tile GetTileInfo(Point position)
         {
+            if(position.X < 0 || position.X > Width - 1 || position.Y < 0 || position.Y > Height - 1)
+            {
+                return new Tile(position, TileType.None, 0);
+            }
             return new Tile(position, types[position.X, position.Y], foodValues[position.X, position.Y]);
         }
 
@@ -151,8 +157,8 @@ namespace EvoNet.Map
 
         public void Grow(int x, int y)
         {
-            foodValues[x, y] += 0.3f;
-            if (foodValues[x, y] > 100) foodValues[x, y] = 100;
+            foodValues[x, y] += 0.1f;
+            if (foodValues[x, y] > MAXIMUMFOODPERTILE) foodValues[x, y] = MAXIMUMFOODPERTILE;
         }
 
         public bool IsFertileToNeighbors(int x, int y)

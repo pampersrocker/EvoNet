@@ -44,7 +44,7 @@ namespace EvoNet
         public static float Sigmoid(float x)
         {
             float et = (float)Math.Pow(Math.E, x);
-            return et / (1 + et);
+            return (et / (1 + et))*2 - 1;
         }
 
         public static float InterpolateCosine(float a, float b, float t)
