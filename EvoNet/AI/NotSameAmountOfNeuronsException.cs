@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EvoNet.NeuronalNetwork
+namespace EvoNet.AI
 {
-    class NeuronalNetworkNotFullmeshedException : Exception
+    class NotSameAmountOfNeuronsException : Exception
     {
     }
 }

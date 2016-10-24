@@ -21,7 +21,6 @@ namespace EvoNet.Map
         float tileSize;
 
         SpriteBatch spriteBatch;
-        public Camera Camera { get; set; }
 
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -105,6 +104,16 @@ namespace EvoNet.Map
         {
             position /= tileSize;
             return GetTileInfo(position.ToPoint());
+        }
+
+        public float GetWorldWidth()
+        {
+            return Width * tileSize;
+        }
+
+        public float GetWorldHeight()
+        {
+            return Height * tileSize;
         }
 
         public void Initialize(EvoGame game)
@@ -195,10 +204,7 @@ namespace EvoNet.Map
         public void Draw(GameTime deltaTime)
         {
             Matrix? UsedMatrix = null;
-            if (Camera != null)
-            {
-                UsedMatrix = Camera.Matrix;
-            }
+            UsedMatrix = Camera.instanceGameWorld.Matrix;
 
             // Render land tiles with shader effect to blend between sand and grass
             spriteBatch.Begin(transformMatrix: UsedMatrix, effect: LandShader);

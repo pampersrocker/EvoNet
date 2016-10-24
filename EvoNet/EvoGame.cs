@@ -7,6 +7,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Diagnostics;
+using System.Collections.Generic;
+using EvoNet.Objects;
 
 namespace EvoNet
 {
@@ -17,11 +19,12 @@ namespace EvoNet
     {
 
         public static Random GlobalRandom = new Random();
+        public static List<Creature> Creatures = new List<Creature>();
+        public static EvoGame Instance;
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
         TileMap tileMap;
-        Camera camera;
         GameConfig gameConfiguration;
         InputManager inputManager;
 
@@ -37,6 +40,7 @@ namespace EvoNet
             graphics.PreferredBackBufferHeight = 720;
             IsMouseVisible = true;
             Content.RootDirectory = "Content";
+            Instance = this;
         }
 
         /// <summary>
@@ -55,14 +59,11 @@ namespace EvoNet
             colorData[0] = Color.White;
             WhiteTexture.SetData(colorData);
 
-            camera = new Camera();
-
             tileMap = new TileMap(100, 100, 100.0f);
             tileMap.Initialize(this);
-            tileMap.Camera = camera;
 
             inputManager = new InputManager();
-            inputManager.Initialize(gameConfiguration, camera);
+            inputManager.Initialize(gameConfiguration, Camera.instanceGameWorld);
 
             base.Initialize();
         }
@@ -118,6 +119,20 @@ namespace EvoNet
 
             tileMap.Update(gameTime);
 
+            while(Creatures.Count < 50)
+            {
+                Creatures.Add(new Creature(new Vector2((float)GlobalRandom.NextDouble() * tileMap.GetWorldWidth(), (float)GlobalRandom.NextDouble() * tileMap.GetWorldHeight()), (float)GlobalRandom.NextDouble() * Mathf.PI * 2));
+            }
+
+            foreach(Creature c in Creatures)
+            {
+                c.ReadSensors();
+            }
+            foreach(Creature c in Creatures)
+            {
+                c.Act();
+            }
+
             base.Update(gameTime);
         }
 
@@ -131,6 +146,10 @@ namespace EvoNet
 
             tileMap.Draw(gameTime);
 
+            foreach(Creature c in Creatures)
+            {
+                c.Draw();
+            }
 
             base.Draw(gameTime);
         }

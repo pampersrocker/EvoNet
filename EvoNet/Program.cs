@@ -1,4 +1,4 @@
-﻿using EvoNet.NeuronalNetwork;
+﻿using EvoNet.AI;
 using System;
 
 namespace EvoNet

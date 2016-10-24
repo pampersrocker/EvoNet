@@ -52,5 +52,19 @@ namespace EvoNet
             float t2 = (1 - Cos(t * PI)) / 2;
             return (a * (1 - t2) + b * t2);
         }
+
+        public static float Clamp01(float value)
+        {
+            if (value < 0) return 0;
+            if (value > 1) return 1;
+            return value;
+        }
+
+        public static float ClampNegPos(float value)
+        {
+            if (value < -1) return -1;
+            if (value > 1) return 1;
+            return value;
+        }
     }
 }

@@ -10,6 +10,18 @@ namespace EvoNet
     public class Camera
     {
         Vector2 translation;
+        private static Camera instanceGameWorld_;
+        public static Camera instanceGameWorld
+        {
+            get
+            {
+                if(instanceGameWorld_ == null)
+                {
+                    instanceGameWorld_ = new Camera();
+                }
+                return instanceGameWorld_;
+            }
+        }
         public Vector2 Translation
         {
             get { return translation; }

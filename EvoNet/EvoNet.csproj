@@ -59,18 +59,20 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Camera.cs" />
+    <Compile Include="CameraAlreadyExistException.cs" />
     <Compile Include="Configuration\GameConfig.cs" />
+    <Compile Include="Objects\Creature.cs" />
     <Compile Include="EvoGame.cs" />
     <Compile Include="Input\InputManager.cs" />
     <Compile Include="Mathf.cs" />
-    <Compile Include="NeuronalNetwork\Connection.cs" />
-    <Compile Include="NeuronalNetwork\InputNeuron.cs" />
-    <Compile Include="NeuronalNetwork\Neuron.cs" />
-    <Compile Include="NeuronalNetwork\NeuronalNetwork.cs" />
-    <Compile Include="NeuronalNetwork\NeuronalNetworkNotFullmeshedException.cs" />
-    <Compile Include="NeuronalNetwork\NeuronalNetworkTest.cs" />
-    <Compile Include="NeuronalNetwork\NotSameAmountOfNeuronsException.cs" />
-    <Compile Include="NeuronalNetwork\WorkingNeuron.cs" />
+    <Compile Include="AI\Connection.cs" />
+    <Compile Include="AI\InputNeuron.cs" />
+    <Compile Include="AI\Neuron.cs" />
+    <Compile Include="AI\NeuronalNetwork.cs" />
+    <Compile Include="AI\NeuronalNetworkNotFullmeshedException.cs" />
+    <Compile Include="AI\NeuronalNetworkTest.cs" />
+    <Compile Include="AI\NotSameAmountOfNeuronsException.cs" />
+    <Compile Include="AI\WorkingNeuron.cs" />
     <Compile Include="ProceduralGeneration\ValueNoise2D.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
