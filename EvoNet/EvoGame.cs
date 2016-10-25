@@ -172,6 +172,7 @@ namespace EvoNet
             spriteBatch.Begin();
             spriteBatch.DrawString(fontArial, "#: " + Creatures.Count, new Vector2(20, 20), Color.Red);
             spriteBatch.DrawString(fontArial, "Deaths: " + numberOfDeaths, new Vector2(20, 40), Color.Red);
+            spriteBatch.DrawString(fontArial, "Maximum Generation: " + Creature.maximumGeneration, new Vector2(20, 60), Color.Red);
             spriteBatch.End();
 
             base.Draw(gameTime);

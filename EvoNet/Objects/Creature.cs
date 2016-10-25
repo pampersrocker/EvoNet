@@ -13,12 +13,23 @@ namespace EvoNet.Objects
 {
     public class Creature
     {
+        private static int _maximumGeneration = 1;
+        public static int maximumGeneration
+        {
+            get
+            {
+                return _maximumGeneration;
+            }
+        }
+
         private const float COST_EAT = 0.1f;
         private const float GAIN_EAT = 1f;
         private const float COST_PERMANENT = 0.01f;
         private const float COST_WALK = 0.05f;
         private const float COST_ROTATE = 0.05f;
         private const float AGEPERTICK = 0.01f;
+
+        private const float FOODDROPPERCENTAGE = 0;
 
         private const float MOVESPEED = 10f;
 
@@ -50,6 +61,7 @@ namespace EvoNet.Objects
         private const String NAME_IN_WASATTACKED       = "Was Attacked";
         private const String NAME_IN_WATERONFEELER     = "Water On Feeler";
         private const String NAME_IN_WATERONCREATURE   = "Water On Creature";
+        private const String NAME_IN_MEMORY1           = "Input Memory #1";
 
         private const String NAME_OUT_BIRTH       = "Birth";
         private const String NAME_OUT_ROTATE      = "Rotate";
@@ -57,6 +69,7 @@ namespace EvoNet.Objects
         private const String NAME_OUT_FEELERANGLE = "Feeler Angle";
         private const String NAME_OUT_ATTACK      = "Attack";
         private const String NAME_OUT_EAT         = "Eat";
+        private const String NAME_OUT_MEMORY1     = "Output Memory #1";
 
         private InputNeuron inBias              = new InputNeuron();
         private InputNeuron inFoodValuePosition = new InputNeuron();
@@ -68,6 +81,7 @@ namespace EvoNet.Objects
         private InputNeuron inWasAttacked       = new InputNeuron();
         private InputNeuron inWaterOnFeeler     = new InputNeuron();
         private InputNeuron inWaterOnCreature   = new InputNeuron();
+        private InputNeuron inMemory1           = new InputNeuron();
 
         private WorkingNeuron outBirth       = new WorkingNeuron();
         private WorkingNeuron outRotate      = new WorkingNeuron();
@@ -75,8 +89,13 @@ namespace EvoNet.Objects
         private WorkingNeuron outFeelerAngle = new WorkingNeuron();
         private WorkingNeuron outAttack      = new WorkingNeuron();
         private WorkingNeuron outEat         = new WorkingNeuron();
+        private WorkingNeuron outMemory1     = new WorkingNeuron();
 
         private Color color;
+
+        private Creature mother;
+        private List<Creature> children = new List<Creature>();
+        private int generation = 1;
 
         public Creature(Vector2 pos, float viewAngle)
         {
@@ -98,6 +117,7 @@ namespace EvoNet.Objects
             inWasAttacked      .SetName(NAME_IN_WASATTACKED);
             inWaterOnFeeler    .SetName(NAME_IN_WATERONFEELER);
             inWaterOnCreature  .SetName(NAME_IN_WATERONCREATURE);
+            inMemory1          .SetName(NAME_IN_MEMORY1);
 
             outBirth      .SetName(NAME_OUT_BIRTH);
             outRotate     .SetName(NAME_OUT_ROTATE);
@@ -105,6 +125,7 @@ namespace EvoNet.Objects
             outFeelerAngle.SetName(NAME_OUT_FEELERANGLE);
             outAttack     .SetName(NAME_OUT_ATTACK);
             outEat        .SetName(NAME_OUT_EAT);
+            outMemory1    .SetName(NAME_OUT_MEMORY1);
 
             brain = new NeuronalNetwork();
 
@@ -118,6 +139,7 @@ namespace EvoNet.Objects
             brain.AddInputNeuron(inWasAttacked);
             brain.AddInputNeuron(inWaterOnFeeler);
             brain.AddInputNeuron(inWaterOnCreature);
+            brain.AddInputNeuron(inMemory1);
 
             brain.GenerateHiddenNeurons(10);
 
@@ -127,6 +149,7 @@ namespace EvoNet.Objects
             brain.AddOutputNeuron(outFeelerAngle);
             brain.AddOutputNeuron(outAttack);
             brain.AddOutputNeuron(outEat);
+            brain.AddOutputNeuron(outMemory1);
 
             brain.GenerateFullMesh();
 
@@ -138,6 +161,12 @@ namespace EvoNet.Objects
 
         public Creature(Creature mother)
         {
+            this.mother = mother;
+            generation = mother.generation + 1;
+            if(generation > _maximumGeneration)
+            {
+                _maximumGeneration = generation;
+            }
             this.pos = mother.pos;
             this.viewAngle = (float)EvoGame.GlobalRandom.NextDouble() * Mathf.PI * 2;
             this.brain = mother.brain.CloneFullMesh();
@@ -152,6 +181,7 @@ namespace EvoNet.Objects
             inWasAttacked       = brain.GetInputNeuronFromName(NAME_IN_WASATTACKED);
             inWaterOnFeeler     = brain.GetInputNeuronFromName(NAME_IN_WATERONFEELER);
             inWaterOnCreature   = brain.GetInputNeuronFromName(NAME_IN_WATERONCREATURE);
+            inMemory1           = brain.GetInputNeuronFromName(NAME_IN_MEMORY1);
 
             outBirth       = brain.GetOutputNeuronFromName(NAME_OUT_BIRTH);
             outRotate      = brain.GetOutputNeuronFromName(NAME_OUT_ROTATE);
@@ -159,6 +189,7 @@ namespace EvoNet.Objects
             outFeelerAngle = brain.GetOutputNeuronFromName(NAME_OUT_FEELERANGLE);
             outAttack      = brain.GetOutputNeuronFromName(NAME_OUT_ATTACK);
             outEat         = brain.GetOutputNeuronFromName(NAME_OUT_EAT);
+            outMemory1     = brain.GetOutputNeuronFromName(NAME_OUT_MEMORY1);
 
             CalculateFeelerPos();
             for (int i = 0; i < 10; i++)
@@ -183,6 +214,8 @@ namespace EvoNet.Objects
 
         public void ReadSensors()
         {
+            inMemory1.SetValue(outMemory1.GetValue());
+
             brain.Invalidate();
 
             Tile creatureTile = EvoGame.Instance.tileMap.GetTileAtWorldPosition(pos);
@@ -224,7 +257,7 @@ namespace EvoNet.Objects
         {
             if (t.IsLand())
             {
-                EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] += energy / 10;
+                EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] += energy * FOODDROPPERCENTAGE;
             }
             EvoGame.CreaturesToKill.Add(this);
         }
@@ -304,7 +337,9 @@ namespace EvoNet.Objects
 
         public void GiveBirth()
         {
-            EvoGame.CreaturesToSpawn.Add(new Creature(this));
+            Creature child = new Creature(this);
+            children.Add(child);
+            EvoGame.CreaturesToSpawn.Add(child);
             energy -= STARTENERGY;
         }
 
