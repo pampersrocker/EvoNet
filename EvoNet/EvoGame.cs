@@ -32,6 +32,7 @@ namespace EvoNet
 
         private SpriteFont fontArial;
 
+        private int numberOfDeaths = 0;
         /// <summary>
         /// Default 1x1 white Texture, can be used to draw shapes in any color
         /// </summary>
@@ -95,7 +96,7 @@ namespace EvoNet
             {
                 for (int y = 0; y < tileMap.Height; y++)
                 {
-                    tileMap.Types[x, y] = heightMap[x,y] > 0.5 ? TileType.Land : TileType.Water;
+                    tileMap.SetTileType(x, y, heightMap[x,y] > 0.5 ? TileType.Land : TileType.Water);
                 }
             }
 
@@ -138,7 +139,8 @@ namespace EvoNet
             {
                 c.Act();
             }
-            foreach(Creature c in CreaturesToKill)
+            numberOfDeaths += CreaturesToKill.Count;
+            foreach (Creature c in CreaturesToKill)
             {
                 Creatures.Remove(c);
             }
@@ -169,6 +171,7 @@ namespace EvoNet
 
             spriteBatch.Begin();
             spriteBatch.DrawString(fontArial, "#: " + Creatures.Count, new Vector2(20, 20), Color.Red);
+            spriteBatch.DrawString(fontArial, "Deaths: " + numberOfDeaths, new Vector2(20, 40), Color.Red);
             spriteBatch.End();
 
             base.Draw(gameTime);

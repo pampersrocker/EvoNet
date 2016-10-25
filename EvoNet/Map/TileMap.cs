@@ -8,7 +8,7 @@ namespace EvoNet.Map
         public const float MAXIMUMFOODPERTILE = 100;
 
         float[,] foodValues;
-        TileType[,] types;
+        private TileType[,] types;
         Rectangle[,] renderRectangles;
         Rectangle[,] rendersourceRectangles;
 
@@ -40,7 +40,7 @@ namespace EvoNet.Map
             }
         }
 
-        public TileType[,] Types
+        private TileType[,] Types
         {
             get
             {
@@ -50,6 +50,15 @@ namespace EvoNet.Map
             set
             {
                 types = value;
+            }
+        }
+
+        public void SetTileType(int x, int y, TileType tt)
+        {
+            types[x, y] = tt;
+            if(tt != TileType.Land)
+            {
+                foodValues[x, y] = 0;
             }
         }
 
@@ -77,6 +86,7 @@ namespace EvoNet.Map
             {
                 for (int y = 0; y < Height; y++)
                 {
+                    foodValues[x, y] = MAXIMUMFOODPERTILE;
                     renderRectangles[x, y] = new Rectangle(
                         (int)(x * inTileSize),
                         (int)(y * inTileSize),
@@ -157,7 +167,7 @@ namespace EvoNet.Map
 
         public void Grow(int x, int y)
         {
-            foodValues[x, y] += 0.1f;
+            foodValues[x, y] += 0.2f;
             if (foodValues[x, y] > MAXIMUMFOODPERTILE) foodValues[x, y] = MAXIMUMFOODPERTILE;
         }
 

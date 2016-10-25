@@ -224,7 +224,7 @@ namespace EvoNet.Objects
         {
             if (t.IsLand())
             {
-                EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] += energy;
+                EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] += energy / 10;
             }
             EvoGame.CreaturesToKill.Add(this);
         }
