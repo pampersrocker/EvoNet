@@ -22,12 +22,20 @@ namespace EvoNet.Objects
             }
         }
 
+        private static Creature _oldestCreatureEver = new Creature(new Vector2(0, 0), 0); //dummy creature
+        public static Creature oldestCreatureEver
+        {
+            get
+            {
+                return _oldestCreatureEver;
+            }
+        }
+
         private const float COST_EAT = 0.1f;
         private const float GAIN_EAT = 1f;
         private const float COST_PERMANENT = 0.01f;
         private const float COST_WALK = 0.05f;
         private const float COST_ROTATE = 0.05f;
-        private const float AGEPERTICK = 0.01f;
 
         private const float FOODDROPPERCENTAGE = 0;
 
@@ -48,6 +56,13 @@ namespace EvoNet.Objects
 
         private float energy = 150;
         private float age = 0;
+        public float Age
+        {
+            get
+            {
+                return age;
+            }
+        }
 
         private NeuronalNetwork brain;
 
@@ -96,6 +111,13 @@ namespace EvoNet.Objects
         private Creature mother;
         private List<Creature> children = new List<Creature>();
         private int generation = 1;
+        public int Generation
+        {
+            get
+            {
+                return generation;
+            }
+        }
 
         public Creature(Vector2 pos, float viewAngle)
         {
@@ -243,7 +265,12 @@ namespace EvoNet.Objects
             ActFeelerRotate();
             ActEat(costMult, t);
 
-            age += AGEPERTICK;
+            age += EvoGame.TIMEPERTICK;
+
+            if(age > _oldestCreatureEver.age)
+            {
+                _oldestCreatureEver = this;
+            }
 
             //TODO implement Attack
 
