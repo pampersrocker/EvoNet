@@ -18,6 +18,8 @@ namespace EvoNet
     public class EvoGame : Game
     {
 
+        public const float TIMEPERTICK = 0.01f;
+        private float year = 0;
         public static Random GlobalRandom = new Random();
         public static List<Creature> Creatures = new List<Creature>();
         public static List<Creature> CreaturesToKill = new List<Creature>();
@@ -150,6 +152,7 @@ namespace EvoNet
                 Creatures.Add(c);
             }
             CreaturesToSpawn.Clear();
+            year += TIMEPERTICK;
 
             base.Update(gameTime);
         }
@@ -173,6 +176,8 @@ namespace EvoNet
             spriteBatch.DrawString(fontArial, "#: " + Creatures.Count, new Vector2(20, 20), Color.Red);
             spriteBatch.DrawString(fontArial, "Deaths: " + numberOfDeaths, new Vector2(20, 40), Color.Red);
             spriteBatch.DrawString(fontArial, "Maximum Generation: " + Creature.maximumGeneration, new Vector2(20, 60), Color.Red);
+            spriteBatch.DrawString(fontArial, "Year: " + year, new Vector2(20, 80), Color.Red);
+            spriteBatch.DrawString(fontArial, "Longest Survival: " + Creature.oldestCreatureEver.Age + " g: " + Creature.oldestCreatureEver.Generation, new Vector2(20, 100), Color.Red);
             spriteBatch.End();
 
             base.Draw(gameTime);
