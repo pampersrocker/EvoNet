@@ -85,3 +85,9 @@
 /processorParam:TextureFormat=Color
 /build:Map/Water2.png
 
+#begin Arial.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=Compressed
+/build:Arial.spritefont
+

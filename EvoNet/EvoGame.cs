@@ -30,6 +30,8 @@ namespace EvoNet
         GameConfig gameConfiguration;
         InputManager inputManager;
 
+        private SpriteFont fontArial;
+
         /// <summary>
         /// Default 1x1 white Texture, can be used to draw shapes in any color
         /// </summary>
@@ -66,6 +68,8 @@ namespace EvoNet
 
             inputManager = new InputManager();
             inputManager.Initialize(gameConfiguration, Camera.instanceGameWorld);
+
+            fontArial = Content.Load<SpriteFont>("Arial");
 
             base.Initialize();
         }
@@ -162,6 +166,10 @@ namespace EvoNet
             {
                 c.Draw();
             }
+
+            spriteBatch.Begin();
+            spriteBatch.DrawString(fontArial, "#: " + Creatures.Count, new Vector2(20, 20), Color.Red);
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
