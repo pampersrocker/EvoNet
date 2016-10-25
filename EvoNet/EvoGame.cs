@@ -9,6 +9,7 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using EvoNet.Objects;
+using EvoNet.Rendering;
 
 namespace EvoNet
 {
@@ -17,7 +18,8 @@ namespace EvoNet
     /// </summary>
     public class EvoGame : Game
     {
-
+        public static Creature DummyCreature;
+        public static Creature OldestCreatureAlive;
         public const float TIMEPERTICK = 0.01f;
         private float year = 0;
         public static Random GlobalRandom = new Random();
@@ -26,7 +28,7 @@ namespace EvoNet
         public static List<Creature> CreaturesToSpawn = new List<Creature>();
         public static EvoGame Instance;
         GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        public static SpriteBatch spriteBatch;
 
         public TileMap tileMap;
         GameConfig gameConfiguration;
@@ -39,6 +41,7 @@ namespace EvoNet
         /// Default 1x1 white Texture, can be used to draw shapes in any color
         /// </summary>
         public static Texture2D WhiteTexture { get; private set; }
+        public static Texture2D WhiteCircleTexture { get; private set; }
 
         public EvoGame()
         {
@@ -74,6 +77,11 @@ namespace EvoNet
 
             fontArial = Content.Load<SpriteFont>("Arial");
 
+            WhiteCircleTexture = Content.Load<Texture2D>("Map/WhiteCircle512");
+
+            DummyCreature = new Creature(new Vector2(), 0);
+
+            
             base.Initialize();
         }
 
@@ -85,7 +93,7 @@ namespace EvoNet
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            RenderHelper.Ini(spriteBatch, WhiteTexture, WhiteCircleTexture);
             // Fill the tilemap with some random values
             // TODO: Replace with terrain generation
             Random rand = new Random();
@@ -154,6 +162,15 @@ namespace EvoNet
             CreaturesToSpawn.Clear();
             year += TIMEPERTICK;
 
+            OldestCreatureAlive = DummyCreature;
+            foreach(Creature c in Creatures)
+            {
+                if(c.Age > OldestCreatureAlive.Age)
+                {
+                    OldestCreatureAlive = c;
+                }
+            }
+
             base.Update(gameTime);
         }
 
@@ -178,6 +195,7 @@ namespace EvoNet
             spriteBatch.DrawString(fontArial, "Maximum Generation: " + Creature.maximumGeneration, new Vector2(20, 60), Color.Red);
             spriteBatch.DrawString(fontArial, "Year: " + year, new Vector2(20, 80), Color.Red);
             spriteBatch.DrawString(fontArial, "Longest Survival: " + Creature.oldestCreatureEver.Age + " g: " + Creature.oldestCreatureEver.Generation, new Vector2(20, 100), Color.Red);
+            spriteBatch.DrawString(fontArial, "Longest Survival Alive: " + OldestCreatureAlive.Age + " g: " + OldestCreatureAlive.Generation, new Vector2(20, 120), Color.Red);
             spriteBatch.End();
 
             base.Draw(gameTime);

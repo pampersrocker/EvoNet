@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using EvoNet.Map;
 using System.Diagnostics;
+using EvoNet.Rendering;
 
 namespace EvoNet.Objects
 {
@@ -107,6 +108,7 @@ namespace EvoNet.Objects
         private WorkingNeuron outMemory1     = new WorkingNeuron();
 
         private Color color;
+        private Color color_inv;
 
         private Creature mother;
         private List<Creature> children = new List<Creature>();
@@ -123,9 +125,9 @@ namespace EvoNet.Objects
         {
             if(spriteBatch == null)
             {
-                spriteBatch = new SpriteBatch(EvoGame.Instance.GraphicsDevice);
-                bodyTex = EvoGame.Instance.Content.Load<Texture2D>("Map/SandTexture");
-                feelerTex = EvoGame.Instance.Content.Load<Texture2D>("Map/SandTexture");
+                spriteBatch = EvoGame.spriteBatch;
+                bodyTex = EvoGame.WhiteCircleTexture;
+                feelerTex = EvoGame.WhiteCircleTexture;
             }
             this.pos = pos;
             this.viewAngle = viewAngle;
@@ -179,6 +181,7 @@ namespace EvoNet.Objects
             CalculateFeelerPos();
 
             color = new Color((float)EvoGame.GlobalRandom.NextDouble(), (float)EvoGame.GlobalRandom.NextDouble(), (float)EvoGame.GlobalRandom.NextDouble());
+            GenerateColorInv();
         }
 
         public Creature(Creature mother)
@@ -232,6 +235,12 @@ namespace EvoNet.Objects
             b = Mathf.Clamp01(b);
 
             color = new Color(r, g, b);
+            GenerateColorInv();
+        }
+
+        public void GenerateColorInv()
+        {
+            color_inv = new Color(255 - color.R, 255 - color.G, 255 - color.B);
         }
 
         public void ReadSensors()
@@ -384,11 +393,11 @@ namespace EvoNet.Objects
 
         public void Draw()
         {
-            //TODO change that quick and dirty solution
             spriteBatch.Begin(transformMatrix: Camera.instanceGameWorld.Matrix);
+            RenderHelper.DrawLine(pos.X, pos.Y, feelerPos.X, feelerPos.Y, Color.White);
+            spriteBatch.Draw(bodyTex, new Rectangle((int)pos.X - 27, (int)pos.Y - 27, 54, 54), color_inv);
             spriteBatch.Draw(bodyTex, new Rectangle((int)pos.X - 25, (int)pos.Y - 25, 50, 50), color);
             spriteBatch.Draw(feelerTex, new Rectangle((int)feelerPos.X - 5, (int)feelerPos.Y - 5, 10, 10), Color.Blue);
-            //TODO draw line between body and feelerpos
             spriteBatch.End();
         }
     }
