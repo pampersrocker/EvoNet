@@ -28,7 +28,7 @@ namespace EvoNet
 
         public TileMap tileMap;
         public GameConfig gameConfiguration;
-        InputManager inputManager;
+        public InputManager inputManager;
 
         CreatureManager creatureManager = new CreatureManager();
 
