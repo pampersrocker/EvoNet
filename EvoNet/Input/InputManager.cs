@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace EvoNet.Input
 {
 
-    
+
 
     public class InputManager : UpdateModule
     {
@@ -22,6 +22,7 @@ namespace EvoNet.Input
         bool oldSpaceDown = false;
         Vector2 oldMousePosition = Vector2.Zero;
         int scrollWheelValue;
+        EvoGame game;
 
         public bool EnableFastForward { get; private set; }
 
@@ -33,17 +34,25 @@ namespace EvoNet.Input
             }
         }
 
-        public void Initialize(GameConfig configuration, Camera inCamera)
+        public void Initialize(EvoGame ingame, Camera inCamera)
         {
-            gameConfiguration = configuration;
+            game = ingame;
+            gameConfiguration = ingame.gameConfiguration;
             camera = inCamera;
             scrollWheelValue = Mouse.GetState().ScrollWheelValue;
         }
 
         public override void Update(GameTime gameTime)
         {
+
+            if (!game.IsActive)
+            {
+                return;
+            }
             KeyboardState keyboardState = Keyboard.GetState();
             MouseState mouseState = Mouse.GetState();
+
+
 
             DoMovement(gameTime, keyboardState, mouseState);
 

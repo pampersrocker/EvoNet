@@ -25,7 +25,7 @@ namespace EvoNet
         public static SpriteBatch spriteBatch;
 
         public TileMap tileMap;
-        GameConfig gameConfiguration;
+        public GameConfig gameConfiguration;
         InputManager inputManager;
 
         CreatureManager creatureManager = new CreatureManager();
@@ -71,7 +71,7 @@ namespace EvoNet
 
 
             inputManager = new InputManager();
-            inputManager.Initialize(gameConfiguration, Camera.instanceGameWorld);
+            inputManager.Initialize(this, Camera.instanceGameWorld);
 
             modules.Add(inputManager);
 
