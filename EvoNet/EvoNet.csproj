@@ -73,12 +73,14 @@
     <Compile Include="AI\NeuronalNetworkTest.cs" />
     <Compile Include="AI\NotSameAmountOfNeuronsException.cs" />
     <Compile Include="AI\WorkingNeuron.cs" />
+    <Compile Include="Objects\CreatureManager.cs" />
     <Compile Include="ProceduralGeneration\ValueNoise2D.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Map\Tile.cs" />
     <Compile Include="Map\TileMap.cs" />
     <Compile Include="Rendering\SpritebatchExtensions.cs" />
+    <Compile Include="Serialization\BinaryFileStreamExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="OpenTK">

@@ -22,7 +22,7 @@ namespace EvoNet.AI
             AddNeuronConnection(new Connection(n, weight));
         }
 
-        private void AddNeuronConnection(Connection connection)
+        public void AddNeuronConnection(Connection connection)
         {
             connections.Add(connection);
         }

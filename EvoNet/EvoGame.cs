@@ -17,13 +17,8 @@ namespace EvoNet
     /// </summary>
     public class EvoGame : Game
     {
-
-        public const float TIMEPERTICK = 0.01f;
-        private float year = 0;
+        
         public static Random GlobalRandom = new Random();
-        public static List<Creature> Creatures = new List<Creature>();
-        public static List<Creature> CreaturesToKill = new List<Creature>();
-        public static List<Creature> CreaturesToSpawn = new List<Creature>();
         public static EvoGame Instance;
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
@@ -32,11 +27,12 @@ namespace EvoNet
         GameConfig gameConfiguration;
         InputManager inputManager;
 
-        private SpriteFont fontArial;
+        CreatureManager creatureManager = new CreatureManager();
+
+        public static SpriteFont FontArial { get; set; }
 
         DateTime lastSerializationTime;
 
-        private int numberOfDeaths = 0;
         /// <summary>
         /// Default 1x1 white Texture, can be used to draw shapes in any color
         /// </summary>
@@ -68,14 +64,15 @@ namespace EvoNet
             colorData[0] = Color.White;
             WhiteTexture.SetData(colorData);
 
-            
+            Creature.Initialize();
 
             inputManager = new InputManager();
             inputManager.Initialize(gameConfiguration, Camera.instanceGameWorld);
 
-            fontArial = Content.Load<SpriteFont>("Arial");
+            FontArial = Content.Load<SpriteFont>("Arial");
 
             lastSerializationTime = DateTime.UtcNow;
+
 
             base.Initialize();
         }
@@ -111,7 +108,9 @@ namespace EvoNet
                 tileMap.SerializeToFile("tilemap.dat");
             }
 
-            
+            creatureManager.Initialize(this);
+            creatureManager.Deserialize("creatures.dat");
+
 
             // TODO: use this.Content to load your game content here
         }
@@ -139,37 +138,14 @@ namespace EvoNet
 
             tileMap.Update(gameTime);
 
-            while(Creatures.Count < 50)
-            {
-                Creatures.Add(new Creature(new Vector2((float)GlobalRandom.NextDouble() * tileMap.GetWorldWidth(), (float)GlobalRandom.NextDouble() * tileMap.GetWorldHeight()), (float)GlobalRandom.NextDouble() * Mathf.PI * 2));
-            }
-
-            foreach(Creature c in Creatures)
-            {
-                c.ReadSensors();
-            }
-            foreach(Creature c in Creatures)
-            {
-                c.Act();
-            }
-            numberOfDeaths += CreaturesToKill.Count;
-            foreach (Creature c in CreaturesToKill)
-            {
-                Creatures.Remove(c);
-            }
-            CreaturesToKill.Clear();
-            foreach(Creature c in CreaturesToSpawn)
-            {
-                Creatures.Add(c);
-            }
-            CreaturesToSpawn.Clear();
-            year += TIMEPERTICK;
+            creatureManager.Update(gameTime);
 
             // Save progress every minute
-            if ((DateTime.UtcNow - lastSerializationTime).TotalMinutes > 1)
+            if ((DateTime.UtcNow - lastSerializationTime).TotalSeconds > 10)
             {
                 lastSerializationTime = DateTime.UtcNow;
                 tileMap.SerializeToFile("tilemap.dat");
+                creatureManager.Serialize("creatures.dat");
             }
 
             base.Update(gameTime);
@@ -185,18 +161,7 @@ namespace EvoNet
 
             tileMap.Draw(gameTime);
 
-            foreach(Creature c in Creatures)
-            {
-                c.Draw();
-            }
-
-            spriteBatch.Begin();
-            spriteBatch.DrawString(fontArial, "#: " + Creatures.Count, new Vector2(20, 20), Color.Red);
-            spriteBatch.DrawString(fontArial, "Deaths: " + numberOfDeaths, new Vector2(20, 40), Color.Red);
-            spriteBatch.DrawString(fontArial, "Maximum Generation: " + Creature.maximumGeneration, new Vector2(20, 60), Color.Red);
-            spriteBatch.DrawString(fontArial, "Year: " + year, new Vector2(20, 80), Color.Red);
-            spriteBatch.DrawString(fontArial, "Longest Survival: " + Creature.oldestCreatureEver.Age + " g: " + Creature.oldestCreatureEver.Generation, new Vector2(20, 100), Color.Red);
-            spriteBatch.End();
+            creatureManager.Draw(gameTime);
 
             base.Draw(gameTime);
         }

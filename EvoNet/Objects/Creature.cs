@@ -8,9 +8,13 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using EvoNet.Map;
 using System.Diagnostics;
+using System.IO;
 
 namespace EvoNet.Objects
 {
+
+    
+
     public class Creature
     {
         private static int _maximumGeneration = 1;
@@ -20,6 +24,7 @@ namespace EvoNet.Objects
             {
                 return _maximumGeneration;
             }
+            set { _maximumGeneration = value; }
         }
 
         private static Creature _oldestCreatureEver = new Creature(new Vector2(0, 0), 0); //dummy creature
@@ -47,6 +52,13 @@ namespace EvoNet.Objects
         private static SpriteBatch spriteBatch = null;
         private static Texture2D bodyTex = null;
         private static Texture2D feelerTex = null;
+
+        public static long currentId;
+
+        public CreatureManager Manager { get; set; }
+
+        // Id for serialization
+        private long id;
 
         private Vector2 pos;
         private float viewAngle;
@@ -109,7 +121,14 @@ namespace EvoNet.Objects
         private Color color;
 
         private Creature mother;
+        
+
         private List<Creature> children = new List<Creature>();
+        
+        // Temps for deserialization
+        private long motherId;
+        private List<long> childIds = new List<long>();
+
         private int generation = 1;
         public int Generation
         {
@@ -119,14 +138,20 @@ namespace EvoNet.Objects
             }
         }
 
-        public Creature(Vector2 pos, float viewAngle)
+        public static void Initialize()
         {
-            if(spriteBatch == null)
+            if (spriteBatch == null)
             {
                 spriteBatch = new SpriteBatch(EvoGame.Instance.GraphicsDevice);
                 bodyTex = EvoGame.Instance.Content.Load<Texture2D>("Map/SandTexture");
                 feelerTex = EvoGame.Instance.Content.Load<Texture2D>("Map/SandTexture");
             }
+        }
+
+        public Creature(Vector2 pos, float viewAngle)
+        {
+            id = currentId++;
+            
             this.pos = pos;
             this.viewAngle = viewAngle;
             inBias             .SetName(NAME_IN_BIAS);
@@ -183,6 +208,7 @@ namespace EvoNet.Objects
 
         public Creature(Creature mother)
         {
+            id = currentId++;
             this.mother = mother;
             generation = mother.generation + 1;
             if(generation > _maximumGeneration)
@@ -193,25 +219,8 @@ namespace EvoNet.Objects
             this.viewAngle = (float)EvoGame.GlobalRandom.NextDouble() * Mathf.PI * 2;
             this.brain = mother.brain.CloneFullMesh();
 
-            inBias              = brain.GetInputNeuronFromName(NAME_IN_BIAS);
-            inFoodValuePosition = brain.GetInputNeuronFromName(NAME_IN_FOODVALUEPOSITION);
-            inFoodValueFeeler   = brain.GetInputNeuronFromName(NAME_IN_FOODVALUEFEELER);
-            inOcclusionFeeler   = brain.GetInputNeuronFromName(NAME_IN_OCCLUSIONFEELER);
-            inEnergy            = brain.GetInputNeuronFromName(NAME_IN_ENERGY);
-            inAge               = brain.GetInputNeuronFromName(NAME_IN_AGE);
-            inGeneticDifference = brain.GetInputNeuronFromName(NAME_IN_GENETICDIFFERENCE);
-            inWasAttacked       = brain.GetInputNeuronFromName(NAME_IN_WASATTACKED);
-            inWaterOnFeeler     = brain.GetInputNeuronFromName(NAME_IN_WATERONFEELER);
-            inWaterOnCreature   = brain.GetInputNeuronFromName(NAME_IN_WATERONCREATURE);
-            inMemory1           = brain.GetInputNeuronFromName(NAME_IN_MEMORY1);
+            SetupVariablesFromBrain();
 
-            outBirth       = brain.GetOutputNeuronFromName(NAME_OUT_BIRTH);
-            outRotate      = brain.GetOutputNeuronFromName(NAME_OUT_ROTATE);
-            outForward     = brain.GetOutputNeuronFromName(NAME_OUT_FORWARD);
-            outFeelerAngle = brain.GetOutputNeuronFromName(NAME_OUT_FEELERANGLE);
-            outAttack      = brain.GetOutputNeuronFromName(NAME_OUT_ATTACK);
-            outEat         = brain.GetOutputNeuronFromName(NAME_OUT_EAT);
-            outMemory1     = brain.GetOutputNeuronFromName(NAME_OUT_MEMORY1);
 
             CalculateFeelerPos();
             for (int i = 0; i < 10; i++)
@@ -232,6 +241,36 @@ namespace EvoNet.Objects
             b = Mathf.Clamp01(b);
 
             color = new Color(r, g, b);
+        }
+
+
+        // For deserialization
+        public Creature()
+        {
+
+        }
+
+        private void SetupVariablesFromBrain()
+        {
+            inBias = brain.GetInputNeuronFromName(NAME_IN_BIAS);
+            inFoodValuePosition = brain.GetInputNeuronFromName(NAME_IN_FOODVALUEPOSITION);
+            inFoodValueFeeler = brain.GetInputNeuronFromName(NAME_IN_FOODVALUEFEELER);
+            inOcclusionFeeler = brain.GetInputNeuronFromName(NAME_IN_OCCLUSIONFEELER);
+            inEnergy = brain.GetInputNeuronFromName(NAME_IN_ENERGY);
+            inAge = brain.GetInputNeuronFromName(NAME_IN_AGE);
+            inGeneticDifference = brain.GetInputNeuronFromName(NAME_IN_GENETICDIFFERENCE);
+            inWasAttacked = brain.GetInputNeuronFromName(NAME_IN_WASATTACKED);
+            inWaterOnFeeler = brain.GetInputNeuronFromName(NAME_IN_WATERONFEELER);
+            inWaterOnCreature = brain.GetInputNeuronFromName(NAME_IN_WATERONCREATURE);
+            inMemory1 = brain.GetInputNeuronFromName(NAME_IN_MEMORY1);
+
+            outBirth = brain.GetOutputNeuronFromName(NAME_OUT_BIRTH);
+            outRotate = brain.GetOutputNeuronFromName(NAME_OUT_ROTATE);
+            outForward = brain.GetOutputNeuronFromName(NAME_OUT_FORWARD);
+            outFeelerAngle = brain.GetOutputNeuronFromName(NAME_OUT_FEELERANGLE);
+            outAttack = brain.GetOutputNeuronFromName(NAME_OUT_ATTACK);
+            outEat = brain.GetOutputNeuronFromName(NAME_OUT_EAT);
+            outMemory1 = brain.GetOutputNeuronFromName(NAME_OUT_MEMORY1);
         }
 
         public void ReadSensors()
@@ -255,7 +294,7 @@ namespace EvoNet.Objects
             inWaterOnCreature.SetValue(creatureTile.IsLand() ? 0 : 1);
         }
 
-        public void Act()
+        public void Act(GameTime deltaTime)
         {
             Tile t = EvoGame.Instance.tileMap.GetTileAtWorldPosition(pos);
             float costMult = CalculateCostMultiplier(t);
@@ -265,7 +304,7 @@ namespace EvoNet.Objects
             ActFeelerRotate();
             ActEat(costMult, t);
 
-            age += EvoGame.TIMEPERTICK;
+            age += (float)deltaTime.ElapsedGameTime.TotalSeconds;
 
             if(age > _oldestCreatureEver.age)
             {
@@ -286,7 +325,7 @@ namespace EvoNet.Objects
             {
                 EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] += energy * FOODDROPPERCENTAGE;
             }
-            EvoGame.CreaturesToKill.Add(this);
+            Manager.CreaturesToKill.Add(this);
         }
 
         private void ActRotate(float costMult)
@@ -365,8 +404,9 @@ namespace EvoNet.Objects
         public void GiveBirth()
         {
             Creature child = new Creature(this);
+            child.Manager = Manager;
             children.Add(child);
-            EvoGame.CreaturesToSpawn.Add(child);
+            Manager.CreaturesToSpawn.Add(child);
             energy -= STARTENERGY;
         }
 
@@ -390,6 +430,71 @@ namespace EvoNet.Objects
             spriteBatch.Draw(feelerTex, new Rectangle((int)feelerPos.X - 5, (int)feelerPos.Y - 5, 10, 10), Color.Blue);
             //TODO draw line between body and feelerpos
             spriteBatch.End();
+        }
+
+        public void Serialize(BinaryWriter writer)
+        {
+            writer.Write("CreatureBegin");
+            writer.Write(id);
+            writer.Write(pos);
+            writer.Write(viewAngle);
+            writer.Write(feelerAngle);
+            writer.Write(energy);
+            writer.Write(age);
+            writer.Write(generation);
+            writer.Write(color);
+            writer.Write(mother != null ? mother.id : -1);
+            writer.Write(children.Count);
+            foreach (Creature child in children)
+            {
+                writer.Write(child.id);
+            }
+            brain.Serialize(writer);
+        }
+
+        public void ConnectAncestry(List<Creature> allThemCreatures)
+        {
+            if (mother == null)
+            {
+                mother = allThemCreatures.Find((p) => p.id == motherId);
+            }
+            if (childIds != null && children.Count != childIds.Count)
+            {
+                foreach (long childId in childIds)
+                {
+                    Creature child = allThemCreatures.Find((p) => p.id == childId);
+                    if (child != null)
+                    {
+                        children.Add(child);
+                    }
+
+                }
+            }
+        }
+
+        public void Deserialize(BinaryReader reader)
+        {
+            string magicString = reader.ReadString();
+            Debug.Assert(magicString == "CreatureBegin");
+            id = reader.ReadInt64();
+            pos = reader.ReadVector2();
+            viewAngle = reader.ReadSingle();
+            feelerAngle = reader.ReadSingle();
+            energy = reader.ReadSingle();
+            age = reader.ReadSingle();
+            generation = reader.ReadInt32();
+            color = reader.ReadColor();
+            motherId = reader.ReadInt64();
+            int childrenCount = reader.ReadInt32();
+            childIds = new List<long>();
+            for (int childIndex = 0; childIndex< childrenCount; childIndex++)
+            {
+                childIds.Add(reader.ReadInt64());
+            }
+            brain = new NeuronalNetwork();
+            brain.Deserialize(reader);
+
+            SetupVariablesFromBrain();
         }
     }
 }

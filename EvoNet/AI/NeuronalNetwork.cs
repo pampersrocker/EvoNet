@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -142,7 +143,7 @@ namespace EvoNet.AI
                 outputNeurons[index - hiddenNeurons.Count].RandomMutation(MutationRate);
             }
         }
-        
+
         public NeuronalNetwork CloneFullMesh()
         {
             //TODO make this mess pretty
@@ -194,6 +195,81 @@ namespace EvoNet.AI
             }
 
             return copy;
+        }
+
+        public void Serialize(BinaryWriter writer)
+        {
+            writer.Write(fullMeshGenerated);
+            writer.Write(inputNeurons.Count);
+            foreach (InputNeuron inputNeuron in inputNeurons)
+            {
+                inputNeuron.Serialize(writer);
+            }
+            writer.Write(hiddenNeurons.Count);
+            foreach (WorkingNeuron hiddenNeuron in hiddenNeurons)
+            {
+                hiddenNeuron.Serialize(writer);
+                writer.Write(hiddenNeuron.GetConnections().Count);
+                foreach (Connection connection in hiddenNeuron.GetConnections())
+                {
+                    // Todo get rid of this covariance cast
+                    connection.Serialize(writer, inputNeurons.Cast<Neuron>());
+                }
+            }
+            writer.Write(outputNeurons.Count);
+            foreach (WorkingNeuron outNeuron in outputNeurons)
+            {
+                outNeuron.Serialize(writer);
+                writer.Write(outNeuron.GetConnections().Count);
+                foreach (Connection connection in outNeuron.GetConnections())
+                {
+                    // Todo get rid of this covariance cast
+                    connection.Serialize(writer, hiddenNeurons.Cast<Neuron>());
+                }
+            }
+        }
+
+        public void Deserialize(BinaryReader reader)
+        {
+            fullMeshGenerated = reader.ReadBoolean();
+            int inputCount = reader.ReadInt32();
+            for (int currentIndex = 0; currentIndex < inputCount; currentIndex++)
+            {
+                InputNeuron newNeuron = new InputNeuron();
+                newNeuron.Deserialize(reader);
+                inputNeurons.Add(newNeuron);
+            }
+            int hiddenCount = reader.ReadInt32();
+            for (int currentIndex = 0; currentIndex < hiddenCount; currentIndex++)
+            {
+                WorkingNeuron newNeuron = new WorkingNeuron();
+                newNeuron.Deserialize(reader);
+                hiddenNeurons.Add(newNeuron);
+
+                int connectionCount = reader.ReadInt32();
+                for (int connectionIndex = 0; connectionIndex < connectionCount; connectionIndex++)
+                {
+                    // Todo get rid of this covariance cast
+                    Connection connection = Connection.Deserialize(reader, inputNeurons.Cast<Neuron>());
+                    newNeuron.AddNeuronConnection(connection);
+                }
+            }
+            int outputCount = reader.ReadInt32();
+            for (int currentIndex = 0; currentIndex < outputCount; currentIndex++)
+            {
+                WorkingNeuron newNeuron = new WorkingNeuron();
+                newNeuron.Deserialize(reader);
+                outputNeurons.Add(newNeuron);
+
+                int connectionCount = reader.ReadInt32();
+                for (int connectionIndex = 0; connectionIndex < connectionCount; connectionIndex++)
+                {
+                    // Todo get rid of this covariance cast
+                    Connection connection = Connection.Deserialize(reader, hiddenNeurons.Cast<Neuron>());
+                    newNeuron.AddNeuronConnection(connection);
+                }
+            }
+            Invalidate();
         }
     }
 }
