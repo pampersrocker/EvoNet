@@ -303,7 +303,7 @@ namespace EvoNet.Objects
             inWaterOnCreature.SetValue(creatureTile.IsLand() ? 0 : 1);
         }
 
-        public void Act(GameTime deltaTime)
+        public void Act()
         {
             Tile t = EvoGame.Instance.tileMap.GetTileAtWorldPosition(pos);
             float costMult = CalculateCostMultiplier(t);
@@ -313,7 +313,7 @@ namespace EvoNet.Objects
             ActFeelerRotate();
             ActEat(costMult, t);
 
-            age += (float)deltaTime.ElapsedGameTime.TotalSeconds;
+            age += EvoGame.TIMEPERTICK;
 
             if(age > _oldestCreatureEver.age)
             {
@@ -332,7 +332,7 @@ namespace EvoNet.Objects
         {
             if (t.IsLand())
             {
-                //EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] += energy * FOODDROPPERCENTAGE;
+                EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] += energy * FOODDROPPERCENTAGE;
             }
             Manager.CreaturesToKill.Add(this);
         }

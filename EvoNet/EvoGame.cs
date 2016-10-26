@@ -24,6 +24,8 @@ namespace EvoNet
         GraphicsDeviceManager graphics;
         public static SpriteBatch spriteBatch;
 
+        public const float TIMEPERTICK = 0.01f;
+
         public TileMap tileMap;
         public GameConfig gameConfiguration;
         InputManager inputManager;
