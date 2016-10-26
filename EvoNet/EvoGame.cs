@@ -34,6 +34,8 @@ namespace EvoNet
 
         private SpriteFont fontArial;
 
+        DateTime lastSerializationTime;
+
         private int numberOfDeaths = 0;
         /// <summary>
         /// Default 1x1 white Texture, can be used to draw shapes in any color
@@ -66,13 +68,14 @@ namespace EvoNet
             colorData[0] = Color.White;
             WhiteTexture.SetData(colorData);
 
-            tileMap = new TileMap(100, 100, 100.0f);
-            tileMap.Initialize(this);
+            
 
             inputManager = new InputManager();
             inputManager.Initialize(gameConfiguration, Camera.instanceGameWorld);
 
             fontArial = Content.Load<SpriteFont>("Arial");
+
+            lastSerializationTime = DateTime.UtcNow;
 
             base.Initialize();
         }
@@ -86,21 +89,29 @@ namespace EvoNet
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // Fill the tilemap with some random values
-            // TODO: Replace with terrain generation
-            Random rand = new Random();
-            ValueNoise2D vn = new ValueNoise2D(tileMap.Width, tileMap.Height);
-            vn.startFrequencyX = 10;
-            vn.startFrequencyY = 10;
-            vn.calculate();
-            float[,] heightMap = vn.getHeightMap();
-            for (int x = 0; x < tileMap.Width; x++)
+            tileMap = TileMap.DeserializeFromFile("tilemap.dat", this);
+            if (tileMap == null)
             {
-                for (int y = 0; y < tileMap.Height; y++)
+                tileMap = new TileMap(100, 100, 100.0f);
+                tileMap.Initialize(this);
+
+                ValueNoise2D vn = new ValueNoise2D(tileMap.Width, tileMap.Height);
+                vn.startFrequencyX = 10;
+                vn.startFrequencyY = 10;
+                vn.calculate();
+                float[,] heightMap = vn.getHeightMap();
+                for (int x = 0; x < tileMap.Width; x++)
                 {
-                    tileMap.SetTileType(x, y, heightMap[x,y] > 0.5 ? TileType.Land : TileType.Water);
+                    for (int y = 0; y < tileMap.Height; y++)
+                    {
+                        tileMap.SetTileType(x, y, heightMap[x, y] > 0.5 ? TileType.Land : TileType.Water);
+                    }
                 }
+
+                tileMap.SerializeToFile("tilemap.dat");
             }
+
+            
 
             // TODO: use this.Content to load your game content here
         }
@@ -153,6 +164,13 @@ namespace EvoNet
             }
             CreaturesToSpawn.Clear();
             year += TIMEPERTICK;
+
+            // Save progress every minute
+            if ((DateTime.UtcNow - lastSerializationTime).TotalMinutes > 1)
+            {
+                lastSerializationTime = DateTime.UtcNow;
+                tileMap.SerializeToFile("tilemap.dat");
+            }
 
             base.Update(gameTime);
         }

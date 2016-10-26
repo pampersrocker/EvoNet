@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.IO;
 
 namespace EvoNet.Map
 {
@@ -60,6 +61,20 @@ namespace EvoNet.Map
             {
                 foodValues[x, y] = 0;
             }
+        }
+
+        public bool SetFoodValue(int x, int y, float foodValue)
+        {
+            if (x >= 0 && x < Width && y >= 0 && y < Height)
+            {
+
+                if (types[x, y] == TileType.Land)
+                {
+                    foodValues[x, y] = foodValue;
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -251,6 +266,61 @@ namespace EvoNet.Map
                 }
             }
             spriteBatch.End();
+
+        }
+
+        public void SerializeToFile(string fileName)
+        {
+            FileStream file = File.Open(fileName, FileMode.OpenOrCreate, FileAccess.Write);
+            BinaryWriter writer = new BinaryWriter(file);
+            writer.Write(Width);
+            writer.Write(Height);
+            writer.Write(tileSize);
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    writer.Write((int)types[x, y]);
+                    if (types[x,y] == TileType.Land)
+                    {
+                        writer.Write(foodValues[x, y]);
+                    }
+                }
+            }
+            file.Close();
+        }
+
+        public static TileMap DeserializeFromFile(string fileName, EvoGame game)
+        {
+            try
+            {
+                FileStream file = File.Open(fileName, FileMode.Open);
+                BinaryReader reader = new BinaryReader(file);
+                int width = reader.ReadInt32();
+                int height = reader.ReadInt32();
+                float tileSize = reader.ReadSingle();
+                TileMap result = new TileMap(width, height, tileSize);
+                result.Initialize(game);
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        TileType type = (TileType)reader.ReadInt32();
+                        result.SetTileType(x, y, type);
+                        if (type == TileType.Land)
+                        {
+                            float foodValue = reader.ReadSingle();
+                            result.SetFoodValue(x, y, foodValue);
+                        }
+                    }
+                }
+                file.Close();
+                return result;
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                return null;
+            }
 
         }
 
