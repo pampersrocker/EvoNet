@@ -12,6 +12,10 @@ namespace EvoNet.Objects
 {
     public class CreatureManager : UpdateModule
     {
+        public static float[] AverageAgeOfLastCreatures = new float[128];
+        private int indexForAverageAgeOfLastCreatures = 0;
+        private bool AverageAgeOfLastCreaturesAccurate = false;
+
         private float year = 0;
         private int numberOfDeaths = 0;
 
@@ -20,6 +24,7 @@ namespace EvoNet.Objects
         public List<Creature> CreaturesToSpawn = new List<Creature>();
 
         public List<float> AliveCreaturesRecord = new List<float>();
+        public List<float> AverageDeathAgeRecord = new List<float>();
 
         private Creature OldestCreatureAlive;
 
@@ -66,6 +71,7 @@ namespace EvoNet.Objects
             numberOfDeaths += CreaturesToKill.Count;
             foreach (Creature c in CreaturesToKill)
             {
+                AddDeathAge(c.Age);
                 Creatures.Remove(c);
             }
             CreaturesToKill.Clear();
@@ -105,22 +111,51 @@ namespace EvoNet.Objects
         private void DrawGeneralStats()
         {
             spriteBatch.Begin();
-            Primitives2D.FillRectangle(spriteBatch, new Rectangle(0, 0, 300, 460), AdditionalColors.TRANSPARENTBLACK);
+            Primitives2D.FillRectangle(spriteBatch, new Rectangle(0, 0, 300, 600), AdditionalColors.TRANSPARENTBLACK);
             spriteBatch.DrawString(Fonts.FontArial, "#: " + Creatures.Count, new Vector2(20, 20), Color.Red);
             spriteBatch.DrawString(Fonts.FontArial, "D: " + numberOfDeaths, new Vector2(20, 40), Color.Red);
             spriteBatch.DrawString(Fonts.FontArial, "max(G): " + Creature.maximumGeneration, new Vector2(20, 60), Color.Red);
             spriteBatch.DrawString(Fonts.FontArial, "Y: " + year, new Vector2(20, 80), Color.Red);
             spriteBatch.DrawString(Fonts.FontArial, "LS: " + Creature.oldestCreatureEver.Age + " g: " + Creature.oldestCreatureEver.Generation, new Vector2(20, 100), Color.Red);
             spriteBatch.DrawString(Fonts.FontArial, "LSA: " + OldestCreatureAlive.Age + " g: " + OldestCreatureAlive.Generation, new Vector2(20, 120), Color.Red);
+            if (AverageAgeOfLastCreaturesAccurate)
+            {
+                float averageDeathAge = CalculateAverageAgeOfLastDeadCreatures();
+                AverageDeathAgeRecord.Add(averageDeathAge);
+                spriteBatch.DrawString(Fonts.FontArial, "AvgDA: " + averageDeathAge, new Vector2(20, 140), Color.Red);
+            }
 
 
             spriteBatch.DrawString(Fonts.FontArial, "Creatures Alive Graph ", new Vector2(20, 180), Color.Red);
             GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 200, 260, 100), Color.Blue, AliveCreaturesRecord, Fonts.FontArial, true);
-            spriteBatch.DrawString(Fonts.FontArial, "Food Available Graph ", new Vector2(20, 320), Color.Red);
-            GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 340, 260, 100), Color.Green, EvoGame.Instance.tileMap.FoodRecord, Fonts.FontArial, true);
+            spriteBatch.DrawString(Fonts.FontArial, "Average Age on Death Graph ", new Vector2(20, 320), Color.Red);
+            if (AverageAgeOfLastCreaturesAccurate)
+                GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 340, 260, 100), Color.Red, AverageDeathAgeRecord, Fonts.FontArial, true);
+            spriteBatch.DrawString(Fonts.FontArial, "Food Available Graph ", new Vector2(20, 460), Color.Red);
+            GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 480, 260, 100), Color.Green, EvoGame.Instance.tileMap.FoodRecord, Fonts.FontArial, true);
 
 
             spriteBatch.End();
+        }
+
+        public void AddDeathAge(float age)
+        {
+            AverageAgeOfLastCreatures[indexForAverageAgeOfLastCreatures++] = age;
+            if(indexForAverageAgeOfLastCreatures >= AverageAgeOfLastCreatures.Length)
+            {
+                indexForAverageAgeOfLastCreatures = 0;
+                AverageAgeOfLastCreaturesAccurate = true;
+            }
+        }
+
+        public float CalculateAverageAgeOfLastDeadCreatures()
+        {
+            float ageAverage = 0;
+            for(int i = 0; i<AverageAgeOfLastCreatures.Length; i++)
+            {
+                ageAverage += AverageAgeOfLastCreatures[i];
+            }
+            return ageAverage / AverageAgeOfLastCreatures.Length;
         }
 
         public void Serialize(string fileName)
