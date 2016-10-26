@@ -18,6 +18,8 @@ namespace EvoNet.Objects
         public List<Creature> CreaturesToKill = new List<Creature>();
         public List<Creature> CreaturesToSpawn = new List<Creature>();
 
+        private Creature OldestCreatureAlive;
+
         EvoGame game;
 
         SpriteBatch spriteBatch;
@@ -69,6 +71,19 @@ namespace EvoNet.Objects
             }
             CreaturesToSpawn.Clear();
             year += (float)deltaTime.ElapsedGameTime.TotalSeconds;
+
+            if (Creatures.Count > 0)
+            {
+
+                OldestCreatureAlive = Creatures[0];
+                foreach (Creature c in Creatures)
+                {
+                    if (c.Age > OldestCreatureAlive.Age)
+                    {
+                        OldestCreatureAlive = c;
+                    }
+                }
+            }
         }
 
         public void Draw(GameTime deltaTime)
@@ -84,6 +99,8 @@ namespace EvoNet.Objects
             spriteBatch.DrawString(EvoGame.FontArial, "Maximum Generation: " + Creature.maximumGeneration, new Vector2(20, 60), Color.Red);
             spriteBatch.DrawString(EvoGame.FontArial, "Year: " + year, new Vector2(20, 80), Color.Red);
             spriteBatch.DrawString(EvoGame.FontArial, "Longest Survival: " + Creature.oldestCreatureEver.Age + " g: " + Creature.oldestCreatureEver.Generation, new Vector2(20, 100), Color.Red);
+
+            spriteBatch.DrawString(EvoGame.FontArial, "Longest Survival Alive: " + OldestCreatureAlive.Age + " g: " + OldestCreatureAlive.Generation, new Vector2(20, 120), Color.Red);
             spriteBatch.End();
         }
 

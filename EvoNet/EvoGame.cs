@@ -9,6 +9,7 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using EvoNet.Objects;
+using EvoNet.Rendering;
 
 namespace EvoNet
 {
@@ -17,11 +18,11 @@ namespace EvoNet
     /// </summary>
     public class EvoGame : Game
     {
-        
+
         public static Random GlobalRandom = new Random();
         public static EvoGame Instance;
         GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        public static SpriteBatch spriteBatch;
 
         public TileMap tileMap;
         GameConfig gameConfiguration;
@@ -39,6 +40,7 @@ namespace EvoNet
         /// Default 1x1 white Texture, can be used to draw shapes in any color
         /// </summary>
         public static Texture2D WhiteTexture { get; private set; }
+        public static Texture2D WhiteCircleTexture { get; private set; }
 
         public EvoGame()
         {
@@ -67,7 +69,6 @@ namespace EvoNet
             colorData[0] = Color.White;
             WhiteTexture.SetData(colorData);
 
-            Creature.Initialize();
 
             inputManager = new InputManager();
             inputManager.Initialize(gameConfiguration, Camera.instanceGameWorld);
@@ -90,25 +91,29 @@ namespace EvoNet
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            WhiteCircleTexture = Content.Load<Texture2D>("Map/WhiteCircle512");
+            Creature.Initialize();
 
+
+            RenderHelper.Ini(spriteBatch, WhiteTexture, WhiteCircleTexture);
             tileMap = TileMap.DeserializeFromFile("tilemap.dat", this);
             if (tileMap == null)
             {
                 tileMap = new TileMap(100, 100, 100.0f);
                 tileMap.Initialize(this);
 
-                ValueNoise2D vn = new ValueNoise2D(tileMap.Width, tileMap.Height);
-                vn.startFrequencyX = 10;
-                vn.startFrequencyY = 10;
-                vn.calculate();
-                float[,] heightMap = vn.getHeightMap();
-                for (int x = 0; x < tileMap.Width; x++)
+            ValueNoise2D vn = new ValueNoise2D(tileMap.Width, tileMap.Height);
+            vn.startFrequencyX = 10;
+            vn.startFrequencyY = 10;
+            vn.calculate();
+            float[,] heightMap = vn.getHeightMap();
+            for (int x = 0; x < tileMap.Width; x++)
+            {
+                for (int y = 0; y < tileMap.Height; y++)
                 {
-                    for (int y = 0; y < tileMap.Height; y++)
-                    {
-                        tileMap.SetTileType(x, y, heightMap[x, y] > 0.5 ? TileType.Land : TileType.Water);
-                    }
+                    tileMap.SetTileType(x, y, heightMap[x,y] > 0.5 ? TileType.Land : TileType.Water);
                 }
+            }
 
                 tileMap.SerializeToFile("tilemap.dat");
             }
@@ -143,7 +148,7 @@ namespace EvoNet
                 Exit();
             foreach (var module in modules)
             {
-                module.Update(gameTime);
+                module.NotifyTick(gameTime);
             }
 
             if (inputManager.EnableFastForward)
@@ -159,8 +164,8 @@ namespace EvoNet
 
                             module.NotifyTick(gameTime);
                         }
-                    }
-                }
+            }
+            }
             }
 
             // Save progress every minute
@@ -170,6 +175,8 @@ namespace EvoNet
                 tileMap.SerializeToFile("tilemap.dat");
                 creatureManager.Serialize("creatures.dat");
             }
+
+
 
             base.Update(gameTime);
         }

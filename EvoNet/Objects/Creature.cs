@@ -9,11 +9,12 @@ using Microsoft.Xna.Framework.Graphics;
 using EvoNet.Map;
 using System.Diagnostics;
 using System.IO;
+using EvoNet.Rendering;
 
 namespace EvoNet.Objects
 {
 
-    
+
 
     public class Creature
     {
@@ -119,12 +120,13 @@ namespace EvoNet.Objects
         private WorkingNeuron outMemory1     = new WorkingNeuron();
 
         private Color color;
+        private Color color_inv;
 
         private Creature mother;
-        
+
 
         private List<Creature> children = new List<Creature>();
-        
+
         // Temps for deserialization
         private long motherId;
         private List<long> childIds = new List<long>();
@@ -140,18 +142,18 @@ namespace EvoNet.Objects
 
         public static void Initialize()
         {
-            if (spriteBatch == null)
+            if(spriteBatch == null)
             {
-                spriteBatch = new SpriteBatch(EvoGame.Instance.GraphicsDevice);
-                bodyTex = EvoGame.Instance.Content.Load<Texture2D>("Map/SandTexture");
-                feelerTex = EvoGame.Instance.Content.Load<Texture2D>("Map/SandTexture");
+                spriteBatch = EvoGame.spriteBatch;
+                bodyTex = EvoGame.WhiteCircleTexture;
+                feelerTex = EvoGame.WhiteCircleTexture;
             }
         }
 
         public Creature(Vector2 pos, float viewAngle)
         {
             id = currentId++;
-            
+
             this.pos = pos;
             this.viewAngle = viewAngle;
             inBias             .SetName(NAME_IN_BIAS);
@@ -204,6 +206,7 @@ namespace EvoNet.Objects
             CalculateFeelerPos();
 
             color = new Color((float)EvoGame.GlobalRandom.NextDouble(), (float)EvoGame.GlobalRandom.NextDouble(), (float)EvoGame.GlobalRandom.NextDouble());
+            GenerateColorInv();
         }
 
         public Creature(Creature mother)
@@ -241,6 +244,7 @@ namespace EvoNet.Objects
             b = Mathf.Clamp01(b);
 
             color = new Color(r, g, b);
+            GenerateColorInv();
         }
 
 
@@ -271,6 +275,11 @@ namespace EvoNet.Objects
             outAttack = brain.GetOutputNeuronFromName(NAME_OUT_ATTACK);
             outEat = brain.GetOutputNeuronFromName(NAME_OUT_EAT);
             outMemory1 = brain.GetOutputNeuronFromName(NAME_OUT_MEMORY1);
+        }
+
+        public void GenerateColorInv()
+        {
+            color_inv = new Color(255 - color.R, 255 - color.G, 255 - color.B);
         }
 
         public void ReadSensors()
@@ -323,7 +332,7 @@ namespace EvoNet.Objects
         {
             if (t.IsLand())
             {
-                EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] += energy * FOODDROPPERCENTAGE;
+                //EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] += energy * FOODDROPPERCENTAGE;
             }
             Manager.CreaturesToKill.Add(this);
         }
@@ -385,7 +394,7 @@ namespace EvoNet.Objects
                     }
                 }
             }
-           
+
         }
 
         private float CalculateCostMultiplier(Tile CreatureTile)
@@ -424,11 +433,11 @@ namespace EvoNet.Objects
 
         public void Draw()
         {
-            //TODO change that quick and dirty solution
             spriteBatch.Begin(transformMatrix: Camera.instanceGameWorld.Matrix);
+            RenderHelper.DrawLine(pos.X, pos.Y, feelerPos.X, feelerPos.Y, Color.White);
+            spriteBatch.Draw(bodyTex, new Rectangle((int)pos.X - 27, (int)pos.Y - 27, 54, 54), color_inv);
             spriteBatch.Draw(bodyTex, new Rectangle((int)pos.X - 25, (int)pos.Y - 25, 50, 50), color);
             spriteBatch.Draw(feelerTex, new Rectangle((int)feelerPos.X - 5, (int)feelerPos.Y - 5, 10, 10), Color.Blue);
-            //TODO draw line between body and feelerpos
             spriteBatch.End();
         }
 
