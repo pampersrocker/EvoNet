@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
+using EvoNet.Rendering;
 
 namespace EvoNet.Objects
 {
@@ -17,6 +18,8 @@ namespace EvoNet.Objects
         public List<Creature> Creatures = new List<Creature>();
         public List<Creature> CreaturesToKill = new List<Creature>();
         public List<Creature> CreaturesToSpawn = new List<Creature>();
+
+        public List<float> AliveCreaturesRecord = new List<float>();
 
         private Creature OldestCreatureAlive;
 
@@ -85,6 +88,8 @@ namespace EvoNet.Objects
                     }
                 }
             }
+
+            AliveCreaturesRecord.Add(Creatures.Count);
         }
 
         public void Draw(GameTime deltaTime)
@@ -94,14 +99,27 @@ namespace EvoNet.Objects
                 c.Draw();
             }
 
-            spriteBatch.Begin();
-            spriteBatch.DrawString(EvoGame.FontArial, "#: " + Creatures.Count, new Vector2(20, 20), Color.Red);
-            spriteBatch.DrawString(EvoGame.FontArial, "Deaths: " + numberOfDeaths, new Vector2(20, 40), Color.Red);
-            spriteBatch.DrawString(EvoGame.FontArial, "Maximum Generation: " + Creature.maximumGeneration, new Vector2(20, 60), Color.Red);
-            spriteBatch.DrawString(EvoGame.FontArial, "Year: " + year, new Vector2(20, 80), Color.Red);
-            spriteBatch.DrawString(EvoGame.FontArial, "Longest Survival: " + Creature.oldestCreatureEver.Age + " g: " + Creature.oldestCreatureEver.Generation, new Vector2(20, 100), Color.Red);
+            DrawGeneralStats();
+        }
 
-            spriteBatch.DrawString(EvoGame.FontArial, "Longest Survival Alive: " + OldestCreatureAlive.Age + " g: " + OldestCreatureAlive.Generation, new Vector2(20, 120), Color.Red);
+        private void DrawGeneralStats()
+        {
+            spriteBatch.Begin();
+            Primitives2D.FillRectangle(spriteBatch, new Rectangle(0, 0, 300, 460), AdditionalColors.TRANSPARENTBLACK);
+            spriteBatch.DrawString(Fonts.FontArial, "#: " + Creatures.Count, new Vector2(20, 20), Color.Red);
+            spriteBatch.DrawString(Fonts.FontArial, "D: " + numberOfDeaths, new Vector2(20, 40), Color.Red);
+            spriteBatch.DrawString(Fonts.FontArial, "max(G): " + Creature.maximumGeneration, new Vector2(20, 60), Color.Red);
+            spriteBatch.DrawString(Fonts.FontArial, "Y: " + year, new Vector2(20, 80), Color.Red);
+            spriteBatch.DrawString(Fonts.FontArial, "LS: " + Creature.oldestCreatureEver.Age + " g: " + Creature.oldestCreatureEver.Generation, new Vector2(20, 100), Color.Red);
+            spriteBatch.DrawString(Fonts.FontArial, "LSA: " + OldestCreatureAlive.Age + " g: " + OldestCreatureAlive.Generation, new Vector2(20, 120), Color.Red);
+
+
+            spriteBatch.DrawString(Fonts.FontArial, "Creatures Alive Graph ", new Vector2(20, 180), Color.Red);
+            GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 200, 260, 100), Color.Blue, AliveCreaturesRecord, Fonts.FontArial, true);
+            spriteBatch.DrawString(Fonts.FontArial, "Food Available Graph ", new Vector2(20, 320), Color.Red);
+            GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 340, 260, 100), Color.Green, EvoGame.Instance.tileMap.FoodRecord, Fonts.FontArial, true);
+
+
             spriteBatch.End();
         }
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 using System.IO;
 
 namespace EvoNet.Map
@@ -22,6 +23,8 @@ namespace EvoNet.Map
         Effect WaterShader { get; set; }
 
         float tileSize;
+        public List<float> FoodRecord = new List<float>();
+
 
         SpriteBatch spriteBatch;
 
@@ -155,6 +158,19 @@ namespace EvoNet.Map
             return Height * tileSize;
         }
 
+        public float CalculateFoodAvailable()
+        {
+            float food = 0;
+            for(int i = 0; i<Width; i++)
+            {
+                for(int k = 0; k<Height; k++)
+                {
+                    food += FoodValues[i, k];
+                }
+            }
+            return food;
+        }
+
         public void Initialize(EvoGame game)
         {
             spriteBatch = new SpriteBatch(game.GraphicsDevice);
@@ -187,6 +203,8 @@ namespace EvoNet.Map
                     }
                 }
             }
+
+            FoodRecord.Add(CalculateFoodAvailable());
         }
 
         public void Grow(int x, int y)

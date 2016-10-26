@@ -32,8 +32,6 @@ namespace EvoNet
 
         CreatureManager creatureManager = new CreatureManager();
 
-        public static SpriteFont FontArial { get; set; }
-
         DateTime lastSerializationTime;
 
         List<UpdateModule> modules = new List<UpdateModule>();
@@ -77,7 +75,7 @@ namespace EvoNet
 
             modules.Add(inputManager);
 
-            FontArial = Content.Load<SpriteFont>("Arial");
+            Fonts.FontArial = Content.Load<SpriteFont>("Arial");
 
             lastSerializationTime = DateTime.UtcNow;
 

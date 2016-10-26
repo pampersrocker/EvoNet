@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace EvoNet
 {
@@ -65,6 +66,32 @@ namespace EvoNet
             if (value < -1) return -1;
             if (value > 1) return 1;
             return value;
+        }
+
+        public static float Max(List<float> list)
+        {
+            float max = float.NegativeInfinity;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] > max)
+                {
+                    max = list[i];
+                }
+            }
+            return max;
+        }
+
+        public static float Min(List<float> list)
+        {
+            float min = float.PositiveInfinity;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] < min)
+                {
+                    min = list[i];
+                }
+            }
+            return min;
         }
     }
 }
