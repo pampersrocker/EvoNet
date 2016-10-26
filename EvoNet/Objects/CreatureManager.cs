@@ -9,7 +9,7 @@ using System.IO;
 
 namespace EvoNet.Objects
 {
-    public class CreatureManager
+    public class CreatureManager : UpdateModule
     {
         private float year = 0;
         private int numberOfDeaths = 0;
@@ -28,7 +28,15 @@ namespace EvoNet.Objects
             spriteBatch = new SpriteBatch(game.GraphicsDevice);
         }
 
-        public void Update(GameTime deltaTime)
+        public override bool WantsFastForward
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        public override void Update(GameTime deltaTime)
         {
             while (Creatures.Count < 50)
             {

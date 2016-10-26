@@ -33,6 +33,8 @@ namespace EvoNet
 
         DateTime lastSerializationTime;
 
+        List<UpdateModule> modules = new List<UpdateModule>();
+
         /// <summary>
         /// Default 1x1 white Texture, can be used to draw shapes in any color
         /// </summary>
@@ -46,6 +48,7 @@ namespace EvoNet
             IsMouseVisible = true;
             Content.RootDirectory = "Content";
             Instance = this;
+            IsFixedTimeStep = true;
         }
 
         /// <summary>
@@ -68,6 +71,8 @@ namespace EvoNet
 
             inputManager = new InputManager();
             inputManager.Initialize(gameConfiguration, Camera.instanceGameWorld);
+
+            modules.Add(inputManager);
 
             FontArial = Content.Load<SpriteFont>("Arial");
 
@@ -111,6 +116,9 @@ namespace EvoNet
             creatureManager.Initialize(this);
             creatureManager.Deserialize("creatures.dat");
 
+            modules.Add(tileMap);
+            modules.Add(creatureManager);
+
 
             // TODO: use this.Content to load your game content here
         }
@@ -133,12 +141,27 @@ namespace EvoNet
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+            foreach (var module in modules)
+            {
+                module.Update(gameTime);
+            }
 
-            inputManager.Update(gameTime);
+            if (inputManager.EnableFastForward)
+            {
+                DateTime startFastForward = DateTime.UtcNow;
+                // Target 60 fps per second
+                while ((DateTime.UtcNow - startFastForward).TotalSeconds < 0.015f )
+                {
+                    foreach (var module in modules)
+                    {
+                        if (module.WantsFastForward)
+                        {
 
-            tileMap.Update(gameTime);
-
-            creatureManager.Update(gameTime);
+                            module.NotifyTick(gameTime);
+                        }
+                    }
+                }
+            }
 
             // Save progress every minute
             if ((DateTime.UtcNow - lastSerializationTime).TotalSeconds > 10)

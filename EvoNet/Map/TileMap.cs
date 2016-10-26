@@ -4,7 +4,7 @@ using System.IO;
 
 namespace EvoNet.Map
 {
-    public class TileMap
+    public class TileMap : UpdateModule
     {
         public const float MAXIMUMFOODPERTILE = 100;
 
@@ -75,6 +75,14 @@ namespace EvoNet.Map
                 }
             }
             return false;
+        }
+
+        public override bool WantsFastForward
+        {
+            get
+            {
+                return true;
+            }
         }
 
         /// <summary>
@@ -166,7 +174,7 @@ namespace EvoNet.Map
             WaterShader.Parameters["Water2"].SetValue(Water2Texture);
         }
 
-        public void Update(GameTime deltaTime)
+        public override void Update(GameTime deltaTime)
         {
             for (int i = 0; i < Width; i++)
             {

@@ -9,15 +9,29 @@ using System.Threading.Tasks;
 
 namespace EvoNet.Input
 {
-    public class InputManager
+
+    
+
+    public class InputManager : UpdateModule
     {
 
         GameConfig gameConfiguration;
         Camera camera;
 
         bool rightMouseDown = false;
+        bool oldSpaceDown = false;
         Vector2 oldMousePosition = Vector2.Zero;
         int scrollWheelValue;
+
+        public bool EnableFastForward { get; private set; }
+
+        public override bool WantsFastForward
+        {
+            get
+            {
+                return false;
+            }
+        }
 
         public void Initialize(GameConfig configuration, Camera inCamera)
         {
@@ -26,9 +40,28 @@ namespace EvoNet.Input
             scrollWheelValue = Mouse.GetState().ScrollWheelValue;
         }
 
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             KeyboardState keyboardState = Keyboard.GetState();
+            MouseState mouseState = Mouse.GetState();
+
+            DoMovement(gameTime, keyboardState, mouseState);
+
+            bool spaceDown = keyboardState.IsKeyDown(Keys.Space);
+
+            if (!oldSpaceDown && spaceDown)
+            {
+                EnableFastForward = !EnableFastForward;
+            }
+
+            oldSpaceDown = spaceDown;
+            scrollWheelValue = mouseState.ScrollWheelValue;
+
+            oldMousePosition = mouseState.Position.ToVector2();
+        }
+
+        private void DoMovement(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState)
+        {
             Vector2 movement = Vector2.Zero;
             bool moveUp = false;
             bool moveDown = false;
@@ -90,7 +123,6 @@ namespace EvoNet.Input
                 camera.Move(movement);
             }
 
-            MouseState mouseState = Mouse.GetState();
 
             if (mouseState.RightButton == ButtonState.Pressed)
             {
@@ -120,12 +152,7 @@ namespace EvoNet.Input
             Vector2 mousePositionAfterScale = Vector2.Transform(mouseState.Position.ToVector2(), Matrix.Invert(camera.Matrix));
 
             // Adjust screen position with respect to scale to achieve zoom to Mouse cursor functionality
-            camera.Move((mousePositionAfterScale- mousePositionBeforeScale)*camera.Scale);
-
-
-            scrollWheelValue = mouseState.ScrollWheelValue;
-
-            oldMousePosition = mouseState.Position.ToVector2();
+            camera.Move((mousePositionAfterScale - mousePositionBeforeScale) * camera.Scale);
         }
     }
 }

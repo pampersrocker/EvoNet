@@ -81,6 +81,7 @@
     <Compile Include="Map\TileMap.cs" />
     <Compile Include="Rendering\SpritebatchExtensions.cs" />
     <Compile Include="Serialization\BinaryFileStreamExtensions.cs" />
+    <Compile Include="UpdateModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="OpenTK">
