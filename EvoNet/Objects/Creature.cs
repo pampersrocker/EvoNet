@@ -360,7 +360,7 @@ namespace EvoNet.Objects
         {
             if (t.IsLand())
             {
-                //EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] += energy * FOODDROPPERCENTAGE;
+                EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] += energy * FOODDROPPERCENTAGE;
             }
             Manager.CreaturesToKill.Add(this);
         }
