@@ -13,6 +13,9 @@ namespace EvoNet.Objects
 {
     public class CreatureManager : UpdateModule
     {
+        public const int COLLISIONGRIDSIZE = 100;
+        public static  List<Creature>[,] CollisionGrid = new List<Creature>[COLLISIONGRIDSIZE, COLLISIONGRIDSIZE];
+
         public static float[] AverageAgeOfLastCreatures = new float[128];
         private int indexForAverageAgeOfLastCreatures = 0;
         private bool AverageAgeOfLastCreaturesAccurate = false;
@@ -39,6 +42,14 @@ namespace EvoNet.Objects
         {
             game = inGame;
             spriteBatch = new SpriteBatch(game.GraphicsDevice);
+
+            for(int i = 0; i<COLLISIONGRIDSIZE; i++)
+            {
+                for(int k = 0; k<COLLISIONGRIDSIZE; k++)
+                {
+                    CollisionGrid[i, k] = new List<Creature>();
+                }
+            }
         }
 
         public override bool WantsFastForward
@@ -47,6 +58,26 @@ namespace EvoNet.Objects
             {
                 return true;
             }
+        }
+
+        private void ResetCollisionGrid()
+        {
+            for(int i = 0; i<COLLISIONGRIDSIZE; i++)
+            {
+                for(int k = 0; k<COLLISIONGRIDSIZE; k++)
+                {
+                    CollisionGrid[i, k].Clear();
+                }
+            }
+        }
+
+        private void HandleCollision()
+        {
+            foreach(Creature c in Creatures)
+            {
+                c.HandleCollisions();
+            }
+            ResetCollisionGrid();
         }
 
         public override void Update(GameTime deltaTime)
@@ -84,6 +115,8 @@ namespace EvoNet.Objects
             }
             CreaturesToSpawn.Clear();
             year += EvoGame.TIMEPERTICK;
+
+            HandleCollision();
 
             if (Creatures.Count > 0)
             {

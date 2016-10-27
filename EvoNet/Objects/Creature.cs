@@ -18,6 +18,12 @@ namespace EvoNet.Objects
 
     public class Creature
     {
+        private int collisionGridX = 0;
+        private int collisionGridY = 0;
+
+        private const int CREATURESIZE = 54;
+        private const int FEELERTIPSIZE = 10;
+
         private static int _maximumGeneration = 1;
         public static int maximumGeneration
         {
@@ -235,6 +241,7 @@ namespace EvoNet.Objects
 
             color = new Color((float)EvoGame.GlobalRandom.NextDouble(), (float)EvoGame.GlobalRandom.NextDouble(), (float)EvoGame.GlobalRandom.NextDouble());
             GenerateColorInv();
+            CalculateCollisionGridPos();
         }
 
         public Creature(Creature mother)
@@ -303,6 +310,12 @@ namespace EvoNet.Objects
             outAttack = brain.GetOutputNeuronFromName(NAME_OUT_ATTACK);
             outEat = brain.GetOutputNeuronFromName(NAME_OUT_EAT);
             outMemory1 = brain.GetOutputNeuronFromName(NAME_OUT_MEMORY1);
+            CalculateCollisionGridPos();
+        }
+
+        private void CalculateCollisionGridPos()
+        {
+            //TODO calculate pos and add this to the collisiongrid
         }
 
         public void GenerateColorInv()
@@ -354,6 +367,8 @@ namespace EvoNet.Objects
             {
                 Kill(t);
             }
+
+            CalculateCollisionGridPos();
         }
 
         private void Kill(Tile t)
@@ -470,8 +485,8 @@ namespace EvoNet.Objects
         public void DrawCreature(SpriteBatch spriteBatch, Vector2 offset)
         {
             RenderHelper.DrawLine(spriteBatch, pos.X + offset.X, pos.Y + offset.Y, feelerPos.X + offset.X, feelerPos.Y + offset.Y, Color.White);
-            spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - 27), (int)(pos.Y + offset.Y - 27), 54, 54), color_inv);
-            spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - 25), (int)(pos.Y + offset.Y - 25), 50, 50), color);
+            spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - CREATURESIZE/2), (int)(pos.Y + offset.Y - CREATURESIZE/2), CREATURESIZE, CREATURESIZE), color_inv);
+            spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - (CREATURESIZE - 4) / 2), (int)(pos.Y + offset.Y - (CREATURESIZE - 4) / 2), CREATURESIZE - 4, CREATURESIZE - 4), color);
             spriteBatch.Draw(feelerTex, new Rectangle((int)(feelerPos.X + offset.X - 5), (int)(feelerPos.Y + offset.Y - 5), 10, 10), Color.Blue);
         }
 
@@ -538,6 +553,35 @@ namespace EvoNet.Objects
             brain.Deserialize(reader);
 
             SetupVariablesFromBrain();
+        }
+
+        public void HandleCollisions()
+        {
+            for(int i = collisionGridX - 1; i<=collisionGridX+1; i++)
+            {
+                for(int k = collisionGridY - 1; k<=collisionGridY+1; k++)
+                {
+                    if(i >= 0 && k >= 0 && i<CreatureManager.COLLISIONGRIDSIZE && k < CreatureManager.COLLISIONGRIDSIZE)
+                    {
+                        List<Creature> collisionList = CreatureManager.CollisionGrid[i, k];
+                        HandleCollisionsWithList(collisionList);
+                    }
+                }
+            }
+        }
+
+        private void HandleCollisionsWithList(List<Creature> creatures)
+        {
+            foreach(Creature c in creatures)
+            {
+                HandleCollisionWithCreature(c);
+            }
+        }
+
+        private void HandleCollisionWithCreature(Creature c)
+        {
+            if (this == c) return;
+            //TODO
         }
     }
 }
