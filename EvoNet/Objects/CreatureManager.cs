@@ -30,14 +30,12 @@ namespace EvoNet.Objects
         private Creature OldestCreatureAlive;
         private Creature SelectedCreature;
 
-        EvoGame game;
-
         SpriteBatch spriteBatch;
 
 
-        public void Initialize(EvoGame inGame)
+        public override void Initialize(EvoGame inGame)
         {
-            game = inGame;
+            base.Initialize(inGame);
             spriteBatch = new SpriteBatch(game.GraphicsDevice);
         }
 
@@ -49,7 +47,7 @@ namespace EvoNet.Objects
             }
         }
 
-        public override void Update(GameTime deltaTime)
+        protected override void Update(GameTime deltaTime)
         {
             while (Creatures.Count < 50)
             {

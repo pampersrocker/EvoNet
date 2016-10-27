@@ -69,7 +69,7 @@ namespace EvoNet
 
 
             inputManager = new InputManager();
-            inputManager.Initialize(this, Camera.instanceGameWorld);
+            inputManager.Initialize(this);
 
             modules.Add(inputManager);
 

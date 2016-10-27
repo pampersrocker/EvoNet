@@ -171,8 +171,9 @@ namespace EvoNet.Map
             return food;
         }
 
-        public void Initialize(EvoGame game)
+        public override void Initialize(EvoGame game)
         {
+            base.Initialize(game);
             spriteBatch = new SpriteBatch(game.GraphicsDevice);
 
             SandTexture = game.Content.Load<Texture2D>("Map/SandTexture");
@@ -190,7 +191,7 @@ namespace EvoNet.Map
             WaterShader.Parameters["Water2"].SetValue(Water2Texture);
         }
 
-        public override void Update(GameTime deltaTime)
+        protected override void Update(GameTime deltaTime)
         {
             for (int i = 0; i < Width; i++)
             {
