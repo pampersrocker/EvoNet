@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
 using EvoNet.Rendering;
+using System.Diagnostics;
 
 namespace EvoNet.Objects
 {
@@ -27,10 +28,12 @@ namespace EvoNet.Objects
         public List<float> AverageDeathAgeRecord = new List<float>();
 
         private Creature OldestCreatureAlive;
+        private Creature SelectedCreature;
 
         EvoGame game;
 
         SpriteBatch spriteBatch;
+
 
         public void Initialize(EvoGame inGame)
         {
@@ -95,7 +98,11 @@ namespace EvoNet.Objects
                 }
             }
 
+            Debug.WriteLine(OldestCreatureAlive.Age + " " + OldestCreatureAlive.Energy);
+
             AliveCreaturesRecord.Add(Creatures.Count);
+
+            SelectedCreature = OldestCreatureAlive;
         }
 
         public void Draw(GameTime deltaTime)
@@ -143,6 +150,13 @@ namespace EvoNet.Objects
 	            GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 480, 260, 100), Color.Green, EvoGame.Instance.tileMap.FoodRecord, Fonts.FontArial, true);
 
             }
+
+
+            if(SelectedCreature != null)
+            {
+                SelectedCreature.Brain.Draw(spriteBatch, new Rectangle(950, 0, 200, 200));
+            }
+
             spriteBatch.End();
         }
 

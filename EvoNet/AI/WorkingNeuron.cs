@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EvoNet.AI
 {
-    class WorkingNeuron : Neuron
+    public class WorkingNeuron : Neuron
     {
         private float? value = null;
         private List<Connection> connections = new List<Connection>();

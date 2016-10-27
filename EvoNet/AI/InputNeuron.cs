@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EvoNet.AI
 {
-    class InputNeuron : Neuron
+    public class InputNeuron : Neuron
     {
         private float value = 0;
         public void SetValue(float x)

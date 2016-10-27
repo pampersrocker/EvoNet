@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EvoNet.AI
 {
-    class Connection
+    public class Connection
     {
         public float weight = 1;
         public Neuron entryNeuron;

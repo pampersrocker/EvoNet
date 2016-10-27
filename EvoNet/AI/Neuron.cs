@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EvoNet.AI
 {
-    abstract class Neuron
+    public abstract class Neuron
     {
         private String name = "NO NAME";
         public abstract float GetValue();

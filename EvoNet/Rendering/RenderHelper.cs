@@ -34,5 +34,13 @@ namespace EvoNet.Rendering
 
             spriteBatch.Draw(whiteTexture, new Rectangle((int)x1, (int)y1, (int)dist, 1), null, c, angle, Vector2.Zero, SpriteEffects.None, 0);
         }
+
+        public static void DrawCircle(SpriteBatch spriteBatch, float x, float y, float radius, Color c)
+        {
+            int xD = (int)Math.Round(x - radius);
+            int yD = (int)Math.Round(y - radius);
+            int radiusD = (int)Math.Round(radius * 2);
+            spriteBatch.Draw(whiteCircleTexture, new Rectangle(xD, yD, radiusD, radiusD), c);
+        }
     }
 }

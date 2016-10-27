@@ -164,8 +164,8 @@ namespace EvoNet
 
                             module.NotifyTick(gameTime);
                         }
-            }
-            }
+                    }
+                }
             }
 
             // Save progress every minute

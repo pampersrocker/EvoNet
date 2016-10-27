@@ -1,4 +1,7 @@
-﻿using System;
+﻿using EvoNet.Rendering;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace EvoNet.AI
 {
-    class NeuronalNetwork
+    public class NeuronalNetwork
     {
         private bool fullMeshGenerated = false;
-        private List<InputNeuron> inputNeurons = new List<InputNeuron>();
-        private List<WorkingNeuron> hiddenNeurons = new List<WorkingNeuron>();
-        private List<WorkingNeuron> outputNeurons = new List<WorkingNeuron>();
+        private List<Neuron> inputNeurons = new List<Neuron>();
+        private List<Neuron> hiddenNeurons = new List<Neuron>();
+        private List<Neuron> outputNeurons = new List<Neuron>();
 
 
         public void AddInputNeuron(InputNeuron neuron)
@@ -30,7 +33,7 @@ namespace EvoNet.AI
 
         public InputNeuron GetInputNeuronFromIndex(int index)
         {
-            return inputNeurons[index];
+            return (InputNeuron)inputNeurons[index];
         }
 
         public InputNeuron GetInputNeuronFromName(String name)
@@ -47,7 +50,7 @@ namespace EvoNet.AI
 
         public WorkingNeuron GetHiddenNeuronFromIndex(int index)
         {
-            return hiddenNeurons[index];
+            return (WorkingNeuron)hiddenNeurons[index];
         }
 
         public WorkingNeuron GetHiddenNeuronFromName(String name)
@@ -64,7 +67,7 @@ namespace EvoNet.AI
 
         public WorkingNeuron GetOutputNeuronFromIndex(int index)
         {
-            return outputNeurons[index];
+            return (WorkingNeuron)outputNeurons[index];
         }
 
         public WorkingNeuron GetOutputNeuronFromName(String name)
@@ -136,11 +139,11 @@ namespace EvoNet.AI
             int index = EvoGame.GlobalRandom.Next(hiddenNeurons.Count + outputNeurons.Count);
             if(index < hiddenNeurons.Count)
             {
-                hiddenNeurons[index].RandomMutation(MutationRate);
+                ((WorkingNeuron)hiddenNeurons[index]).RandomMutation(MutationRate);
             }
             else
             {
-                outputNeurons[index - hiddenNeurons.Count].RandomMutation(MutationRate);
+                ((WorkingNeuron)outputNeurons[index - hiddenNeurons.Count]).RandomMutation(MutationRate);
             }
         }
 
@@ -169,8 +172,8 @@ namespace EvoNet.AI
 
             for (int i = 0; i < hiddenNeurons.Count; i++)
             {
-                List<Connection> connectionsOrginal = hiddenNeurons[i].GetConnections();
-                List<Connection> connectionsCopy = copy.hiddenNeurons[i].GetConnections();
+                List<Connection> connectionsOrginal = ((WorkingNeuron)hiddenNeurons[i]).GetConnections();
+                List<Connection> connectionsCopy = ((WorkingNeuron)copy.hiddenNeurons[i]).GetConnections();
                 if (connectionsOrginal.Count != connectionsCopy.Count)
                 {
                     throw new NotSameAmountOfNeuronsException();
@@ -182,8 +185,8 @@ namespace EvoNet.AI
             }
             for (int i = 0; i < outputNeurons.Count; i++)
             {
-                List<Connection> connectionsOrginal = outputNeurons[i].GetConnections();
-                List<Connection> connectionsCopy = copy.outputNeurons[i].GetConnections();
+                List<Connection> connectionsOrginal = ((WorkingNeuron)outputNeurons[i]).GetConnections();
+                List<Connection> connectionsCopy = ((WorkingNeuron)copy.outputNeurons[i]).GetConnections();
                 if (connectionsOrginal.Count != connectionsCopy.Count)
                 {
                     throw new NotSameAmountOfNeuronsException();
@@ -270,6 +273,59 @@ namespace EvoNet.AI
                 }
             }
             Invalidate();
+        }
+
+
+        private const float NEURONSIZE = 15;
+
+        public void Draw(SpriteBatch spriteBatch, Rectangle rect)
+        {
+            float yMin = rect.Y + NEURONSIZE / 2;
+            float yMax = rect.Y + rect.Height - NEURONSIZE / 2;
+            DrawLayer(spriteBatch, rect.X + NEURONSIZE / 2, yMin, yMax, inputNeurons, new Vector2(-10, -10), true);
+            DrawLayer(spriteBatch, rect.X + rect.Width / 2, yMin, yMax, hiddenNeurons);
+            DrawLayer(spriteBatch, rect.X + rect.Width - NEURONSIZE / 2, yMin, yMax, outputNeurons, new Vector2(10, -10));
+        }
+
+        private void DrawLayer(SpriteBatch spriteBatch, float x, float yMin, float yMax, List<Neuron> layer, Vector2? nameOffset = null, bool writeRight = false) {
+            float yDiff = yMax - yMin;
+            float distanceBetweenNeurons = yDiff / (layer.Count - 1);
+            float currentY = yMin;
+
+            for(int i = 0; i<layer.Count; i++)
+            {
+                DrawNeuron(spriteBatch, x, currentY, layer[i], nameOffset, writeRight);
+                currentY += distanceBetweenNeurons;
+            }
+        }
+
+        private void DrawNeuron(SpriteBatch spriteBatch, float x, float y, Neuron n, Vector2? nameOffset = null, bool writeRight = false)
+        {
+            Color c = Color.Black;
+            float val = n.GetValue();
+            if(val < 0)
+            {
+                c = Color.Red;
+            }
+            else
+            {
+                c = Color.Blue;
+            }
+
+            float valSize = val * NEURONSIZE;
+
+            RenderHelper.DrawCircle(spriteBatch, x, y, NEURONSIZE / 2 + 1, Color.White);
+            RenderHelper.DrawCircle(spriteBatch, x, y, valSize / 2, c);
+
+            if (nameOffset != null)
+            {
+                Vector2 pos = new Vector2(x, y) + (Vector2)nameOffset;
+                if (writeRight)
+                {
+                    pos.X -= Fonts.FontArial.MeasureString(n.GetName()).X;
+                }
+                spriteBatch.DrawString(Fonts.FontArial, n.GetName(), pos, Color.White);
+            }
         }
     }
 }

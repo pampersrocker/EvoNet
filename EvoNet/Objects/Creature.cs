@@ -68,6 +68,13 @@ namespace EvoNet.Objects
         private Vector2 feelerPos;
 
         private float energy = 150;
+        public float Energy
+        {
+            get
+            {
+                return energy;
+            }
+        }
         private float age = 0;
         public float Age
         {
@@ -78,6 +85,13 @@ namespace EvoNet.Objects
         }
 
         private NeuronalNetwork brain;
+        public NeuronalNetwork Brain
+        {
+            get
+            {
+                return brain;
+            }
+        }
 
         private const String NAME_IN_BIAS              = "bias";
         private const String NAME_IN_FOODVALUEPOSITION = "Food Value Position";
@@ -296,7 +310,7 @@ namespace EvoNet.Objects
             inFoodValueFeeler.SetValue(feelerTile.food / TileMap.MAXIMUMFOODPERTILE);
             inOcclusionFeeler.SetValue(0); //TODO find real value
             inEnergy.SetValue((energy - MINIMUMSURVIVALENERGY) / (STARTENERGY - MINIMUMSURVIVALENERGY));
-            inAge.SetValue(age);
+            inAge.SetValue(age / 10f);
             inGeneticDifference.SetValue(0); //TODO find real value
             inWasAttacked.SetValue(0); //TODO find real value
             inWaterOnFeeler.SetValue(feelerTile.IsLand() ? 0 : 1);
@@ -322,7 +336,7 @@ namespace EvoNet.Objects
 
             //TODO implement Attack
 
-            if(energy < 100)
+            if(energy < 100 || float.IsNaN(energy))
             {
                 Kill(t);
             }
