@@ -71,5 +71,16 @@ namespace EvoNet.AI
             clone.SetName(GetName());
             return clone;
         }
+
+        public float GetStrongestConnection()
+        {
+            float strongest = 0;
+            foreach(Connection c in connections)
+            {
+                float val = Mathf.Abs(c.weight);
+                if (val > strongest) strongest = val;
+            }
+            return strongest;
+        }
     }
 }

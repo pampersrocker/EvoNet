@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -280,27 +281,51 @@ namespace EvoNet.AI
 
         public void Draw(SpriteBatch spriteBatch, Rectangle rect)
         {
+            CalculateNeuronsRenderPosition(rect);
             float yMin = rect.Y + NEURONSIZE / 2;
             float yMax = rect.Y + rect.Height - NEURONSIZE / 2;
-            DrawLayer(spriteBatch, rect.X + NEURONSIZE / 2, yMin, yMax, inputNeurons, new Vector2(-10, -10), true);
-            DrawLayer(spriteBatch, rect.X + rect.Width / 2, yMin, yMax, hiddenNeurons);
-            DrawLayer(spriteBatch, rect.X + rect.Width - NEURONSIZE / 2, yMin, yMax, outputNeurons, new Vector2(10, -10));
+            float strongestConnection = GetStrongestConnection();
+            DrawLayer(spriteBatch, outputNeurons, strongestConnection, new Vector2(10, -10));
+            DrawLayer(spriteBatch, hiddenNeurons, strongestConnection);
+            DrawLayer(spriteBatch, inputNeurons, strongestConnection, new Vector2(-10, -10), true);
         }
 
-        private void DrawLayer(SpriteBatch spriteBatch, float x, float yMin, float yMax, List<Neuron> layer, Vector2? nameOffset = null, bool writeRight = false) {
+        private void CalculateNeuronsRenderPosition(Rectangle rect)
+        {
+            float yMin = rect.Y + NEURONSIZE / 2;
+            float yMax = rect.Y + rect.Height - NEURONSIZE / 2;
+            CalculateNeuronsRederPositionLayer(outputNeurons, rect.X + rect.Width - NEURONSIZE / 2, yMin, yMax);
+            CalculateNeuronsRederPositionLayer(hiddenNeurons, rect.X + rect.Width / 2, yMin, yMax);
+            CalculateNeuronsRederPositionLayer(inputNeurons, rect.X + NEURONSIZE / 2, yMin, yMax);
+        }
+
+        private void CalculateNeuronsRederPositionLayer(List<Neuron> layer, float x, float yMin, float yMax)
+        {
             float yDiff = yMax - yMin;
             float distanceBetweenNeurons = yDiff / (layer.Count - 1);
             float currentY = yMin;
-
-            for(int i = 0; i<layer.Count; i++)
+            for (int i = 0; i < layer.Count; i++)
             {
-                DrawNeuron(spriteBatch, x, currentY, layer[i], nameOffset, writeRight);
+                layer[i].DrawPosition = new Vector2(x, currentY);
                 currentY += distanceBetweenNeurons;
             }
         }
 
-        private void DrawNeuron(SpriteBatch spriteBatch, float x, float y, Neuron n, Vector2? nameOffset = null, bool writeRight = false)
+        private void DrawLayer(SpriteBatch spriteBatch, List<Neuron> layer, float strongestConnection, Vector2? nameOffset = null, bool writeRight = false) {
+            for(int i = 0; i<layer.Count; i++)
+            {
+                DrawNeuron(spriteBatch, layer[i], strongestConnection, nameOffset, writeRight);
+            }
+        }
+
+        private void DrawNeuron(SpriteBatch spriteBatch, Neuron n, float strongestConnection, Vector2? nameOffset = null, bool writeRight = false)
         {
+            if(n is WorkingNeuron)
+            {
+                DrawConnections(spriteBatch, n, strongestConnection);
+            }
+            float x = n.DrawPosition.X;
+            float y = n.DrawPosition.Y;
             Color c = Color.Black;
             float val = n.GetValue();
             if(val < 0)
@@ -309,7 +334,7 @@ namespace EvoNet.AI
             }
             else
             {
-                c = Color.Blue;
+                c = Color.Green;
             }
 
             float valSize = val * NEURONSIZE;
@@ -326,6 +351,47 @@ namespace EvoNet.AI
                 }
                 spriteBatch.DrawString(Fonts.FontArial, n.GetName(), pos, Color.White);
             }
+        }
+
+        private void DrawConnections(SpriteBatch spriteBatch, Neuron n, float strongestConnection)
+        {
+            WorkingNeuron wn = (WorkingNeuron)n;
+            foreach(Connection c in wn.GetConnections())
+            {
+                Color color = Color.Black;
+                float value = c.GetValue();
+                float alpha = Math.Abs(value) / strongestConnection;
+                //TODO 
+                if (value > 0)
+                {
+                    color = new Color(0f, 1f, 0f, alpha);
+                }else
+                {
+
+                    color = new Color(1f, 0f, 0f, alpha);
+                }
+                RenderHelper.DrawLine(spriteBatch, n.DrawPosition.X, n.DrawPosition.Y, c.entryNeuron.DrawPosition.X, c.entryNeuron.DrawPosition.Y, color, 1);
+            }
+        }
+
+        public float GetStrongestConnection()
+        {
+            return Mathf.Max(GetStrongestLayerConnection(hiddenNeurons), GetStrongestLayerConnection(outputNeurons));
+        }
+
+        private float GetStrongestLayerConnection(List<Neuron> layer)
+        {
+            float strongestConnection = 0;
+            foreach (Neuron n in layer)
+            {
+                WorkingNeuron wn = (WorkingNeuron)n;
+                float strongestNeuronConnection = Math.Abs(wn.GetStrongestConnection());
+                if (strongestNeuronConnection > strongestConnection)
+                {
+                    strongestConnection = strongestNeuronConnection;
+                }
+            }
+            return strongestConnection;
         }
     }
 }

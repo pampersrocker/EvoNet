@@ -95,7 +95,7 @@ namespace EvoNet
             Creature.Initialize();
 
 
-            RenderHelper.Ini(spriteBatch, WhiteTexture, WhiteCircleTexture);
+            RenderHelper.Ini(WhiteTexture, WhiteCircleTexture);
             tileMap = TileMap.DeserializeFromFile("tilemap.dat", this);
             if (tileMap == null)
             {

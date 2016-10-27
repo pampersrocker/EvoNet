@@ -14,25 +14,18 @@ namespace EvoNet.Rendering
 {
     class RenderHelper
     {
-        private static SpriteBatch spriteBatch = null;
         private static Texture2D whiteTexture = null;
         private static Texture2D whiteCircleTexture = null;
 
-        public static void Ini(SpriteBatch spriteBatch, Texture2D whiteTexture, Texture2D whiteCircleTexture)
+        public static void Ini(Texture2D whiteTexture, Texture2D whiteCircleTexture)
         {
-            RenderHelper.spriteBatch = spriteBatch;
             RenderHelper.whiteTexture = whiteTexture;
             RenderHelper.whiteCircleTexture = whiteCircleTexture;
         }
 
-        public static void DrawLine(float x0, float y0, float x1, float y1, Color c)
+        public static void DrawLine(SpriteBatch spriteBatch, float x0, float y0, float x1, float y1, Color c, int lineWidth = 1)
         {
-            float xDiff = x0 - x1;
-            float yDiff = y0 - y1;
-            float angle = (float)Math.Atan2(yDiff, xDiff);
-            float dist = (float)Math.Sqrt(xDiff * xDiff + yDiff * yDiff);
-
-            spriteBatch.Draw(whiteTexture, new Rectangle((int)x1, (int)y1, (int)dist, 1), null, c, angle, Vector2.Zero, SpriteEffects.None, 0);
+            Primitives2D.DrawLine(spriteBatch, x0, y0, x1, y1, c);
         }
 
         public static void DrawCircle(SpriteBatch spriteBatch, float x, float y, float radius, Color c)
@@ -42,5 +35,6 @@ namespace EvoNet.Rendering
             int radiusD = (int)Math.Round(radius * 2);
             spriteBatch.Draw(whiteCircleTexture, new Rectangle(xD, yD, radiusD, radiusD), c);
         }
+
     }
 }

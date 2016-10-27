@@ -98,8 +98,6 @@ namespace EvoNet.Objects
                 }
             }
 
-            Debug.WriteLine(OldestCreatureAlive.Age + " " + OldestCreatureAlive.Energy);
-
             AliveCreaturesRecord.Add(Creatures.Count);
 
             SelectedCreature = OldestCreatureAlive;
@@ -141,8 +139,6 @@ namespace EvoNet.Objects
             {
                 spriteBatch.DrawString(Fonts.FontArial, "Creatures Alive Graph ", new Vector2(20, 180), Color.Red);
 	            GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 200, 260, 100), Color.Blue, AliveCreaturesRecord, Fonts.FontArial, true);
-	            spriteBatch.DrawString(Fonts.FontArial, "Creatures Alive Graph ", new Vector2(20, 180), Color.Red);
-	            GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 200, 260, 100), Color.Blue, AliveCreaturesRecord, Fonts.FontArial, true);
 	            spriteBatch.DrawString(Fonts.FontArial, "Average Age on Death Graph ", new Vector2(20, 320), Color.Red);
 	            if (AverageAgeOfLastCreaturesAccurate)
 	                GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 340, 260, 100), Color.Red, AverageDeathAgeRecord, Fonts.FontArial, true);
@@ -154,7 +150,16 @@ namespace EvoNet.Objects
 
             if(SelectedCreature != null)
             {
-                SelectedCreature.Brain.Draw(spriteBatch, new Rectangle(950, 0, 200, 200));
+                Primitives2D.FillRectangle(spriteBatch, new Rectangle(800, 0, 500, 400), AdditionalColors.TRANSPARENTBLACK);
+
+                spriteBatch.DrawString(Fonts.FontArial, "Selected Creature: ", new Vector2(820, 50), Color.Red);
+                spriteBatch.DrawString(Fonts.FontArial, "A: " + SelectedCreature.Age, new Vector2(820, 70), Color.Red);
+                spriteBatch.DrawString(Fonts.FontArial, "E: " + SelectedCreature.Energy, new Vector2(820, 90), Color.Red);
+                spriteBatch.DrawString(Fonts.FontArial, "C: " + SelectedCreature.Children.Count, new Vector2(820, 110), Color.Red);
+                spriteBatch.DrawString(Fonts.FontArial, "G: " + SelectedCreature.Generation, new Vector2(820, 130), Color.Red);
+                spriteBatch.DrawString(Fonts.FontArial, "S: " + (SelectedCreature.Energy > 100 ? "Alive" : "Dead"), new Vector2(820, 150), Color.Red);
+                SelectedCreature.DrawCreature(spriteBatch, SelectedCreature.Pos * -1 + new Vector2(1050, 70));
+                SelectedCreature.Brain.Draw(spriteBatch, new Rectangle(950, 160, 200, 200));
             }
 
             spriteBatch.End();

@@ -62,6 +62,13 @@ namespace EvoNet.Objects
         private long id;
 
         private Vector2 pos;
+        public Vector2 Pos
+        {
+            get
+            {
+                return pos;
+            }
+        }
         private float viewAngle;
 
         private float feelerAngle;
@@ -140,6 +147,13 @@ namespace EvoNet.Objects
 
 
         private List<Creature> children = new List<Creature>();
+        public List<Creature> Children
+        {
+            get
+            {
+                return children;
+            }
+        }
 
         // Temps for deserialization
         private long motherId;
@@ -448,11 +462,17 @@ namespace EvoNet.Objects
         public void Draw()
         {
             spriteBatch.Begin(transformMatrix: Camera.instanceGameWorld.Matrix);
-            RenderHelper.DrawLine(pos.X, pos.Y, feelerPos.X, feelerPos.Y, Color.White);
-            spriteBatch.Draw(bodyTex, new Rectangle((int)pos.X - 27, (int)pos.Y - 27, 54, 54), color_inv);
-            spriteBatch.Draw(bodyTex, new Rectangle((int)pos.X - 25, (int)pos.Y - 25, 50, 50), color);
-            spriteBatch.Draw(feelerTex, new Rectangle((int)feelerPos.X - 5, (int)feelerPos.Y - 5, 10, 10), Color.Blue);
+            DrawCreature(spriteBatch, Vector2.Zero);
+
             spriteBatch.End();
+        }
+
+        public void DrawCreature(SpriteBatch spriteBatch, Vector2 offset)
+        {
+            RenderHelper.DrawLine(spriteBatch, pos.X + offset.X, pos.Y + offset.Y, feelerPos.X + offset.X, feelerPos.Y + offset.Y, Color.White);
+            spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - 27), (int)(pos.Y + offset.Y - 27), 54, 54), color_inv);
+            spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - 25), (int)(pos.Y + offset.Y - 25), 50, 50), color);
+            spriteBatch.Draw(feelerTex, new Rectangle((int)(feelerPos.X + offset.X - 5), (int)(feelerPos.Y + offset.Y - 5), 10, 10), Color.Blue);
         }
 
         public void Serialize(BinaryWriter writer)

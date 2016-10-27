@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace EvoNet.AI
             name = reader.ReadString();
         }
 
-
+        public Vector2 DrawPosition { get; set; }
 
         public string GetName()
         {
