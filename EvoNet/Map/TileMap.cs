@@ -192,7 +192,6 @@ namespace EvoNet.Map
 
         public override void Update(GameTime deltaTime)
         {
-            deltaTime = null; //Do not ever use delta Time!
             for (int i = 0; i < Width; i++)
             {
                 for (int k = 0; k < Height; k++)
