@@ -46,7 +46,7 @@ namespace EvoNet.ProceduralGeneration
                 {
                     for(int k = 0; k<currentFrequencyY + 1; k++)
                     {
-                        discretePoints[i, k] = (float)EvoGame.GlobalRandom.NextDouble() * currentAlpha;
+                        discretePoints[i, k] = (float)EvoGame.RandomFloat() * currentAlpha;
                     }
                 }
 

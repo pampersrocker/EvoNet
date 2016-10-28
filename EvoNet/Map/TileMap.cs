@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace EvoNet.Map
 {
@@ -33,11 +34,13 @@ namespace EvoNet.Map
 
         public float[,] FoodValues
         {
+            [MethodImpl(MethodImplOptions.Synchronized)]
             get
             {
                 return foodValues;
             }
 
+            [MethodImpl(MethodImplOptions.Synchronized)]
             set
             {
                 foodValues = value;
@@ -66,6 +69,7 @@ namespace EvoNet.Map
             }
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public bool SetFoodValue(int x, int y, float foodValue)
         {
             if (x >= 0 && x < Width && y >= 0 && y < Height)
@@ -146,6 +150,22 @@ namespace EvoNet.Map
         {
             position /= tileSize;
             return GetTileInfo(position.ToPoint());
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public float EatOfTile(int x, int y, float eatAmount)
+        {
+            float foodVal = FoodValues[x, y];
+            if (foodVal > eatAmount)
+            {
+                FoodValues[x, y] -= eatAmount;
+                return eatAmount;
+            }
+            else
+            {
+                FoodValues[x, y] = 0;
+                return foodVal;
+            }
         }
 
         public float GetWorldWidth()

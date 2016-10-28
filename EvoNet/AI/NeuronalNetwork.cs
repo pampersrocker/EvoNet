@@ -137,7 +137,7 @@ namespace EvoNet.AI
 
         public void RandomMutation(float MutationRate)
         {
-            int index = EvoGame.GlobalRandom.Next(hiddenNeurons.Count + outputNeurons.Count);
+            int index = EvoGame.RandomInt(hiddenNeurons.Count + outputNeurons.Count);
             if(index < hiddenNeurons.Count)
             {
                 ((WorkingNeuron)hiddenNeurons[index]).RandomMutation(MutationRate);

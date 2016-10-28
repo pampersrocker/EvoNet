@@ -25,12 +25,14 @@ namespace EvoNet.Objects
         private const int CREATURESIZE = 54;
         private const int FEELERTIPSIZE = 10;
 
-        private float MAXIMUMFEELERDISTANCE = 100;
+        private const float MAXIMUMFEELERDISTANCE = 100;
         private float feelerOcclusion = 0;
 
         private static int _maximumGeneration = 1;
         public static int maximumGeneration
         {
+
+            [MethodImpl(MethodImplOptions.Synchronized)]
             get
             {
                 return _maximumGeneration;
@@ -244,7 +246,7 @@ namespace EvoNet.Objects
             brain.RandomizeAllWeights();
             CalculateFeelerPos(MAXIMUMFEELERDISTANCE);
 
-            color = new Color((float)EvoGame.GlobalRandom.NextDouble(), (float)EvoGame.GlobalRandom.NextDouble(), (float)EvoGame.GlobalRandom.NextDouble());
+            color = new Color(EvoGame.RandomFloat(), EvoGame.RandomFloat(), EvoGame.RandomFloat());
             GenerateColorInv();
             CalculateCollisionGridPos();
         }
@@ -252,14 +254,14 @@ namespace EvoNet.Objects
         public Creature(Creature mother)
         {
             id = currentId++;
-            this.mother = mother;
+            //this.mother = mother;
             generation = mother.generation + 1;
             if(generation > _maximumGeneration)
             {
                 _maximumGeneration = generation;
             }
             this.pos = mother.pos;
-            this.viewAngle = (float)EvoGame.GlobalRandom.NextDouble() * Mathf.PI * 2;
+            this.viewAngle = EvoGame.RandomFloat() * Mathf.PI * 2;
             this.brain = mother.brain.CloneFullMesh();
 
             SetupVariablesFromBrain();
@@ -271,20 +273,25 @@ namespace EvoNet.Objects
                 brain.RandomMutation(0.1f);
             }
 
-            float r = mother.color.R / 255f;
-            float g = mother.color.G / 255f;
-            float b = mother.color.B / 255f;
+            int r = mother.color.R;
+            int g = mother.color.G;
+            int b = mother.color.B;
 
-            r += (float)EvoGame.GlobalRandom.NextDouble() * 0.1f - 0.05f;
-            g += (float)EvoGame.GlobalRandom.NextDouble() * 0.1f - 0.05f;
-            b += (float)EvoGame.GlobalRandom.NextDouble() * 0.1f - 0.05f;
+            r += EvoGame.RandomInt(-5, 6);
+            g += EvoGame.RandomInt(-5, 6);
+            b += EvoGame.RandomInt(-5, 6);
 
-            r = Mathf.Clamp01(r);
-            g = Mathf.Clamp01(g);
-            b = Mathf.Clamp01(b);
+            r = Mathf.ClampColorValue(r);
+            g = Mathf.ClampColorValue(g);
+            b = Mathf.ClampColorValue(b);
 
             color = new Color(r, g, b);
             GenerateColorInv();
+
+            if(CreatureManager.SelectedCreature == null || CreatureManager.SelectedCreature.Energy < 100)
+            {
+                CreatureManager.SelectedCreature = this;
+            }
         }
 
 
@@ -318,11 +325,17 @@ namespace EvoNet.Objects
             CalculateCollisionGridPos();
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         private void CalculateCollisionGridPos()
         {
-            collisionGridX = (int)((pos.X / EvoGame.Instance.tileMap.GetWorldWidth()) * CreatureManager.COLLISIONGRIDSIZE / 3 + CreatureManager.COLLISIONGRIDSIZE / 3);
-            collisionGridY = (int)((pos.Y / EvoGame.Instance.tileMap.GetWorldHeight()) *CreatureManager.COLLISIONGRIDSIZE / 3 + CreatureManager.COLLISIONGRIDSIZE / 3);
-            CreatureManager.CollisionGrid[collisionGridX, collisionGridY].Add(this);
+            lock (this)
+            {
+                collisionGridX = (int)((pos.X / EvoGame.Instance.tileMap.GetWorldWidth()) * CreatureManager.COLLISIONGRIDSIZE / 3 + CreatureManager.COLLISIONGRIDSIZE / 3);
+                collisionGridY = (int)((pos.Y / EvoGame.Instance.tileMap.GetWorldHeight()) * CreatureManager.COLLISIONGRIDSIZE / 3 + CreatureManager.COLLISIONGRIDSIZE / 3);
+                collisionGridX = Mathf.Clamp(collisionGridX, 0, CreatureManager.COLLISIONGRIDSIZE - 1);
+                collisionGridY = Mathf.Clamp(collisionGridY, 0, CreatureManager.COLLISIONGRIDSIZE - 1);
+                CreatureManager.AddToCollisionGrid(collisionGridX, collisionGridY, this);
+            }
         }
 
         public void GenerateColorInv()
@@ -392,7 +405,7 @@ namespace EvoNet.Objects
             {
                 EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] += energy * FOODDROPPERCENTAGE;
             }
-            Manager.CreaturesToKill.Add(this);
+            Manager.RemoveCreature(this);
         }
 
         private void ActRotate(float costMult, float fixedDeltaTime)
@@ -436,21 +449,8 @@ namespace EvoNet.Objects
         {
             if(t.type != TileType.None)
             {
-                float foodVal = EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y];
-                if (foodVal > 0)
-                {
-                    float eatAmount = GAIN_EAT * eatWish * fixedDeltaTime;
-                    if (foodVal > eatAmount)
-                    {
-                        energy += eatAmount;
-                        EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] -= eatAmount;
-                    }
-                    else
-                    {
-                        energy += foodVal;
-                        EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] = 0;
-                    }
-                }
+                float eatAmount = GAIN_EAT * eatWish * fixedDeltaTime;
+                energy += EvoGame.Instance.tileMap.EatOfTile(t.position.X, t.position.Y, eatAmount);
             }
 
         }
@@ -473,7 +473,7 @@ namespace EvoNet.Objects
             Creature child = new Creature(this);
             child.Manager = Manager;
             children.Add(child);
-            Manager.CreaturesToSpawn.Add(child);
+            Manager.AddCreature(child);
             energy -= STARTENERGY;
         }
 
@@ -586,7 +586,7 @@ namespace EvoNet.Objects
                 {
                     if (i >= 0 && k >= 0 && i < CreatureManager.COLLISIONGRIDSIZE && k < CreatureManager.COLLISIONGRIDSIZE)
                     {
-                        List<Creature> collisionList = CreatureManager.CollisionGrid[i, k];
+                        List<Creature> collisionList = CreatureManager.GetCollisionGridList(i, k);
                         HandleCollisionsWithList(collisionList);
                     }
                 }
@@ -595,9 +595,10 @@ namespace EvoNet.Objects
 
         private void HandleCollisionsWithList(List<Creature> creatures)
         {
-            foreach(Creature c in creatures)
+            for(int i = 0; i<creatures.Count; i++)
             {
-                HandleCollisionWithCreature(c);
+                Creature c = creatures[i];
+                if(c != null) HandleCollisionWithCreature(c);
             }
         }
 

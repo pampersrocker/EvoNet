@@ -10,6 +10,7 @@ using EvoNet.Rendering;
 using System.Diagnostics;
 using System.Threading;
 using EvoNet.ThreadingHelper;
+using System.Runtime.CompilerServices;
 
 namespace EvoNet.Objects
 {
@@ -17,7 +18,7 @@ namespace EvoNet.Objects
     {
         public static int AmountOfCores = Environment.ProcessorCount;
         public const int COLLISIONGRIDSIZE = 300;
-        public static  List<Creature>[,] CollisionGrid = new List<Creature>[COLLISIONGRIDSIZE, COLLISIONGRIDSIZE];
+        private static  List<Creature>[,] CollisionGrid = new List<Creature>[COLLISIONGRIDSIZE, COLLISIONGRIDSIZE];
 
         public static float[] AverageAgeOfLastCreatures = new float[128];
         private int indexForAverageAgeOfLastCreatures = 0;
@@ -26,9 +27,9 @@ namespace EvoNet.Objects
         private float year = 0;
         private int numberOfDeaths = 0;
 
-        public List<Creature> Creatures = new List<Creature>();
-        public List<Creature> CreaturesToKill = new List<Creature>();
-        public List<Creature> CreaturesToSpawn = new List<Creature>();
+        private List<Creature> Creatures = new List<Creature>();
+        private List<Creature> CreaturesToKill = new List<Creature>();
+        private List<Creature> CreaturesToSpawn = new List<Creature>();
 
         public List<float> AliveCreaturesRecord = new List<float>();
         public List<float> AverageDeathAgeRecord = new List<float>();
@@ -38,19 +39,47 @@ namespace EvoNet.Objects
 
         SpriteBatch spriteBatch;
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void AddCreature(Creature c)
+        {
+            CreaturesToSpawn.Add(c);
+        }
+
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void RemoveCreature(Creature c)
+        {
+            CreaturesToKill.Add(c);
+        }
+
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private void MergeCreaturesAndSpawnCreatures()
+        {
+            foreach (Creature c in CreaturesToSpawn)
+            {
+                Creatures.Add(c);
+            }
+            CreaturesToSpawn.Clear();
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private void RemoveCreaturesFromDeathList()
+        {
+            foreach (Creature c in CreaturesToKill)
+            {
+                AddDeathAge(c.Age);
+                Creatures.Remove(c);
+            }
+            CreaturesToKill.Clear();
+        }
 
         public override void Initialize(EvoGame inGame)
         {
             base.Initialize(inGame);
             spriteBatch = new SpriteBatch(game.GraphicsDevice);
 
-            for(int i = 0; i<COLLISIONGRIDSIZE; i++)
-            {
-                for(int k = 0; k<COLLISIONGRIDSIZE; k++)
-                {
-                    CollisionGrid[i, k] = new List<Creature>();
-                }
-            }
+            GenerateCollisionGrid();
         }
 
         public override bool WantsFastForward
@@ -61,6 +90,33 @@ namespace EvoNet.Objects
             }
         }
 
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public static void AddToCollisionGrid(int x, int y, Creature c)
+        {
+            CollisionGrid[x, y].Add(c);
+        }
+
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public static List<Creature> GetCollisionGridList(int x, int y)
+        {
+            return CollisionGrid[x, y];
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private void GenerateCollisionGrid()
+        {
+            for (int i = 0; i < COLLISIONGRIDSIZE; i++)
+            {
+                for (int k = 0; k < COLLISIONGRIDSIZE; k++)
+                {
+                    CollisionGrid[i, k] = new List<Creature>();
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
         private void ResetCollisionGrid()
         {
             for(int i = 0; i<COLLISIONGRIDSIZE; i++)
@@ -97,9 +153,9 @@ namespace EvoNet.Objects
             {
                 Creature justSpawned = new Creature(
                     new Vector2(
-                        (float)EvoGame.GlobalRandom.NextDouble() * game.tileMap.GetWorldWidth(),
-                        (float)EvoGame.GlobalRandom.NextDouble() * game.tileMap.GetWorldHeight()),
-                    (float)EvoGame.GlobalRandom.NextDouble() * Mathf.PI * 2);
+                        EvoGame.RandomFloat() * game.tileMap.GetWorldWidth(),
+                        EvoGame.RandomFloat() * game.tileMap.GetWorldHeight()),
+                    EvoGame.RandomFloat() * Mathf.PI * 2);
                 justSpawned.Manager = this;
                 Creatures.Add(justSpawned);
             }
@@ -117,6 +173,7 @@ namespace EvoNet.Objects
                     MultithreadingHelper.PulseAndFinish();
                 });
             }
+            MultithreadingHelper.WaitForEmptyThreadPool();
             for (int i = 0; i < AmountOfCores; i++)
             {
                 int upperBound = Creatures.Count * (i + 1) / AmountOfCores;
@@ -132,17 +189,10 @@ namespace EvoNet.Objects
             }
             MultithreadingHelper.WaitForEmptyThreadPool();
             numberOfDeaths += CreaturesToKill.Count;
-            foreach (Creature c in CreaturesToKill)
-            {
-                AddDeathAge(c.Age);
-                Creatures.Remove(c);
-            }
-            CreaturesToKill.Clear();
-            foreach (Creature c in CreaturesToSpawn)
-            {
-                Creatures.Add(c);
-            }
-            CreaturesToSpawn.Clear();
+
+            RemoveCreaturesFromDeathList();
+            MergeCreaturesAndSpawnCreatures();
+            
             year += (float)deltaTime.ElapsedGameTime.TotalSeconds;
 
             HandleCollision();
@@ -161,8 +211,6 @@ namespace EvoNet.Objects
             }
 
             AliveCreaturesRecord.Add(Creatures.Count);
-
-            SelectedCreature = OldestCreatureAlive;
         }
 
         public void Draw(GameTime deltaTime)

@@ -61,11 +61,32 @@ namespace EvoNet
             return value;
         }
 
+        public static float Clamp(float value, float min, float max)
+        {
+            if (value < min) return min;
+            if (value > max) return max;
+            return value;
+        }
+
+        public static int Clamp(int value, int min, int max)
+        {
+            if (value < min) return min;
+            if (value > max) return max;
+            return value;
+        }
+
         public static float ClampNegPos(float value)
         {
             if (value < -1) return -1;
             if (value > 1) return 1;
             return value;
+        }
+
+        public static int ClampColorValue(int val)
+        {
+            if (val < 0) return 0;
+            if (val > 255) return 255;
+            return val;
         }
 
         public static float Max(List<float> list)

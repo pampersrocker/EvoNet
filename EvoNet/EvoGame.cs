@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using EvoNet.Objects;
 using EvoNet.Rendering;
+using System.Runtime.CompilerServices;
 
 namespace EvoNet
 {
@@ -19,7 +20,23 @@ namespace EvoNet
     public class EvoGame : Game
     {
 
-        public static Random GlobalRandom = new Random();
+        private static Random GlobalRandom = new Random();
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public static float RandomFloat()
+        {
+            return (float)GlobalRandom.NextDouble();
+        }
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public static int RandomInt(int min, int max)
+        {
+            return GlobalRandom.Next(min, max);
+        }
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public static int RandomInt(int max)
+        {
+            return GlobalRandom.Next(max);
+        }
+
         public static EvoGame Instance;
         GraphicsDeviceManager graphics;
         public static SpriteBatch spriteBatch;
