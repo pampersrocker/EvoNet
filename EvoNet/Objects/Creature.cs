@@ -10,6 +10,7 @@ using EvoNet.Map;
 using System.Diagnostics;
 using System.IO;
 using EvoNet.Rendering;
+using System.Runtime.CompilerServices;
 
 namespace EvoNet.Objects
 {
@@ -329,31 +330,30 @@ namespace EvoNet.Objects
             color_inv = new Color(255 - color.R, 255 - color.G, 255 - color.B);
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void ReadSensors()
         {
-            //lock (this)
-            {
-                inMemory1.SetValue(outMemory1.GetValue());
+            inMemory1.SetValue(outMemory1.GetValue());
 
-                brain.Invalidate();
+            brain.Invalidate();
 
-                Tile creatureTile = EvoGame.Instance.tileMap.GetTileAtWorldPosition(pos);
-                Tile feelerTile = EvoGame.Instance.tileMap.GetTileAtWorldPosition(feelerPos);
+            Tile creatureTile = EvoGame.Instance.tileMap.GetTileAtWorldPosition(pos);
+            Tile feelerTile = EvoGame.Instance.tileMap.GetTileAtWorldPosition(feelerPos);
 
-                inBias.SetValue(1);
-                inFoodValuePosition.SetValue(creatureTile.food / TileMap.MAXIMUMFOODPERTILE);
-                inFoodValueFeeler.SetValue(feelerTile.food / TileMap.MAXIMUMFOODPERTILE);
-                inOcclusionFeeler.SetValue(feelerOcclusion);
-                inEnergy.SetValue((energy - MINIMUMSURVIVALENERGY) / (STARTENERGY - MINIMUMSURVIVALENERGY));
-                inAge.SetValue(age / 10f);
-                inGeneticDifference.SetValue(0); //TODO find real value
-                inWasAttacked.SetValue(0); //TODO find real value
-                inWaterOnFeeler.SetValue(feelerTile.IsLand() ? 0 : 1);
-                inWaterOnCreature.SetValue(creatureTile.IsLand() ? 0 : 1);
-            }
+            inBias.SetValue(1);
+            inFoodValuePosition.SetValue(creatureTile.food / TileMap.MAXIMUMFOODPERTILE);
+            inFoodValueFeeler.SetValue(feelerTile.food / TileMap.MAXIMUMFOODPERTILE);
+            inOcclusionFeeler.SetValue(feelerOcclusion);
+            inEnergy.SetValue((energy - MINIMUMSURVIVALENERGY) / (STARTENERGY - MINIMUMSURVIVALENERGY));
+            inAge.SetValue(age / 10f);
+            inGeneticDifference.SetValue(0); //TODO find real value
+            inWasAttacked.SetValue(0); //TODO find real value
+            inWaterOnFeeler.SetValue(feelerTile.IsLand() ? 0 : 1);
+            inWaterOnCreature.SetValue(creatureTile.IsLand() ? 0 : 1);
             
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void Act(GameTime deltaTime)
         {
             float fixedDeltaTime = (float)deltaTime.ElapsedGameTime.TotalSeconds;

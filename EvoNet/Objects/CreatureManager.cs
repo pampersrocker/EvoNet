@@ -103,14 +103,34 @@ namespace EvoNet.Objects
                 justSpawned.Manager = this;
                 Creatures.Add(justSpawned);
             }
-            foreach (Creature c in Creatures)
+
+            for (int i = 0; i < AmountOfCores; i++)
             {
-                c.ReadSensors();
+                int upperBound = Creatures.Count * (i + 1) / AmountOfCores;
+                if (upperBound > Creatures.Count) upperBound = Creatures.Count;
+                int lowerBound = Creatures.Count * i / AmountOfCores;
+                MultithreadingHelper.StartWork((object state) => {
+                    for (int k = lowerBound; k < upperBound; k++)
+                    {
+                        Creatures[k].ReadSensors();
+                    }
+                    MultithreadingHelper.PulseAndFinish();
+                });
             }
-            foreach (Creature c in Creatures)
+            for (int i = 0; i < AmountOfCores; i++)
             {
-                c.Act(deltaTime);
+                int upperBound = Creatures.Count * (i + 1) / AmountOfCores;
+                if (upperBound > Creatures.Count) upperBound = Creatures.Count;
+                int lowerBound = Creatures.Count * i / AmountOfCores;
+                MultithreadingHelper.StartWork((object state) => {
+                    for (int k = lowerBound; k < upperBound; k++)
+                    {
+                        Creatures[k].Act(deltaTime);
+                    }
+                    MultithreadingHelper.PulseAndFinish();
+                });
             }
+            MultithreadingHelper.WaitForEmptyThreadPool();
             numberOfDeaths += CreaturesToKill.Count;
             foreach (Creature c in CreaturesToKill)
             {
