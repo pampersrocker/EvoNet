@@ -11,9 +11,30 @@ namespace EvoNet
     {
         public abstract bool WantsFastForward { get; }
 
-        public virtual float FixedUpdateTime { get { return 0.016f; } }
+        public virtual float FixedUpdateTime
+        {
+            get
+            {
+                if (game != null)
+                {
+                    return game.gameConfiguration.TickInterval;
+                }
+                else
+                {
+                    return 0.01f;
+                }
+            }
+        }
+
 
         private TimeSpan totalElapsedTime = new TimeSpan();
+
+        public EvoGame game;
+
+        public virtual void Initialize(EvoGame game)
+        {
+            this.game = game;
+        }
 
         public void NotifyTick(GameTime actualTime)
         {
@@ -22,6 +43,6 @@ namespace EvoNet
             Update(deltaTime);
         }
 
-        public abstract void Update(GameTime deltaTime);
+        protected abstract void Update(GameTime deltaTime);
     }
 }

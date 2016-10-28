@@ -24,8 +24,6 @@ namespace EvoNet
         GraphicsDeviceManager graphics;
         public static SpriteBatch spriteBatch;
 
-        public const float TIMEPERTICK = 0.01f;
-
         public TileMap tileMap;
         public GameConfig gameConfiguration;
         public InputManager inputManager;
@@ -71,7 +69,7 @@ namespace EvoNet
 
 
             inputManager = new InputManager();
-            inputManager.Initialize(this, Camera.instanceGameWorld);
+            inputManager.Initialize(this);
 
             modules.Add(inputManager);
 
