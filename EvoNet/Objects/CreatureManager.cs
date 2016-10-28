@@ -30,14 +30,12 @@ namespace EvoNet.Objects
         private Creature OldestCreatureAlive;
         private Creature SelectedCreature;
 
-        EvoGame game;
-
         SpriteBatch spriteBatch;
 
 
-        public void Initialize(EvoGame inGame)
+        public override void Initialize(EvoGame inGame)
         {
-            game = inGame;
+            base.Initialize(inGame);
             spriteBatch = new SpriteBatch(game.GraphicsDevice);
         }
 
@@ -49,9 +47,8 @@ namespace EvoNet.Objects
             }
         }
 
-        public override void Update(GameTime deltaTime)
+        protected override void Update(GameTime deltaTime)
         {
-            deltaTime = null; //DO NOT EVER USE THE DELTA TIME!
             while (Creatures.Count < 50)
             {
                 Creature justSpawned = new Creature(
@@ -69,7 +66,7 @@ namespace EvoNet.Objects
             }
             foreach (Creature c in Creatures)
             {
-                c.Act();
+                c.Act(deltaTime);
             }
             numberOfDeaths += CreaturesToKill.Count;
             foreach (Creature c in CreaturesToKill)
@@ -83,7 +80,7 @@ namespace EvoNet.Objects
                 Creatures.Add(c);
             }
             CreaturesToSpawn.Clear();
-            year += EvoGame.TIMEPERTICK;
+            year += (float)deltaTime.ElapsedGameTime.TotalSeconds;
 
             if (Creatures.Count > 0)
             {

@@ -37,15 +37,16 @@ namespace EvoNet.Objects
             }
         }
 
-        private const float COST_EAT = 0.1f;
-        private const float GAIN_EAT = 1f;
-        private const float COST_PERMANENT = 0.01f;
-        private const float COST_WALK = 0.05f;
-        private const float COST_ROTATE = 0.05f;
+        private const float COST_EAT = 10f;
+        private const float GAIN_EAT = 100f;
+        private const float COST_PERMANENT = 1f;
+        private const float COST_WALK = 5f;
+        private const float COST_ROTATE = 5f;
 
         private const float FOODDROPPERCENTAGE = 0;
 
-        private const float MOVESPEED = 10f;
+        private const float ROTATE_FACTOR = 10f;
+        private const float MOVESPEED = 1000f;
 
         private const float STARTENERGY = 150;
         private const float MINIMUMSURVIVALENERGY = 100;
@@ -331,17 +332,18 @@ namespace EvoNet.Objects
             inWaterOnCreature.SetValue(creatureTile.IsLand() ? 0 : 1);
         }
 
-        public void Act()
+        public void Act(GameTime deltaTime)
         {
+            float fixedDeltaTime = (float)deltaTime.ElapsedGameTime.TotalSeconds;
             Tile t = EvoGame.Instance.tileMap.GetTileAtWorldPosition(pos);
             float costMult = CalculateCostMultiplier(t);
-            ActRotate(costMult);
-            ActMove(costMult);
+            ActRotate(costMult, fixedDeltaTime);
+            ActMove(costMult, fixedDeltaTime);
             ActBirth();
             ActFeelerRotate();
-            ActEat(costMult, t);
+            ActEat(costMult, t, fixedDeltaTime);
 
-            age += EvoGame.TIMEPERTICK;
+            age += fixedDeltaTime;
 
             if(age > _oldestCreatureEver.age)
             {
@@ -365,20 +367,20 @@ namespace EvoNet.Objects
             Manager.CreaturesToKill.Add(this);
         }
 
-        private void ActRotate(float costMult)
+        private void ActRotate(float costMult, float fixedDeltaTime)
         {
             float rotateForce = Mathf.ClampNegPos(outRotate.GetValue());
-            this.viewAngle += rotateForce / 10;
-            energy -= Mathf.Abs(rotateForce * COST_ROTATE * costMult);
+            this.viewAngle += rotateForce * fixedDeltaTime * ROTATE_FACTOR;
+            energy -= Mathf.Abs(rotateForce * COST_ROTATE * fixedDeltaTime * costMult);
         }
 
-        private void ActMove(float costMult)
+        private void ActMove(float costMult, float fixedDeltaTime)
         {
-            Vector2 forwardVector = new Vector2(Mathf.Sin(viewAngle), Mathf.Cos(viewAngle)) * MOVESPEED;
+            Vector2 forwardVector = new Vector2(Mathf.Sin(viewAngle), Mathf.Cos(viewAngle)) * MOVESPEED * fixedDeltaTime;
             float forwardForce = Mathf.ClampNegPos(outForward.GetValue());
             forwardVector *= forwardForce;
             this.pos += forwardVector;
-            energy -= Mathf.Abs(forwardForce * COST_WALK * costMult);
+            energy -= Mathf.Abs(forwardForce * COST_WALK * fixedDeltaTime * costMult);
         }
 
         private void ActBirth()
@@ -393,27 +395,28 @@ namespace EvoNet.Objects
             CalculateFeelerPos();
         }
 
-        private void ActEat(float costMult, Tile creatureTile)
+        private void ActEat(float costMult, Tile creatureTile, float fixedDeltaTime)
         {
             float eatWish = Mathf.Clamp01(outEat.GetValue());
             if (eatWish > 0)
             {
-                Eat(eatWish, creatureTile);
-                energy -= eatWish * COST_EAT * costMult;
+                Eat(eatWish, creatureTile, fixedDeltaTime);
+                energy -= eatWish * COST_EAT * fixedDeltaTime * costMult;
             }
         }
 
-        private void Eat(float eatWish, Tile t)
+        private void Eat(float eatWish, Tile t, float fixedDeltaTime)
         {
             if(t.type != TileType.None)
             {
                 float foodVal = EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y];
                 if (foodVal > 0)
                 {
-                    if (foodVal > GAIN_EAT * eatWish)
+                    float eatAmount = GAIN_EAT * eatWish * fixedDeltaTime;
+                    if (foodVal > eatAmount)
                     {
-                        energy += GAIN_EAT * eatWish;
-                        EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] -= GAIN_EAT;
+                        energy += eatAmount;
+                        EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] -= eatAmount;
                     }
                     else
                     {

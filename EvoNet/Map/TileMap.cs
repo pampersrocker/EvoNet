@@ -171,8 +171,9 @@ namespace EvoNet.Map
             return food;
         }
 
-        public void Initialize(EvoGame game)
+        public override void Initialize(EvoGame game)
         {
+            base.Initialize(game);
             spriteBatch = new SpriteBatch(game.GraphicsDevice);
 
             SandTexture = game.Content.Load<Texture2D>("Map/SandTexture");
@@ -190,16 +191,16 @@ namespace EvoNet.Map
             WaterShader.Parameters["Water2"].SetValue(Water2Texture);
         }
 
-        public override void Update(GameTime deltaTime)
+        protected override void Update(GameTime deltaTime)
         {
-            deltaTime = null; //Do not ever use delta Time!
+            float fixedDeltaTime = (float)deltaTime.ElapsedGameTime.TotalSeconds;
             for (int i = 0; i < Width; i++)
             {
                 for (int k = 0; k < Height; k++)
                 {
                     if (IsFertile(i, k))
                     {
-                        Grow(i, k);
+                        Grow(i, k, fixedDeltaTime);
                     }
                 }
             }
@@ -207,9 +208,9 @@ namespace EvoNet.Map
             FoodRecord.Add(CalculateFoodAvailable());
         }
 
-        public void Grow(int x, int y)
+        public void Grow(int x, int y, float fixedDeltaTime)
         {
-            foodValues[x, y] += 0.2f;
+            foodValues[x, y] += 20f * fixedDeltaTime;
             if (foodValues[x, y] > MAXIMUMFOODPERTILE) foodValues[x, y] = MAXIMUMFOODPERTILE;
         }
 

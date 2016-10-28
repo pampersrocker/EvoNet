@@ -22,7 +22,6 @@ namespace EvoNet.Input
         bool oldSpaceDown = false;
         Vector2 oldMousePosition = Vector2.Zero;
         int scrollWheelValue;
-        EvoGame game;
 
         public bool EnableFastForward { get; private set; }
 
@@ -34,15 +33,16 @@ namespace EvoNet.Input
             }
         }
 
-        public void Initialize(EvoGame ingame, Camera inCamera)
+        public override void Initialize(EvoGame ingame)
         {
+            base.Initialize(ingame);
             game = ingame;
             gameConfiguration = ingame.gameConfiguration;
-            camera = inCamera;
+            camera = Camera.instanceGameWorld;
             scrollWheelValue = Mouse.GetState().ScrollWheelValue;
         }
 
-        public override void Update(GameTime gameTime)
+        protected override void Update(GameTime gameTime)
         {
 
             if (!game.IsActive)

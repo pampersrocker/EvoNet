@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Input;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using YamlDotNet.Serialization;
 
@@ -16,6 +18,8 @@ namespace EvoNet.Configuration
 
         public float ScaleFactor { get; set; }
 
+        public float TickInterval { get; set; }
+
         public static GameConfig DefaultConfig
         {
             get
@@ -27,6 +31,7 @@ namespace EvoNet.Configuration
                 config.MoveRightKeys = new List<Keys> { Keys.D, Keys.Right };
                 config.MovementSensitivity = 100.0f;
                 config.ScaleFactor = 0.1f;
+                config.TickInterval = 0.01f;
                 return config;
             }
         }
@@ -38,6 +43,7 @@ namespace EvoNet.Configuration
                 string sourceText = File.ReadAllText("Config.cfg");
                 Deserializer yamlDeserializer = new Deserializer();
                 GameConfig deserialized = yamlDeserializer.Deserialize<GameConfig>(sourceText);
+                CheckLoadedConfig(deserialized);
                 return deserialized;
             }
             else
@@ -47,6 +53,15 @@ namespace EvoNet.Configuration
                 string serialized = yamlSerializer.Serialize(DefaultConfig);
                 File.WriteAllText("Config.cfg", serialized);
                 return DefaultConfig;
+            }
+        }
+
+        public static void CheckLoadedConfig(GameConfig config)
+        {
+            if (config.TickInterval <= 0)
+            {
+                Console.WriteLine("Reset TickInterval in config from {0} to {1}", config.TickInterval, 0.01f);
+                config.TickInterval = 0.01f;
             }
         }
     }
