@@ -8,12 +8,15 @@ using Microsoft.Xna.Framework.Graphics;
 using System.IO;
 using EvoNet.Rendering;
 using System.Diagnostics;
+using System.Threading;
+using EvoNet.ThreadingHelper;
 
 namespace EvoNet.Objects
 {
     public class CreatureManager : UpdateModule
     {
-        public const int COLLISIONGRIDSIZE = 100;
+        public static int AmountOfCores = Environment.ProcessorCount;
+        public const int COLLISIONGRIDSIZE = 300;
         public static  List<Creature>[,] CollisionGrid = new List<Creature>[COLLISIONGRIDSIZE, COLLISIONGRIDSIZE];
 
         public static float[] AverageAgeOfLastCreatures = new float[128];
@@ -31,7 +34,7 @@ namespace EvoNet.Objects
         public List<float> AverageDeathAgeRecord = new List<float>();
 
         private Creature OldestCreatureAlive;
-        private Creature SelectedCreature;
+        public static Creature SelectedCreature;
 
         EvoGame game;
 
@@ -73,10 +76,20 @@ namespace EvoNet.Objects
 
         private void HandleCollision()
         {
-            foreach(Creature c in Creatures)
+            for(int i = 0; i< AmountOfCores; i++)
             {
-                c.HandleCollisions();
+                int upperBound = Creatures.Count * (i + 1) / AmountOfCores;
+                if (upperBound > Creatures.Count) upperBound = Creatures.Count;
+                int lowerBound = Creatures.Count * i / AmountOfCores;
+                MultithreadingHelper.StartWork((object state)=>{
+                    for (int k = lowerBound; k < upperBound; k++)
+                    {
+                        Creatures[k].HandleCollisions();
+                    }
+                    MultithreadingHelper.PulseAndFinish();
+                });
             }
+            MultithreadingHelper.WaitForEmptyThreadPool();
             ResetCollisionGrid();
         }
 
@@ -93,7 +106,6 @@ namespace EvoNet.Objects
                 justSpawned.Manager = this;
                 Creatures.Add(justSpawned);
             }
-
             foreach (Creature c in Creatures)
             {
                 c.ReadSensors();

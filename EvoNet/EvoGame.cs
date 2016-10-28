@@ -92,7 +92,6 @@ namespace EvoNet
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             WhiteCircleTexture = Content.Load<Texture2D>("Map/WhiteCircle512");
-            Creature.Initialize();
 
 
             RenderHelper.Ini(WhiteTexture, WhiteCircleTexture);
@@ -124,6 +123,7 @@ namespace EvoNet
             modules.Add(tileMap);
             modules.Add(creatureManager);
 
+            Creature.Initialize();
 
             // TODO: use this.Content to load your game content here
         }

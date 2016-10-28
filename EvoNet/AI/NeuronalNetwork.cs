@@ -364,11 +364,11 @@ namespace EvoNet.AI
                 //TODO 
                 if (value > 0)
                 {
-                    color = new Color(0f, 1f, 0f, alpha);
+                    color = new Color(0f, alpha, 0f, 1f);
                 }else
                 {
 
-                    color = new Color(1f, 0f, 0f, alpha);
+                    color = new Color(alpha, 0f, 0f, 1f);
                 }
                 RenderHelper.DrawLine(spriteBatch, n.DrawPosition.X, n.DrawPosition.Y, c.entryNeuron.DrawPosition.X, c.entryNeuron.DrawPosition.Y, color, 1);
             }

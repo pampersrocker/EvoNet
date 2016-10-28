@@ -84,6 +84,7 @@
     <Compile Include="Rendering\GraphRenderer.cs" />
     <Compile Include="Rendering\SpritebatchExtensions.cs" />
     <Compile Include="Serialization\BinaryFileStreamExtensions.cs" />
+    <Compile Include="ThreadingHelper\MultithreadingHelper.cs" />
     <Compile Include="UpdateModule.cs" />
     <Compile Include="Rendering\RenderHelper.cs" />
   </ItemGroup>

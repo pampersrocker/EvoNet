@@ -24,6 +24,9 @@ namespace EvoNet.Objects
         private const int CREATURESIZE = 54;
         private const int FEELERTIPSIZE = 10;
 
+        private float MAXIMUMFEELERDISTANCE = 100;
+        private float feelerOcclusion = 0;
+
         private static int _maximumGeneration = 1;
         public static int maximumGeneration
         {
@@ -34,7 +37,7 @@ namespace EvoNet.Objects
             set { _maximumGeneration = value; }
         }
 
-        private static Creature _oldestCreatureEver = new Creature(new Vector2(0, 0), 0); //dummy creature
+        private static Creature _oldestCreatureEver = null; //dummy creature
         public static Creature oldestCreatureEver
         {
             get
@@ -237,7 +240,7 @@ namespace EvoNet.Objects
             brain.GenerateFullMesh();
 
             brain.RandomizeAllWeights();
-            CalculateFeelerPos();
+            CalculateFeelerPos(MAXIMUMFEELERDISTANCE);
 
             color = new Color((float)EvoGame.GlobalRandom.NextDouble(), (float)EvoGame.GlobalRandom.NextDouble(), (float)EvoGame.GlobalRandom.NextDouble());
             GenerateColorInv();
@@ -260,7 +263,7 @@ namespace EvoNet.Objects
             SetupVariablesFromBrain();
 
 
-            CalculateFeelerPos();
+            CalculateFeelerPos(MAXIMUMFEELERDISTANCE);
             for (int i = 0; i < 10; i++)
             {
                 brain.RandomMutation(0.1f);
@@ -286,7 +289,7 @@ namespace EvoNet.Objects
         // For deserialization
         public Creature()
         {
-
+            CalculateCollisionGridPos();
         }
 
         private void SetupVariablesFromBrain()
@@ -315,7 +318,9 @@ namespace EvoNet.Objects
 
         private void CalculateCollisionGridPos()
         {
-            //TODO calculate pos and add this to the collisiongrid
+            collisionGridX = (int)((pos.X / EvoGame.Instance.tileMap.GetWorldWidth()) * CreatureManager.COLLISIONGRIDSIZE / 3 + CreatureManager.COLLISIONGRIDSIZE / 3);
+            collisionGridY = (int)((pos.Y / EvoGame.Instance.tileMap.GetWorldHeight()) *CreatureManager.COLLISIONGRIDSIZE / 3 + CreatureManager.COLLISIONGRIDSIZE / 3);
+            CreatureManager.CollisionGrid[collisionGridX, collisionGridY].Add(this);
         }
 
         public void GenerateColorInv()
@@ -325,50 +330,62 @@ namespace EvoNet.Objects
 
         public void ReadSensors()
         {
-            inMemory1.SetValue(outMemory1.GetValue());
+            //lock (this)
+            {
+                inMemory1.SetValue(outMemory1.GetValue());
 
-            brain.Invalidate();
+                brain.Invalidate();
 
-            Tile creatureTile = EvoGame.Instance.tileMap.GetTileAtWorldPosition(pos);
-            Tile feelerTile   = EvoGame.Instance.tileMap.GetTileAtWorldPosition(feelerPos);
+                Tile creatureTile = EvoGame.Instance.tileMap.GetTileAtWorldPosition(pos);
+                Tile feelerTile = EvoGame.Instance.tileMap.GetTileAtWorldPosition(feelerPos);
 
-            inBias.SetValue(1);
-            inFoodValuePosition.SetValue(creatureTile.food / TileMap.MAXIMUMFOODPERTILE);
-            inFoodValueFeeler.SetValue(feelerTile.food / TileMap.MAXIMUMFOODPERTILE);
-            inOcclusionFeeler.SetValue(0); //TODO find real value
-            inEnergy.SetValue((energy - MINIMUMSURVIVALENERGY) / (STARTENERGY - MINIMUMSURVIVALENERGY));
-            inAge.SetValue(age / 10f);
-            inGeneticDifference.SetValue(0); //TODO find real value
-            inWasAttacked.SetValue(0); //TODO find real value
-            inWaterOnFeeler.SetValue(feelerTile.IsLand() ? 0 : 1);
-            inWaterOnCreature.SetValue(creatureTile.IsLand() ? 0 : 1);
+                inBias.SetValue(1);
+                inFoodValuePosition.SetValue(creatureTile.food / TileMap.MAXIMUMFOODPERTILE);
+                inFoodValueFeeler.SetValue(feelerTile.food / TileMap.MAXIMUMFOODPERTILE);
+                inOcclusionFeeler.SetValue(feelerOcclusion);
+                inEnergy.SetValue((energy - MINIMUMSURVIVALENERGY) / (STARTENERGY - MINIMUMSURVIVALENERGY));
+                inAge.SetValue(age / 10f);
+                inGeneticDifference.SetValue(0); //TODO find real value
+                inWasAttacked.SetValue(0); //TODO find real value
+                inWaterOnFeeler.SetValue(feelerTile.IsLand() ? 0 : 1);
+                inWaterOnCreature.SetValue(creatureTile.IsLand() ? 0 : 1);
+            }
+            
         }
 
         public void Act()
         {
-            Tile t = EvoGame.Instance.tileMap.GetTileAtWorldPosition(pos);
-            float costMult = CalculateCostMultiplier(t);
-            ActRotate(costMult);
-            ActMove(costMult);
-            ActBirth();
-            ActFeelerRotate();
-            ActEat(costMult, t);
-
-            age += EvoGame.TIMEPERTICK;
-
-            if(age > _oldestCreatureEver.age)
+            //lock (this)
             {
-                _oldestCreatureEver = this;
+                Tile t = EvoGame.Instance.tileMap.GetTileAtWorldPosition(pos);
+                float costMult = CalculateCostMultiplier(t);
+                ActRotate(costMult);
+                ActMove(costMult);
+                ActBirth();
+                ActFeelerRotate();
+                ActEat(costMult, t);
+
+                age += EvoGame.TIMEPERTICK;
+
+                if (oldestCreatureEver == null)
+                {
+                    _oldestCreatureEver = this;
+                }
+                if (age > _oldestCreatureEver.age)
+                {
+                    _oldestCreatureEver = this;
+                }
+
+                //TODO implement Attack
+
+                if (energy < 100 || float.IsNaN(energy))
+                {
+                    Kill(t);
+                }
+
+                CalculateCollisionGridPos();
             }
-
-            //TODO implement Attack
-
-            if(energy < 100 || float.IsNaN(energy))
-            {
-                Kill(t);
-            }
-
-            CalculateCollisionGridPos();
+            
         }
 
         private void Kill(Tile t)
@@ -405,7 +422,6 @@ namespace EvoNet.Objects
         private void ActFeelerRotate()
         {
             feelerAngle = Mathf.ClampNegPos(outFeelerAngle.GetValue()) * Mathf.PI;
-            CalculateFeelerPos();
         }
 
         private void ActEat(float costMult, Tile creatureTile)
@@ -467,25 +483,29 @@ namespace EvoNet.Objects
             return energy > STARTENERGY + MINIMUMSURVIVALENERGY * 1.1f;
         }
 
-        public void CalculateFeelerPos()
+        public void CalculateFeelerPos(float feelerDistance)
         {
             float angle = feelerAngle + viewAngle;
-            Vector2 localFeelerPos = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle)) * 100;
+            Vector2 localFeelerPos = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle)) * feelerDistance;
             feelerPos = pos + localFeelerPos;
         }
 
         public void Draw()
         {
-            spriteBatch.Begin(transformMatrix: Camera.instanceGameWorld.Matrix);
-            DrawCreature(spriteBatch, Vector2.Zero);
+            //lock (this)
+            {
 
-            spriteBatch.End();
+                spriteBatch.Begin(transformMatrix: Camera.instanceGameWorld.Matrix);
+                DrawCreature(spriteBatch, Vector2.Zero);
+
+                spriteBatch.End();
+            }
         }
 
         public void DrawCreature(SpriteBatch spriteBatch, Vector2 offset)
         {
             RenderHelper.DrawLine(spriteBatch, pos.X + offset.X, pos.Y + offset.Y, feelerPos.X + offset.X, feelerPos.Y + offset.Y, Color.White);
-            spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - CREATURESIZE/2), (int)(pos.Y + offset.Y - CREATURESIZE/2), CREATURESIZE, CREATURESIZE), color_inv);
+            spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - CREATURESIZE / 2), (int)(pos.Y + offset.Y - CREATURESIZE / 2), CREATURESIZE, CREATURESIZE), color_inv);
             spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - (CREATURESIZE - 4) / 2), (int)(pos.Y + offset.Y - (CREATURESIZE - 4) / 2), CREATURESIZE - 4, CREATURESIZE - 4), color);
             spriteBatch.Draw(feelerTex, new Rectangle((int)(feelerPos.X + offset.X - 5), (int)(feelerPos.Y + offset.Y - 5), 10, 10), Color.Blue);
         }
@@ -557,14 +577,19 @@ namespace EvoNet.Objects
 
         public void HandleCollisions()
         {
-            for(int i = collisionGridX - 1; i<=collisionGridX+1; i++)
+            //lock (this)
             {
-                for(int k = collisionGridY - 1; k<=collisionGridY+1; k++)
+                feelerOcclusion = 0;
+                CalculateFeelerPos(MAXIMUMFEELERDISTANCE);
+                for (int i = collisionGridX - 1; i <= collisionGridX + 1; i++)
                 {
-                    if(i >= 0 && k >= 0 && i<CreatureManager.COLLISIONGRIDSIZE && k < CreatureManager.COLLISIONGRIDSIZE)
+                    for (int k = collisionGridY - 1; k <= collisionGridY + 1; k++)
                     {
-                        List<Creature> collisionList = CreatureManager.CollisionGrid[i, k];
-                        HandleCollisionsWithList(collisionList);
+                        if (i >= 0 && k >= 0 && i < CreatureManager.COLLISIONGRIDSIZE && k < CreatureManager.COLLISIONGRIDSIZE)
+                        {
+                            List<Creature> collisionList = CreatureManager.CollisionGrid[i, k];
+                            HandleCollisionsWithList(collisionList);
+                        }
                     }
                 }
             }
@@ -581,7 +606,29 @@ namespace EvoNet.Objects
         private void HandleCollisionWithCreature(Creature c)
         {
             if (this == c) return;
-            //TODO
+            if(feelerOcclusion != 1) HandleCollisionWithCreatureEye(c);
+        }
+
+        private void HandleCollisionWithCreatureEye(Creature c)
+        {
+            for(float t = 0; t<= 1 - feelerOcclusion; t += 0.1f)
+            {
+                CalculateFeelerPos(MAXIMUMFEELERDISTANCE * t);
+                if (IsMyFeelerCollidingWithCreature(c))
+                {
+                    long idd = this.id;
+                    feelerOcclusion = 1 - t;
+                    return;
+                }
+            }
+        }
+
+        private bool IsMyFeelerCollidingWithCreature(Creature c)
+        {
+            float dist = (this.feelerPos - c.pos).LengthSquared();
+            float minDist = (FEELERTIPSIZE + CREATURESIZE) / 2;
+            minDist *= minDist;
+            return dist < minDist;
         }
     }
 }
