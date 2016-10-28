@@ -574,21 +574,20 @@ namespace EvoNet.Objects
             SetupVariablesFromBrain();
         }
 
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void HandleCollisions()
         {
-            //lock (this)
+            feelerOcclusion = 0;
+            CalculateFeelerPos(MAXIMUMFEELERDISTANCE);
+            for (int i = collisionGridX - 1; i <= collisionGridX + 1; i++)
             {
-                feelerOcclusion = 0;
-                CalculateFeelerPos(MAXIMUMFEELERDISTANCE);
-                for (int i = collisionGridX - 1; i <= collisionGridX + 1; i++)
+                for (int k = collisionGridY - 1; k <= collisionGridY + 1; k++)
                 {
-                    for (int k = collisionGridY - 1; k <= collisionGridY + 1; k++)
+                    if (i >= 0 && k >= 0 && i < CreatureManager.COLLISIONGRIDSIZE && k < CreatureManager.COLLISIONGRIDSIZE)
                     {
-                        if (i >= 0 && k >= 0 && i < CreatureManager.COLLISIONGRIDSIZE && k < CreatureManager.COLLISIONGRIDSIZE)
-                        {
-                            List<Creature> collisionList = CreatureManager.CollisionGrid[i, k];
-                            HandleCollisionsWithList(collisionList);
-                        }
+                        List<Creature> collisionList = CreatureManager.CollisionGrid[i, k];
+                        HandleCollisionsWithList(collisionList);
                     }
                 }
             }
