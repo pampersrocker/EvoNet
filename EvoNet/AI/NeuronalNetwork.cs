@@ -393,7 +393,7 @@ namespace EvoNet.AI
                 }
                 Color color = Color.Black;
                 float value = c.GetValue();
-                float alpha = Math.Abs(value) / strongestConnection;
+                float alpha = Mathf.Sqrt(Math.Abs(value) / strongestConnection);
                 //TODO 
                 if (value > 0)
                 {

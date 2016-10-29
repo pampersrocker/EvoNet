@@ -8,6 +8,10 @@ namespace EvoNet
         public const float PI = 3.1415926535f;
         public const float DEGREETORAD = PI / 180.0f;
         public const float RADTODEGREE = 180.0f / PI;
+        public static float Sqrt(float value)
+        {
+            return (float)Math.Sqrt(value);
+        }
         public static float Abs(float value)
         {
             return (float)Math.Abs(value);
