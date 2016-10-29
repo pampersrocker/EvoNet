@@ -1,6 +1,7 @@
 ﻿using EvoNet.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -279,15 +280,43 @@ namespace EvoNet.AI
 
         private const float NEURONSIZE = 15;
 
+        private Neuron GetNeuronUnderMouse()
+        {
+            MouseState ms = Mouse.GetState();
+            foreach (Neuron n in inputNeurons)
+            {
+                if (n.IsMouseOverDrawPosition(NEURONSIZE, ms))
+                {
+                    return n;
+                }
+            }
+            foreach (Neuron n in hiddenNeurons)
+            {
+                if (n.IsMouseOverDrawPosition(NEURONSIZE, ms))
+                {
+                    return n;
+                }
+            }
+            foreach (Neuron n in outputNeurons)
+            {
+                if (n.IsMouseOverDrawPosition(NEURONSIZE, ms))
+                {
+                    return n;
+                }
+            }
+            return null;
+        }
+
         public void Draw(SpriteBatch spriteBatch, Rectangle rect)
         {
             CalculateNeuronsRenderPosition(rect);
+            Neuron mouseNeuron = GetNeuronUnderMouse();
             float yMin = rect.Y + NEURONSIZE / 2;
             float yMax = rect.Y + rect.Height - NEURONSIZE / 2;
             float strongestConnection = GetStrongestConnection();
-            DrawLayer(spriteBatch, outputNeurons, strongestConnection, new Vector2(10, -10));
-            DrawLayer(spriteBatch, hiddenNeurons, strongestConnection);
-            DrawLayer(spriteBatch, inputNeurons, strongestConnection, new Vector2(-10, -10), true);
+            DrawLayer(spriteBatch, outputNeurons, strongestConnection, mouseNeuron, new Vector2(10, -10));
+            DrawLayer(spriteBatch, hiddenNeurons, strongestConnection, mouseNeuron);
+            DrawLayer(spriteBatch, inputNeurons, strongestConnection, mouseNeuron, new Vector2(-10, -10), true);
         }
 
         private void CalculateNeuronsRenderPosition(Rectangle rect)
@@ -311,18 +340,18 @@ namespace EvoNet.AI
             }
         }
 
-        private void DrawLayer(SpriteBatch spriteBatch, List<Neuron> layer, float strongestConnection, Vector2? nameOffset = null, bool writeRight = false) {
+        private void DrawLayer(SpriteBatch spriteBatch, List<Neuron> layer, float strongestConnection, Neuron mouseNeuron, Vector2? nameOffset = null, bool writeRight = false) {
             for(int i = 0; i<layer.Count; i++)
             {
-                DrawNeuron(spriteBatch, layer[i], strongestConnection, nameOffset, writeRight);
+                DrawNeuron(spriteBatch, layer[i], strongestConnection, mouseNeuron, nameOffset, writeRight);
             }
         }
 
-        private void DrawNeuron(SpriteBatch spriteBatch, Neuron n, float strongestConnection, Vector2? nameOffset = null, bool writeRight = false)
+        private void DrawNeuron(SpriteBatch spriteBatch, Neuron n, float strongestConnection, Neuron mouseNeuron, Vector2? nameOffset = null, bool writeRight = false)
         {
             if(n is WorkingNeuron)
             {
-                DrawConnections(spriteBatch, n, strongestConnection);
+                DrawConnections(spriteBatch, n, strongestConnection, mouseNeuron);
             }
             float x = n.DrawPosition.X;
             float y = n.DrawPosition.Y;
@@ -353,11 +382,15 @@ namespace EvoNet.AI
             }
         }
 
-        private void DrawConnections(SpriteBatch spriteBatch, Neuron n, float strongestConnection)
+        private void DrawConnections(SpriteBatch spriteBatch, Neuron n, float strongestConnection, Neuron mouseNeuron)
         {
             WorkingNeuron wn = (WorkingNeuron)n;
             foreach(Connection c in wn.GetConnections())
             {
+                if(mouseNeuron != null && n != mouseNeuron && c.entryNeuron != mouseNeuron)
+                {
+                    continue;
+                }
                 Color color = Color.Black;
                 float value = c.GetValue();
                 float alpha = Math.Abs(value) / strongestConnection;

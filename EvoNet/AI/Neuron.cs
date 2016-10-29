@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,6 +24,13 @@ namespace EvoNet.AI
         }
 
         public Vector2 DrawPosition { get; set; }
+
+        public bool IsMouseOverDrawPosition(float NeuronSize, MouseState ms)
+        {
+            Vector2 mousePos = new Vector2(ms.Position.X , ms.Position.Y);
+            Vector2 to = DrawPosition - mousePos;
+            return to.LengthSquared() < NeuronSize * NeuronSize;
+        }
 
         public string GetName()
         {

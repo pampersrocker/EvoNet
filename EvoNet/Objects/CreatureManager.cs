@@ -260,7 +260,7 @@ namespace EvoNet.Objects
 
             if(SelectedCreature != null)
             {
-                Primitives2D.FillRectangle(spriteBatch, new Rectangle(800, 0, 500, 400), AdditionalColors.TRANSPARENTBLACK);
+                Primitives2D.FillRectangle(spriteBatch, new Rectangle(800, 0, 500, 450), AdditionalColors.TRANSPARENTBLACK);
 
                 spriteBatch.DrawString(Fonts.FontArial, "Selected Creature: ", new Vector2(820, 50), Color.Red);
                 spriteBatch.DrawString(Fonts.FontArial, "A: " + SelectedCreature.Age, new Vector2(820, 70), Color.Red);
@@ -269,7 +269,7 @@ namespace EvoNet.Objects
                 spriteBatch.DrawString(Fonts.FontArial, "G: " + SelectedCreature.Generation, new Vector2(820, 130), Color.Red);
                 spriteBatch.DrawString(Fonts.FontArial, "S: " + (SelectedCreature.Energy > 100 ? "Alive" : "Dead"), new Vector2(820, 150), Color.Red);
                 SelectedCreature.DrawCreature(spriteBatch, SelectedCreature.Pos * -1 + new Vector2(1050, 70));
-                SelectedCreature.Brain.Draw(spriteBatch, new Rectangle(950, 160, 200, 200));
+                SelectedCreature.Brain.Draw(spriteBatch, new Rectangle(950, 160, 200, 250));
             }
 
             spriteBatch.End();
