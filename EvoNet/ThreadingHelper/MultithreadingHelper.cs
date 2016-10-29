@@ -37,7 +37,6 @@ namespace EvoNet.ThreadingHelper
             {
                 while(AmountOfActiveWorkers > 0)
                 {
-                    Debug.WriteLine(AmountOfActiveWorkers);
                     Monitor.Wait(WorkerLock);
                 }
             }
