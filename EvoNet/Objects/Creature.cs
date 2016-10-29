@@ -50,7 +50,10 @@ namespace EvoNet.Objects
         }
 
         private const float COST_EAT = 10f;
+        private const float COST_ATTACK = 10f;
         private const float GAIN_EAT = 100f;
+        private const float DESTROYED_ATTACK = 110f;
+        private const float GAIN_ATTACK = 50f;
         private const float COST_PERMANENT = 1f;
         private const float COST_WALK = 5f;
         private const float COST_ROTATE = 5f;
@@ -87,14 +90,46 @@ namespace EvoNet.Objects
         private float feelerAngle;
         private Vector2 feelerPos;
 
-        private float energy = 150;
+        private float energy_ = 150;
+        private object energyLock = new object();
         public float Energy
         {
             get
             {
-                return energy;
+                lock (energyLock)
+                {
+                    return energy_;
+                }
+            }
+            set
+            {
+                lock (energyLock)
+                {
+                    energy_ = value;
+                }
             }
         }
+
+        private float timeSinceThisWasAttacked_ = 1;
+        private object AttackLock = new object();
+        public float TimeSinceThisWasAttacked
+        {
+            get
+            {
+                lock (AttackLock)
+                {
+                    return timeSinceThisWasAttacked_;
+                }
+            }
+            set
+            {
+                lock (AttackLock)
+                {
+                    timeSinceThisWasAttacked_ = value;
+                }
+            }
+        }
+
         private float age = 0;
         public float Age
         {
@@ -153,11 +188,50 @@ namespace EvoNet.Objects
         private WorkingNeuron outEat         = new WorkingNeuron();
         private WorkingNeuron outMemory1     = new WorkingNeuron();
 
-        private Color color;
-        private Color color_inv;
+        private object colorLock = new object();
+        private Color color_;
+        private Color color_inv_;
+        private Color color
+        {
+            get
+            {
+                lock (colorLock)
+                {
+                    return color_;
+                }
+            }
+            set
+            {
+                lock (colorLock)
+                {
+                    color_ = value;
+                }
+            }
+        }
+        private Color color_inv
+        {
+            get
+            {
+                lock (colorLock)
+                {
+                    return color_inv_;
+                }
+            }
+            set
+            {
+                lock (colorLock)
+                {
+                    color_inv_ = value;
+                }
+            }
+        }
 
         private Creature mother;
 
+        private float timeSinceLastAttack = 0;
+        private const float TIMEBETWEENATTACKS = 0.1f;
+
+        private Creature feelerCreature = null;
 
         private List<Creature> children = new List<Creature>();
         public List<Creature> Children
@@ -338,6 +412,22 @@ namespace EvoNet.Objects
             }
         }
 
+        private float CalculateGeneticDifferencToFeelerCreature()
+        {
+            if(feelerCreature == null)
+            {
+                return 0;
+            }
+            Vector3 vec = new Vector3(
+                color.R - feelerCreature.color.R,
+                color.G - feelerCreature.color.G,
+                color.B - feelerCreature.color.B
+                );
+
+            vec /= 255f;
+            return vec.Length();
+        }
+
         public void GenerateColorInv()
         {
             color_inv = new Color(255 - color.R, 255 - color.G, 255 - color.B);
@@ -357,10 +447,10 @@ namespace EvoNet.Objects
             inFoodValuePosition.SetValue(creatureTile.food / TileMap.MAXIMUMFOODPERTILE);
             inFoodValueFeeler.SetValue(feelerTile.food / TileMap.MAXIMUMFOODPERTILE);
             inOcclusionFeeler.SetValue(feelerOcclusion);
-            inEnergy.SetValue((energy - MINIMUMSURVIVALENERGY) / (STARTENERGY - MINIMUMSURVIVALENERGY));
+            inEnergy.SetValue((Energy - MINIMUMSURVIVALENERGY) / (STARTENERGY - MINIMUMSURVIVALENERGY));
             inAge.SetValue(age / 10f);
-            inGeneticDifference.SetValue(0); //TODO find real value
-            inWasAttacked.SetValue(0); //TODO find real value
+            inGeneticDifference.SetValue(CalculateGeneticDifferencToFeelerCreature());
+            inWasAttacked.SetValue(Mathf.Clamp01(1 - TimeSinceThisWasAttacked));
             inWaterOnFeeler.SetValue(feelerTile.IsLand() ? 0 : 1);
             inWaterOnCreature.SetValue(creatureTile.IsLand() ? 0 : 1);
             
@@ -377,7 +467,10 @@ namespace EvoNet.Objects
             ActBirth();
             ActFeelerRotate();
             ActEat(costMult, t, fixedDeltaTime);
+            ActAttack(costMult);
 
+            timeSinceLastAttack += fixedDeltaTime;
+            TimeSinceThisWasAttacked += fixedDeltaTime;
             age += fixedDeltaTime;
 
             if (oldestCreatureEver == null)
@@ -389,9 +482,7 @@ namespace EvoNet.Objects
                 _oldestCreatureEver = this;
             }
 
-            //TODO implement Attack
-
-            if (energy < 100 || float.IsNaN(energy))
+            if (Energy < 100 || float.IsNaN(Energy))
             {
                 Kill(t);
             }
@@ -403,16 +494,31 @@ namespace EvoNet.Objects
         {
             if (t.IsLand())
             {
-                EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] += energy * FOODDROPPERCENTAGE;
+                EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] += Energy * FOODDROPPERCENTAGE;
             }
             Manager.RemoveCreature(this);
+        }
+
+        private void ActAttack(float costMult)
+        {
+            if(outAttack.GetValue() > 0 && timeSinceLastAttack > TIMEBETWEENATTACKS)
+            {
+                timeSinceLastAttack = 0;
+                Energy -= COST_ATTACK;
+                if(feelerCreature != null)
+                {
+                    feelerCreature.Energy -= DESTROYED_ATTACK;
+                    feelerCreature.TimeSinceThisWasAttacked = 0;
+                    this.Energy += GAIN_ATTACK;
+                }
+            }
         }
 
         private void ActRotate(float costMult, float fixedDeltaTime)
         {
             float rotateForce = Mathf.ClampNegPos(outRotate.GetValue());
             this.viewAngle += rotateForce * fixedDeltaTime * ROTATE_FACTOR;
-            energy -= Mathf.Abs(rotateForce * COST_ROTATE * fixedDeltaTime * costMult);
+            Energy -= Mathf.Abs(rotateForce * COST_ROTATE * fixedDeltaTime * costMult);
         }
 
         private void ActMove(float costMult, float fixedDeltaTime)
@@ -421,7 +527,7 @@ namespace EvoNet.Objects
             float forwardForce = Mathf.ClampNegPos(outForward.GetValue());
             forwardVector *= forwardForce;
             this.pos += forwardVector;
-            energy -= Mathf.Abs(forwardForce * COST_WALK * fixedDeltaTime * costMult);
+            Energy -= Mathf.Abs(forwardForce * COST_WALK * fixedDeltaTime * costMult);
         }
 
         private void ActBirth()
@@ -441,7 +547,7 @@ namespace EvoNet.Objects
             if (eatWish > 0)
             {
                 Eat(eatWish, creatureTile, fixedDeltaTime);
-                energy -= eatWish * COST_EAT * fixedDeltaTime * costMult;
+                Energy -= eatWish * COST_EAT * fixedDeltaTime * costMult;
             }
         }
 
@@ -450,7 +556,7 @@ namespace EvoNet.Objects
             if(t.type != TileType.None)
             {
                 float eatAmount = GAIN_EAT * eatWish * fixedDeltaTime;
-                energy += EvoGame.Instance.tileMap.EatOfTile(t.position.X, t.position.Y, eatAmount);
+                Energy += EvoGame.Instance.tileMap.EatOfTile(t.position.X, t.position.Y, eatAmount);
             }
 
         }
@@ -474,12 +580,12 @@ namespace EvoNet.Objects
             child.Manager = Manager;
             children.Add(child);
             Manager.AddCreature(child);
-            energy -= STARTENERGY;
+            Energy -= STARTENERGY;
         }
 
         public bool IsAbleToGiveBirth()
         {
-            return energy > STARTENERGY + MINIMUMSURVIVALENERGY * 1.1f;
+            return Energy > STARTENERGY + MINIMUMSURVIVALENERGY * 1.1f;
         }
 
         public void CalculateFeelerPos(float feelerDistance)
@@ -506,9 +612,10 @@ namespace EvoNet.Objects
             RenderHelper.DrawLine(spriteBatch, pos.X + offset.X, pos.Y + offset.Y, feelerPos.X + offset.X, feelerPos.Y + offset.Y, Color.White);
             spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - CREATURESIZE / 2), (int)(pos.Y + offset.Y - CREATURESIZE / 2), CREATURESIZE, CREATURESIZE), color_inv);
             spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - (CREATURESIZE - 4) / 2), (int)(pos.Y + offset.Y - (CREATURESIZE - 4) / 2), CREATURESIZE - 4, CREATURESIZE - 4), color);
-            spriteBatch.Draw(feelerTex, new Rectangle((int)(feelerPos.X + offset.X - 5), (int)(feelerPos.Y + offset.Y - 5), 10, 10), Color.Blue);
+            spriteBatch.Draw(feelerTex, new Rectangle((int)(feelerPos.X + offset.X - 5), (int)(feelerPos.Y + offset.Y - 5), 10, 10), timeSinceLastAttack > TIMEBETWEENATTACKS ? Color.Blue : Color.Red);
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void Serialize(BinaryWriter writer)
         {
             writer.Write("CreatureBegin");
@@ -516,7 +623,7 @@ namespace EvoNet.Objects
             writer.Write(pos);
             writer.Write(viewAngle);
             writer.Write(feelerAngle);
-            writer.Write(energy);
+            writer.Write(Energy);
             writer.Write(age);
             writer.Write(generation);
             writer.Write(color);
@@ -549,6 +656,7 @@ namespace EvoNet.Objects
             }
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void Deserialize(BinaryReader reader)
         {
             string magicString = reader.ReadString();
@@ -557,7 +665,7 @@ namespace EvoNet.Objects
             pos = reader.ReadVector2();
             viewAngle = reader.ReadSingle();
             feelerAngle = reader.ReadSingle();
-            energy = reader.ReadSingle();
+            Energy = reader.ReadSingle();
             age = reader.ReadSingle();
             generation = reader.ReadInt32();
             color = reader.ReadColor();
@@ -579,6 +687,7 @@ namespace EvoNet.Objects
         public void HandleCollisions()
         {
             feelerOcclusion = 0;
+            feelerCreature = null;
             CalculateFeelerPos(MAXIMUMFEELERDISTANCE);
             for (int i = collisionGridX - 1; i <= collisionGridX + 1; i++)
             {
@@ -615,8 +724,8 @@ namespace EvoNet.Objects
                 CalculateFeelerPos(MAXIMUMFEELERDISTANCE * t);
                 if (IsMyFeelerCollidingWithCreature(c))
                 {
-                    long idd = this.id;
                     feelerOcclusion = 1 - t;
+                    feelerCreature = c;
                     return;
                 }
             }
