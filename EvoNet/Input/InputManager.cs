@@ -64,6 +64,17 @@ namespace EvoNet.Input
                 EnableFastForward = !EnableFastForward;
             }
 
+            if (keyboardState.IsKeyDown(Keys.R))
+            {
+                float viewportWidth = game.GraphicsDevice.Viewport.Width;
+                float tileMapWidth = game.tileMap.GetWorldWidth();
+                float viewportHeight = game.GraphicsDevice.Viewport.Height;
+                float tileMapHeight = game.tileMap.GetWorldHeight();
+                Camera.instanceGameWorld.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
+
+                Camera.instanceGameWorld.Translation = new Vector2(tileMapWidth / 2, 0);
+            }
+
             oldSpaceDown = spaceDown;
             scrollWheelValue = mouseState.ScrollWheelValue;
 
@@ -144,7 +155,7 @@ namespace EvoNet.Input
                 }
 
                 Vector2 delta = mouseState.Position.ToVector2() - oldMousePosition;
-                camera.Move(delta);
+                camera.Move(delta / camera.Scale);
             }
             else
             {
@@ -162,7 +173,7 @@ namespace EvoNet.Input
             Vector2 mousePositionAfterScale = Vector2.Transform(mouseState.Position.ToVector2(), Matrix.Invert(camera.Matrix));
 
             // Adjust screen position with respect to scale to achieve zoom to Mouse cursor functionality
-            camera.Move((mousePositionAfterScale - mousePositionBeforeScale) * camera.Scale);
+            camera.Move((mousePositionAfterScale - mousePositionBeforeScale) );
         }
     }
 }

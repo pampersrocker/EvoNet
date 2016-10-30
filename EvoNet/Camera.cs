@@ -83,9 +83,9 @@ namespace EvoNet
 
         public void UpdateMatrix()
         {
-            cachedMatrix = Matrix.CreateScale(Scale) *
-              Matrix.CreateRotationZ(Rotation * Mathf.DEGREETORAD) *
-              Matrix.CreateTranslation(Translation.X, Translation.Y, 0);
+            cachedMatrix = Matrix.CreateTranslation(Translation.X, Translation.Y, 0) *
+                Matrix.CreateRotationZ(Rotation * Mathf.DEGREETORAD) *
+                Matrix.CreateScale(Scale);
             matrixNeedsUpdate = false;
         }
 

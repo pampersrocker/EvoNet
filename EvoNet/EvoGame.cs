@@ -116,21 +116,30 @@ namespace EvoNet
                 tileMap = new TileMap(100, 100, 100.0f);
                 tileMap.Initialize(this);
 
-            ValueNoise2D vn = new ValueNoise2D(tileMap.Width, tileMap.Height);
-            vn.startFrequencyX = 10;
-            vn.startFrequencyY = 10;
-            vn.calculate();
-            float[,] heightMap = vn.getHeightMap();
-            for (int x = 0; x < tileMap.Width; x++)
-            {
-                for (int y = 0; y < tileMap.Height; y++)
+                ValueNoise2D vn = new ValueNoise2D(tileMap.Width, tileMap.Height);
+                vn.startFrequencyX = 10;
+                vn.startFrequencyY = 10;
+                vn.calculate();
+                float[,] heightMap = vn.getHeightMap();
+                for (int x = 0; x < tileMap.Width; x++)
                 {
-                    tileMap.SetTileType(x, y, heightMap[x,y] > 0.5 ? TileType.Land : TileType.Water);
+                    for (int y = 0; y < tileMap.Height; y++)
+                    {
+                        tileMap.SetTileType(x, y, heightMap[x, y] > 0.5 ? TileType.Land : TileType.Water);
+                    }
                 }
-            }
 
                 tileMap.SerializeToFile("tilemap.dat");
+
             }
+
+            float viewportWidth = GraphicsDevice.Viewport.Width;
+            float tileMapWidth = tileMap.GetWorldWidth();
+            float viewportHeight = GraphicsDevice.Viewport.Height;
+            float tileMapHeight = tileMap.GetWorldHeight();
+            Camera.instanceGameWorld.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
+
+            Camera.instanceGameWorld.Translation = new Vector2(tileMapWidth / 2, 0);
 
             creatureManager.Initialize(this);
             creatureManager.Deserialize("creatures.dat");
