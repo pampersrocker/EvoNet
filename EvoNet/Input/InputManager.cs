@@ -47,6 +47,7 @@ namespace EvoNet.Input
 
             if (!game.IsActive)
             {
+                scrollWheelValue = Mouse.GetState().ScrollWheelValue;
                 return;
             }
             KeyboardState keyboardState = Keyboard.GetState();
