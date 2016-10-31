@@ -49,6 +49,7 @@ namespace EvoNet.Objects
             }
         }
 
+        private const float MINAGETOGIVEBIRTH = 4f;
         private const float COST_EAT = 10f;
         private const float COST_ATTACK = 10f;
         private const float GAIN_EAT = 100f;
@@ -585,7 +586,7 @@ namespace EvoNet.Objects
 
         public bool IsAbleToGiveBirth()
         {
-            return Energy > STARTENERGY + MINIMUMSURVIVALENERGY * 1.1f;
+            return Energy > STARTENERGY + MINIMUMSURVIVALENERGY * 1.1f && Age > MINAGETOGIVEBIRTH;
         }
 
         public void CalculateFeelerPos(float feelerDistance)
