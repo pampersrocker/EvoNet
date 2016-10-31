@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EvoSim;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EvoNet.ProceduralGeneration
 {
-    class ValueNoise2D
+    public class ValueNoise2D
     {
         public int octaves = 8;
         public int startFrequencyX = 2;
@@ -46,7 +47,7 @@ namespace EvoNet.ProceduralGeneration
                 {
                     for(int k = 0; k<currentFrequencyY + 1; k++)
                     {
-                        discretePoints[i, k] = (float)EvoGame.RandomFloat() * currentAlpha;
+                        discretePoints[i, k] = (float)Simulation.RandomFloat() * currentAlpha;
                     }
                 }
 

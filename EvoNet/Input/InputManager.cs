@@ -1,4 +1,5 @@
 ﻿using EvoNet.Configuration;
+using EvoSim;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -18,6 +19,8 @@ namespace EvoNet.Input
         GameConfig gameConfiguration;
         Camera camera;
 
+        EvoGame game;
+
         bool rightMouseDown = false;
         bool oldSpaceDown = false;
         Vector2 oldMousePosition = Vector2.Zero;
@@ -33,11 +36,16 @@ namespace EvoNet.Input
             }
         }
 
-        public override void Initialize(EvoGame ingame)
+        public void Initialize(EvoGame game)
+        {
+            Initialize(game.sim);
+            this.game = game;
+        }
+
+        public override void Initialize(Simulation ingame)
         {
             base.Initialize(ingame);
-            game = ingame;
-            gameConfiguration = ingame.gameConfiguration;
+            gameConfiguration = ingame.SimulationConfiguration;
             camera = Camera.instanceGameWorld;
             scrollWheelValue = Mouse.GetState().ScrollWheelValue;
         }

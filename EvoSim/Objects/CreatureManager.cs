@@ -6,11 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
-using EvoNet.Rendering;
 using System.Diagnostics;
 using System.Threading;
 using EvoNet.ThreadingHelper;
 using System.Runtime.CompilerServices;
+using EvoSim;
 
 namespace EvoNet.Objects
 {
@@ -74,10 +74,9 @@ namespace EvoNet.Objects
             CreaturesToKill.Clear();
         }
 
-        public override void Initialize(EvoGame inGame)
+        public override void Initialize(Simulation inGame)
         {
             base.Initialize(inGame);
-            spriteBatch = new SpriteBatch(game.GraphicsDevice);
 
             GenerateCollisionGrid();
         }
@@ -153,9 +152,9 @@ namespace EvoNet.Objects
             {
                 Creature justSpawned = new Creature(
                     new Vector2(
-                        EvoGame.RandomFloat() * game.tileMap.GetWorldWidth(),
-                        EvoGame.RandomFloat() * game.tileMap.GetWorldHeight()),
-                    EvoGame.RandomFloat() * Mathf.PI * 2);
+                        Simulation.RandomFloat() * simulation.tileMap.GetWorldWidth(),
+                        Simulation.RandomFloat() * simulation.tileMap.GetWorldHeight()),
+                    Simulation.RandomFloat() * Mathf.PI * 2);
                 justSpawned.Manager = this;
                 Creatures.Add(justSpawned);
             }
@@ -225,54 +224,54 @@ namespace EvoNet.Objects
 
         private void DrawGeneralStats()
         {
-            spriteBatch.Begin();
-            Primitives2D.FillRectangle(spriteBatch, new Rectangle(0, 0, 300, 600), AdditionalColors.TRANSPARENTBLACK);
-            spriteBatch.DrawString(Fonts.FontArial, "#: " + Creatures.Count, new Vector2(20, 20), Color.Red);
-            spriteBatch.DrawString(Fonts.FontArial, "D: " + numberOfDeaths, new Vector2(20, 40), Color.Red);
-            spriteBatch.DrawString(Fonts.FontArial, "max(G): " + Creature.maximumGeneration, new Vector2(20, 60), Color.Red);
-            spriteBatch.DrawString(Fonts.FontArial, "Y: " + year, new Vector2(20, 80), Color.Red);
-            spriteBatch.DrawString(Fonts.FontArial, "LS: " + Creature.oldestCreatureEver.Age + " g: " + Creature.oldestCreatureEver.Generation, new Vector2(20, 100), Color.Red);
-            spriteBatch.DrawString(Fonts.FontArial, "LSA: " + OldestCreatureAlive.Age + " g: " + OldestCreatureAlive.Generation, new Vector2(20, 120), Color.Red);
-            if (AverageAgeOfLastCreaturesAccurate)
-            {
-                float averageDeathAge = CalculateAverageAgeOfLastDeadCreatures();
-                AverageDeathAgeRecord.Add(averageDeathAge);
-                spriteBatch.DrawString(Fonts.FontArial, "AvgDA: " + averageDeathAge, new Vector2(20, 140), Color.Red);
-            }
-
-            if (EvoGame.Instance.inputManager.EnableFastForward)
-            {
-                spriteBatch.DrawString(Fonts.FontArial, "Graph rendering disabled", new Vector2(20, 180), Color.Red);
-                spriteBatch.DrawString(Fonts.FontArial, "during fast forward!", new Vector2(20, 200), Color.Red);
-            }
-            else
-            {
-                spriteBatch.DrawString(Fonts.FontArial, "Creatures Alive Graph ", new Vector2(20, 180), Color.Red);
-	            GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 200, 260, 100), Color.Blue, AliveCreaturesRecord, Fonts.FontArial, true);
-	            spriteBatch.DrawString(Fonts.FontArial, "Average Age on Death Graph ", new Vector2(20, 320), Color.Red);
-	            if (AverageAgeOfLastCreaturesAccurate)
-	                GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 340, 260, 100), Color.Red, AverageDeathAgeRecord, Fonts.FontArial, true);
-	            spriteBatch.DrawString(Fonts.FontArial, "Food Available Graph ", new Vector2(20, 460), Color.Red);
-	            GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 480, 260, 100), Color.Green, EvoGame.Instance.tileMap.FoodRecord, Fonts.FontArial, true);
-
-            }
-
-
-            if(SelectedCreature != null)
-            {
-                Primitives2D.FillRectangle(spriteBatch, new Rectangle(800, 0, 500, 450), AdditionalColors.TRANSPARENTBLACK);
-
-                spriteBatch.DrawString(Fonts.FontArial, "Selected Creature: ", new Vector2(820, 50), Color.Red);
-                spriteBatch.DrawString(Fonts.FontArial, "A: " + SelectedCreature.Age, new Vector2(820, 70), Color.Red);
-                spriteBatch.DrawString(Fonts.FontArial, "E: " + SelectedCreature.Energy, new Vector2(820, 90), Color.Red);
-                spriteBatch.DrawString(Fonts.FontArial, "C: " + SelectedCreature.Children.Count, new Vector2(820, 110), Color.Red);
-                spriteBatch.DrawString(Fonts.FontArial, "G: " + SelectedCreature.Generation, new Vector2(820, 130), Color.Red);
-                spriteBatch.DrawString(Fonts.FontArial, "S: " + (SelectedCreature.Energy > 100 ? "Alive" : "Dead"), new Vector2(820, 150), Color.Red);
-                SelectedCreature.DrawCreature(spriteBatch, SelectedCreature.Pos * -1 + new Vector2(1050, 70));
-                SelectedCreature.Brain.Draw(spriteBatch, new Rectangle(950, 160, 200, 250));
-            }
-
-            spriteBatch.End();
+            //spriteBatch.Begin();
+            //Primitives2D.FillRectangle(spriteBatch, new Rectangle(0, 0, 300, 600), AdditionalColors.TRANSPARENTBLACK);
+            //spriteBatch.DrawString(Fonts.FontArial, "#: " + Creatures.Count, new Vector2(20, 20), Color.Red);
+            //spriteBatch.DrawString(Fonts.FontArial, "D: " + numberOfDeaths, new Vector2(20, 40), Color.Red);
+            //spriteBatch.DrawString(Fonts.FontArial, "max(G): " + Creature.maximumGeneration, new Vector2(20, 60), Color.Red);
+            //spriteBatch.DrawString(Fonts.FontArial, "Y: " + year, new Vector2(20, 80), Color.Red);
+            //spriteBatch.DrawString(Fonts.FontArial, "LS: " + Creature.oldestCreatureEver.Age + " g: " + Creature.oldestCreatureEver.Generation, new Vector2(20, 100), Color.Red);
+            //spriteBatch.DrawString(Fonts.FontArial, "LSA: " + OldestCreatureAlive.Age + " g: " + OldestCreatureAlive.Generation, new Vector2(20, 120), Color.Red);
+            //if (AverageAgeOfLastCreaturesAccurate)
+            //{
+            //    float averageDeathAge = CalculateAverageAgeOfLastDeadCreatures();
+            //    AverageDeathAgeRecord.Add(averageDeathAge);
+            //    spriteBatch.DrawString(Fonts.FontArial, "AvgDA: " + averageDeathAge, new Vector2(20, 140), Color.Red);
+            //}
+            //
+            //if (EvoGame.Instance.inputManager.EnableFastForward)
+            //{
+            //    spriteBatch.DrawString(Fonts.FontArial, "Graph rendering disabled", new Vector2(20, 180), Color.Red);
+            //    spriteBatch.DrawString(Fonts.FontArial, "during fast forward!", new Vector2(20, 200), Color.Red);
+            //}
+            //else
+            //{
+            //    spriteBatch.DrawString(Fonts.FontArial, "Creatures Alive Graph ", new Vector2(20, 180), Color.Red);
+	        //    GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 200, 260, 100), Color.Blue, AliveCreaturesRecord, Fonts.FontArial, true);
+	        //    spriteBatch.DrawString(Fonts.FontArial, "Average Age on Death Graph ", new Vector2(20, 320), Color.Red);
+	        //    if (AverageAgeOfLastCreaturesAccurate)
+	        //        GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 340, 260, 100), Color.Red, AverageDeathAgeRecord, Fonts.FontArial, true);
+	        //    spriteBatch.DrawString(Fonts.FontArial, "Food Available Graph ", new Vector2(20, 460), Color.Red);
+	        //    GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 480, 260, 100), Color.Green, EvoGame.Instance.tileMap.FoodRecord, Fonts.FontArial, true);
+            //
+            //}
+            //
+            //
+            //if(SelectedCreature != null)
+            //{
+            //    Primitives2D.FillRectangle(spriteBatch, new Rectangle(800, 0, 500, 450), AdditionalColors.TRANSPARENTBLACK);
+            //
+            //    spriteBatch.DrawString(Fonts.FontArial, "Selected Creature: ", new Vector2(820, 50), Color.Red);
+            //    spriteBatch.DrawString(Fonts.FontArial, "A: " + SelectedCreature.Age, new Vector2(820, 70), Color.Red);
+            //    spriteBatch.DrawString(Fonts.FontArial, "E: " + SelectedCreature.Energy, new Vector2(820, 90), Color.Red);
+            //    spriteBatch.DrawString(Fonts.FontArial, "C: " + SelectedCreature.Children.Count, new Vector2(820, 110), Color.Red);
+            //    spriteBatch.DrawString(Fonts.FontArial, "G: " + SelectedCreature.Generation, new Vector2(820, 130), Color.Red);
+            //    spriteBatch.DrawString(Fonts.FontArial, "S: " + (SelectedCreature.Energy > 100 ? "Alive" : "Dead"), new Vector2(820, 150), Color.Red);
+            //    SelectedCreature.DrawCreature(spriteBatch, SelectedCreature.Pos * -1 + new Vector2(1050, 70));
+            //    SelectedCreature.Brain.Draw(spriteBatch, new Rectangle(950, 160, 200, 250));
+            //}
+            //
+            //spriteBatch.End();
         }
 
         public void AddDeathAge(float age)

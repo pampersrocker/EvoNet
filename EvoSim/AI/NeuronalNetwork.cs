@@ -1,4 +1,4 @@
-﻿using EvoNet.Rendering;
+﻿using EvoSim;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -138,7 +138,7 @@ namespace EvoNet.AI
 
         public void RandomMutation(float MutationRate)
         {
-            int index = EvoGame.RandomInt(hiddenNeurons.Count + outputNeurons.Count);
+            int index = Simulation.RandomInt(hiddenNeurons.Count + outputNeurons.Count);
             if(index < hiddenNeurons.Count)
             {
                 ((WorkingNeuron)hiddenNeurons[index]).RandomMutation(MutationRate);
@@ -349,62 +349,62 @@ namespace EvoNet.AI
 
         private void DrawNeuron(SpriteBatch spriteBatch, Neuron n, float strongestConnection, Neuron mouseNeuron, Vector2? nameOffset = null, bool writeRight = false)
         {
-            if(n is WorkingNeuron)
-            {
-                DrawConnections(spriteBatch, n, strongestConnection, mouseNeuron);
-            }
-            float x = n.DrawPosition.X;
-            float y = n.DrawPosition.Y;
-            Color c = Color.Black;
-            float val = n.GetValue();
-            if(val < 0)
-            {
-                c = Color.Red;
-            }
-            else
-            {
-                c = Color.Green;
-            }
-
-            float valSize = val * NEURONSIZE;
-
-            RenderHelper.DrawCircle(spriteBatch, x, y, NEURONSIZE / 2 + 1, Color.White);
-            RenderHelper.DrawCircle(spriteBatch, x, y, valSize / 2, c);
-
-            if (nameOffset != null)
-            {
-                Vector2 pos = new Vector2(x, y) + (Vector2)nameOffset;
-                if (writeRight)
-                {
-                    pos.X -= Fonts.FontArial.MeasureString(n.GetName()).X;
-                }
-                spriteBatch.DrawString(Fonts.FontArial, n.GetName(), pos, Color.White);
-            }
+            //if(n is WorkingNeuron)
+            //{
+            //    DrawConnections(spriteBatch, n, strongestConnection, mouseNeuron);
+            //}
+            //float x = n.DrawPosition.X;
+            //float y = n.DrawPosition.Y;
+            //Color c = Color.Black;
+            //float val = n.GetValue();
+            //if(val < 0)
+            //{
+            //    c = Color.Red;
+            //}
+            //else
+            //{
+            //    c = Color.Green;
+            //}
+            //
+            //float valSize = val * NEURONSIZE;
+            //
+            //RenderHelper.DrawCircle(spriteBatch, x, y, NEURONSIZE / 2 + 1, Color.White);
+            //RenderHelper.DrawCircle(spriteBatch, x, y, valSize / 2, c);
+            //
+            //if (nameOffset != null)
+            //{
+            //    Vector2 pos = new Vector2(x, y) + (Vector2)nameOffset;
+            //    if (writeRight)
+            //    {
+            //        pos.X -= Fonts.FontArial.MeasureString(n.GetName()).X;
+            //    }
+            //    spriteBatch.DrawString(Fonts.FontArial, n.GetName(), pos, Color.White);
+            //}
         }
 
         private void DrawConnections(SpriteBatch spriteBatch, Neuron n, float strongestConnection, Neuron mouseNeuron)
         {
-            WorkingNeuron wn = (WorkingNeuron)n;
-            foreach(Connection c in wn.GetConnections())
-            {
-                if(mouseNeuron != null && n != mouseNeuron && c.entryNeuron != mouseNeuron)
-                {
-                    continue;
-                }
-                Color color = Color.Black;
-                float value = c.GetValue();
-                float alpha = Mathf.Sqrt(Math.Abs(value) / strongestConnection);
-                //TODO 
-                if (value > 0)
-                {
-                    color = new Color(0f, alpha, 0f, 1f);
-                }else
-                {
-
-                    color = new Color(alpha, 0f, 0f, 1f);
-                }
-                RenderHelper.DrawLine(spriteBatch, n.DrawPosition.X, n.DrawPosition.Y, c.entryNeuron.DrawPosition.X, c.entryNeuron.DrawPosition.Y, color, 1);
-            }
+            //WorkingNeuron wn = (WorkingNeuron)n;
+            //foreach(Connection c in wn.GetConnections())
+            //{
+            //    if(mouseNeuron != null && n != mouseNeuron && c.entryNeuron != mouseNeuron)
+            //    {
+            //        continue;
+            //    }
+            //    Color color = Color.Black;
+            //    float value = c.GetValue();
+            //    float alpha = Mathf.Sqrt(Math.Abs(value) / strongestConnection);
+            //    //TODO 
+            //    if (value > 0)
+            //    {
+            //        color = new Color(0f, alpha, 0f, 1f);
+            //    }else
+            //    {
+            //
+            //        color = new Color(alpha, 0f, 0f, 1f);
+            //    }
+            //    RenderHelper.DrawLine(spriteBatch, n.DrawPosition.X, n.DrawPosition.Y, c.entryNeuron.DrawPosition.X, c.entryNeuron.DrawPosition.Y, color, 1);
+            //}
         }
 
         public float GetStrongestConnection()

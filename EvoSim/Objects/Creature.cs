@@ -9,8 +9,8 @@ using Microsoft.Xna.Framework.Graphics;
 using EvoNet.Map;
 using System.Diagnostics;
 using System.IO;
-using EvoNet.Rendering;
 using System.Runtime.CompilerServices;
+using EvoSim;
 
 namespace EvoNet.Objects
 {
@@ -148,6 +148,8 @@ namespace EvoNet.Objects
             }
         }
 
+        private Simulation simulation;
+
         private const String NAME_IN_BIAS              = "bias";
         private const String NAME_IN_FOODVALUEPOSITION = "Food Value Position";
         private const String NAME_IN_FOODVALUEFEELER   = "Food Value Feeler";
@@ -259,9 +261,9 @@ namespace EvoNet.Objects
         {
             if(spriteBatch == null)
             {
-                spriteBatch = EvoGame.spriteBatch;
-                bodyTex = EvoGame.WhiteCircleTexture;
-                feelerTex = EvoGame.WhiteCircleTexture;
+                //spriteBatch = EvoGame.spriteBatch;
+                //bodyTex = EvoGame.WhiteCircleTexture;
+                //feelerTex = EvoGame.WhiteCircleTexture;
             }
         }
 
@@ -320,7 +322,7 @@ namespace EvoNet.Objects
             brain.RandomizeAllWeights();
             CalculateFeelerPos(MAXIMUMFEELERDISTANCE);
 
-            color = new Color(EvoGame.RandomFloat(), EvoGame.RandomFloat(), EvoGame.RandomFloat());
+            color = new Color(Simulation.RandomFloat(), Simulation.RandomFloat(), Simulation.RandomFloat());
             GenerateColorInv();
             CalculateCollisionGridPos();
         }
@@ -335,7 +337,7 @@ namespace EvoNet.Objects
                 _maximumGeneration = generation;
             }
             this.pos = mother.pos;
-            this.viewAngle = EvoGame.RandomFloat() * Mathf.PI * 2;
+            this.viewAngle = Simulation.RandomFloat() * Mathf.PI * 2;
             this.brain = mother.brain.CloneFullMesh();
 
             SetupVariablesFromBrain();
@@ -351,9 +353,9 @@ namespace EvoNet.Objects
             int g = mother.color.G;
             int b = mother.color.B;
 
-            r += EvoGame.RandomInt(-5, 6);
-            g += EvoGame.RandomInt(-5, 6);
-            b += EvoGame.RandomInt(-5, 6);
+            r += Simulation.RandomInt(-5, 6);
+            g += Simulation.RandomInt(-5, 6);
+            b += Simulation.RandomInt(-5, 6);
 
             r = Mathf.ClampColorValue(r);
             g = Mathf.ClampColorValue(g);
@@ -404,8 +406,8 @@ namespace EvoNet.Objects
         {
             lock (this)
             {
-                collisionGridX = (int)((pos.X / EvoGame.Instance.tileMap.GetWorldWidth()) * CreatureManager.COLLISIONGRIDSIZE / 3 + CreatureManager.COLLISIONGRIDSIZE / 3);
-                collisionGridY = (int)((pos.Y / EvoGame.Instance.tileMap.GetWorldHeight()) * CreatureManager.COLLISIONGRIDSIZE / 3 + CreatureManager.COLLISIONGRIDSIZE / 3);
+                collisionGridX = (int)((pos.X / simulation.tileMap.GetWorldWidth()) * CreatureManager.COLLISIONGRIDSIZE / 3 + CreatureManager.COLLISIONGRIDSIZE / 3);
+                collisionGridY = (int)((pos.Y / simulation.tileMap.GetWorldHeight()) * CreatureManager.COLLISIONGRIDSIZE / 3 + CreatureManager.COLLISIONGRIDSIZE / 3);
                 collisionGridX = Mathf.Clamp(collisionGridX, 0, CreatureManager.COLLISIONGRIDSIZE - 1);
                 collisionGridY = Mathf.Clamp(collisionGridY, 0, CreatureManager.COLLISIONGRIDSIZE - 1);
                 CreatureManager.AddToCollisionGrid(collisionGridX, collisionGridY, this);
@@ -440,8 +442,8 @@ namespace EvoNet.Objects
 
             brain.Invalidate();
 
-            Tile creatureTile = EvoGame.Instance.tileMap.GetTileAtWorldPosition(pos);
-            Tile feelerTile = EvoGame.Instance.tileMap.GetTileAtWorldPosition(feelerPos);
+            Tile creatureTile = simulation.tileMap.GetTileAtWorldPosition(pos);
+            Tile feelerTile = simulation.tileMap.GetTileAtWorldPosition(feelerPos);
 
             inBias.SetValue(1);
             inFoodValuePosition.SetValue(creatureTile.food / TileMap.MAXIMUMFOODPERTILE);
@@ -460,7 +462,7 @@ namespace EvoNet.Objects
         public void Act(GameTime deltaTime)
         {
             float fixedDeltaTime = (float)deltaTime.ElapsedGameTime.TotalSeconds;
-            Tile t = EvoGame.Instance.tileMap.GetTileAtWorldPosition(pos);
+            Tile t = simulation.tileMap.GetTileAtWorldPosition(pos);
             float costMult = CalculateCostMultiplier(t);
             ActRotate(costMult, fixedDeltaTime);
             ActMove(costMult, fixedDeltaTime);
@@ -494,7 +496,7 @@ namespace EvoNet.Objects
         {
             if (t.IsLand())
             {
-                EvoGame.Instance.tileMap.FoodValues[t.position.X, t.position.Y] += Energy * FOODDROPPERCENTAGE;
+                simulation.tileMap.FoodValues[t.position.X, t.position.Y] += Energy * FOODDROPPERCENTAGE;
             }
             Manager.RemoveCreature(this);
         }
@@ -556,7 +558,7 @@ namespace EvoNet.Objects
             if(t.type != TileType.None)
             {
                 float eatAmount = GAIN_EAT * eatWish * fixedDeltaTime;
-                Energy += EvoGame.Instance.tileMap.EatOfTile(t.position.X, t.position.Y, eatAmount);
+                Energy += simulation.tileMap.EatOfTile(t.position.X, t.position.Y, eatAmount);
             }
 
         }
@@ -597,22 +599,22 @@ namespace EvoNet.Objects
 
         public void Draw()
         {
-            //lock (this)
-            {
-
-                spriteBatch.Begin(transformMatrix: Camera.instanceGameWorld.Matrix);
-                DrawCreature(spriteBatch, Vector2.Zero);
-
-                spriteBatch.End();
-            }
+            ////lock (this)
+            //{
+            //
+            //    spriteBatch.Begin(transformMatrix: Camera.instanceGameWorld.Matrix);
+            //    DrawCreature(spriteBatch, Vector2.Zero);
+            //
+            //    spriteBatch.End();
+            //}
         }
 
         public void DrawCreature(SpriteBatch spriteBatch, Vector2 offset)
         {
-            RenderHelper.DrawLine(spriteBatch, pos.X + offset.X, pos.Y + offset.Y, feelerPos.X + offset.X, feelerPos.Y + offset.Y, Color.White);
-            spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - CREATURESIZE / 2), (int)(pos.Y + offset.Y - CREATURESIZE / 2), CREATURESIZE, CREATURESIZE), color_inv);
-            spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - (CREATURESIZE - 4) / 2), (int)(pos.Y + offset.Y - (CREATURESIZE - 4) / 2), CREATURESIZE - 4, CREATURESIZE - 4), color);
-            spriteBatch.Draw(feelerTex, new Rectangle((int)(feelerPos.X + offset.X - 5), (int)(feelerPos.Y + offset.Y - 5), 10, 10), timeSinceLastAttack > TIMEBETWEENATTACKS ? Color.Blue : Color.Red);
+            //RenderHelper.DrawLine(spriteBatch, pos.X + offset.X, pos.Y + offset.Y, feelerPos.X + offset.X, feelerPos.Y + offset.Y, Color.White);
+            //spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - CREATURESIZE / 2), (int)(pos.Y + offset.Y - CREATURESIZE / 2), CREATURESIZE, CREATURESIZE), color_inv);
+            //spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - (CREATURESIZE - 4) / 2), (int)(pos.Y + offset.Y - (CREATURESIZE - 4) / 2), CREATURESIZE - 4, CREATURESIZE - 4), color);
+            //spriteBatch.Draw(feelerTex, new Rectangle((int)(feelerPos.X + offset.X - 5), (int)(feelerPos.Y + offset.Y - 5), 10, 10), timeSinceLastAttack > TIMEBETWEENATTACKS ? Color.Blue : Color.Red);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]

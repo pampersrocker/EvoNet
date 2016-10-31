@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using EvoNet.Objects;
 using EvoNet.Rendering;
 using System.Runtime.CompilerServices;
+using EvoSim;
 
 namespace EvoNet
 {
@@ -20,22 +21,7 @@ namespace EvoNet
     public class EvoGame : Game
     {
 
-        private static Random GlobalRandom = new Random();
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public static float RandomFloat()
-        {
-            return (float)GlobalRandom.NextDouble();
-        }
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public static int RandomInt(int min, int max)
-        {
-            return GlobalRandom.Next(min, max);
-        }
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public static int RandomInt(int max)
-        {
-            return GlobalRandom.Next(max);
-        }
+
 
         public static EvoGame Instance;
         GraphicsDeviceManager graphics;
@@ -50,6 +36,8 @@ namespace EvoNet
         DateTime lastSerializationTime;
 
         List<UpdateModule> modules = new List<UpdateModule>();
+
+        public Simulation sim;
 
         /// <summary>
         /// Default 1x1 white Texture, can be used to draw shapes in any color
@@ -110,11 +98,11 @@ namespace EvoNet
 
 
             RenderHelper.Ini(WhiteTexture, WhiteCircleTexture);
-            tileMap = TileMap.DeserializeFromFile("tilemap.dat", this);
+            tileMap = TileMap.DeserializeFromFile("tilemap.dat", sim);
             if (tileMap == null)
             {
                 tileMap = new TileMap(100, 100, 100.0f);
-                tileMap.Initialize(this);
+                tileMap.Initialize(sim);
 
                 ValueNoise2D vn = new ValueNoise2D(tileMap.Width, tileMap.Height);
                 vn.startFrequencyX = 10;
@@ -141,7 +129,7 @@ namespace EvoNet
 
             Camera.instanceGameWorld.Translation = new Vector2(tileMapWidth / 2, 0);
 
-            creatureManager.Initialize(this);
+            creatureManager.Initialize(sim);
             creatureManager.Deserialize("creatures.dat");
 
             modules.Add(tileMap);

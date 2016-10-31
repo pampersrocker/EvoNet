@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using EvoSim;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.IO;
@@ -191,24 +192,24 @@ namespace EvoNet.Map
             return food;
         }
 
-        public override void Initialize(EvoGame game)
+        public override void Initialize(Simulation game)
         {
             base.Initialize(game);
-            spriteBatch = new SpriteBatch(game.GraphicsDevice);
-
-            SandTexture = game.Content.Load<Texture2D>("Map/SandTexture");
-            GrassTexture = game.Content.Load<Texture2D>("Map/GrassTexture");
-            BlendMap = game.Content.Load<Texture2D>("Map/BlendMap");
-            Water1Texture = game.Content.Load<Texture2D>("Map/Water1");
-            Water2Texture = game.Content.Load<Texture2D>("Map/Water2");
-            BlendMap = game.Content.Load<Texture2D>("Map/BlendMap");
-            LandShader = game.Content.Load<Effect>("Map/GrassDisplay");
-            WaterShader = game.Content.Load<Effect>("Map/WaterEffect");
-
-            LandShader.Parameters["GrassTexture"].SetValue(GrassTexture);
-            LandShader.Parameters["SandTexture"].SetValue(SandTexture);
-            LandShader.Parameters["BlendMap"].SetValue(BlendMap);
-            WaterShader.Parameters["Water2"].SetValue(Water2Texture);
+            //spriteBatch = new SpriteBatch(game.GraphicsDevice);
+            //
+            //SandTexture = game.Content.Load<Texture2D>("Map/SandTexture");
+            //GrassTexture = game.Content.Load<Texture2D>("Map/GrassTexture");
+            //BlendMap = game.Content.Load<Texture2D>("Map/BlendMap");
+            //Water1Texture = game.Content.Load<Texture2D>("Map/Water1");
+            //Water2Texture = game.Content.Load<Texture2D>("Map/Water2");
+            //BlendMap = game.Content.Load<Texture2D>("Map/BlendMap");
+            //LandShader = game.Content.Load<Effect>("Map/GrassDisplay");
+            //WaterShader = game.Content.Load<Effect>("Map/WaterEffect");
+            //
+            //LandShader.Parameters["GrassTexture"].SetValue(GrassTexture);
+            //LandShader.Parameters["SandTexture"].SetValue(SandTexture);
+            //LandShader.Parameters["BlendMap"].SetValue(BlendMap);
+            //WaterShader.Parameters["Water2"].SetValue(Water2Texture);
         }
 
         protected override void Update(GameTime deltaTime)
@@ -282,38 +283,38 @@ namespace EvoNet.Map
 
         public void Draw(GameTime deltaTime)
         {
-            Matrix? UsedMatrix = null;
-            UsedMatrix = Camera.instanceGameWorld.Matrix;
-
-            // Render land tiles with shader effect to blend between sand and grass
-            spriteBatch.Begin(transformMatrix: UsedMatrix, effect: LandShader);
-            for (int x = 0; x < Width; x++)
-            {
-                for (int y = 0; y < Height; y++)
-                {
-                    if (types[x, y] == TileType.Land)
-                    {
-                        Color color = new Color(0.0f, 0.0f, 1.0f, 1 - foodValues[x, y] / 100.0f);
-                        spriteBatch.Draw(SandTexture, renderRectangles[x, y], rendersourceRectangles[x, y], color);
-                    }
-                }
-            }
-            spriteBatch.End();
-
-            // Render water tiles with animated "water" shader
-            spriteBatch.Begin(transformMatrix: UsedMatrix, effect: WaterShader);
-            WaterShader.Parameters["Time"].SetValue((float)deltaTime.TotalGameTime.TotalSeconds / 3);
-            for (int x = 0; x < Width; x++)
-            {
-                for (int y = 0; y < Height; y++)
-                {
-                    if (types[x, y] == TileType.Water)
-                    {
-                        spriteBatch.Draw(Water1Texture, renderRectangles[x, y], rendersourceRectangles[x, y], Color.White);
-                    }
-                }
-            }
-            spriteBatch.End();
+            //Matrix? UsedMatrix = null;
+            //UsedMatrix = Camera.instanceGameWorld.Matrix;
+            //
+            //// Render land tiles with shader effect to blend between sand and grass
+            //spriteBatch.Begin(transformMatrix: UsedMatrix, effect: LandShader);
+            //for (int x = 0; x < Width; x++)
+            //{
+            //    for (int y = 0; y < Height; y++)
+            //    {
+            //        if (types[x, y] == TileType.Land)
+            //        {
+            //            Color color = new Color(0.0f, 0.0f, 1.0f, 1 - foodValues[x, y] / 100.0f);
+            //            spriteBatch.Draw(SandTexture, renderRectangles[x, y], rendersourceRectangles[x, y], color);
+            //        }
+            //    }
+            //}
+            //spriteBatch.End();
+            //
+            //// Render water tiles with animated "water" shader
+            //spriteBatch.Begin(transformMatrix: UsedMatrix, effect: WaterShader);
+            //WaterShader.Parameters["Time"].SetValue((float)deltaTime.TotalGameTime.TotalSeconds / 3);
+            //for (int x = 0; x < Width; x++)
+            //{
+            //    for (int y = 0; y < Height; y++)
+            //    {
+            //        if (types[x, y] == TileType.Water)
+            //        {
+            //            spriteBatch.Draw(Water1Texture, renderRectangles[x, y], rendersourceRectangles[x, y], Color.White);
+            //        }
+            //    }
+            //}
+            //spriteBatch.End();
 
         }
 
@@ -338,7 +339,7 @@ namespace EvoNet.Map
             file.Close();
         }
 
-        public static TileMap DeserializeFromFile(string fileName, EvoGame game)
+        public static TileMap DeserializeFromFile(string fileName, Simulation game)
         {
             try
             {
