@@ -238,12 +238,6 @@ namespace EvoNet.Map
             return false;
         }
 
-        public void Draw(GameTime deltaTime)
-        {
-            
-
-        }
-
         public void SerializeToFile(string fileName)
         {
             FileStream file = File.Open(fileName, FileMode.OpenOrCreate, FileAccess.Write);

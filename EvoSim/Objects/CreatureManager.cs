@@ -215,11 +215,6 @@ namespace EvoNet.Objects
             AliveCreaturesRecord.Add(creatures.Count);
         }
 
-        public void Draw(GameTime deltaTime)
-        {
-
-        }
-
 
 
         public void AddDeathAge(float age)
