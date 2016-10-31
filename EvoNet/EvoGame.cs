@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using EvoNet.Objects;
 using EvoNet.Rendering;
 using System.Runtime.CompilerServices;
+using EvoSim;
 
 namespace EvoNet
 {
@@ -20,37 +21,22 @@ namespace EvoNet
     public class EvoGame : Game
     {
 
-        private static Random GlobalRandom = new Random();
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public static float RandomFloat()
-        {
-            return (float)GlobalRandom.NextDouble();
-        }
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public static int RandomInt(int min, int max)
-        {
-            return GlobalRandom.Next(min, max);
-        }
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public static int RandomInt(int max)
-        {
-            return GlobalRandom.Next(max);
-        }
+
 
         public static EvoGame Instance;
         GraphicsDeviceManager graphics;
         public static SpriteBatch spriteBatch;
 
-        public TileMap tileMap;
         public GameConfig gameConfiguration;
         public InputManager inputManager;
 
-        CreatureManager creatureManager = new CreatureManager();
 
         DateTime lastSerializationTime;
 
         List<UpdateModule> modules = new List<UpdateModule>();
 
+        public Simulation sim;
+        public SimulationRenderer simRenderer;
         /// <summary>
         /// Default 1x1 white Texture, can be used to draw shapes in any color
         /// </summary>
@@ -84,6 +70,12 @@ namespace EvoNet
             colorData[0] = Color.White;
             WhiteTexture.SetData(colorData);
 
+            sim = new Simulation();
+
+            modules.Add(sim);
+
+            simRenderer = new SimulationRenderer(sim);
+
 
             inputManager = new InputManager();
             inputManager.Initialize(this);
@@ -110,46 +102,20 @@ namespace EvoNet
 
 
             RenderHelper.Ini(WhiteTexture, WhiteCircleTexture);
-            tileMap = TileMap.DeserializeFromFile("tilemap.dat", this);
-            if (tileMap == null)
-            {
-                tileMap = new TileMap(100, 100, 100.0f);
-                tileMap.Initialize(this);
 
-                ValueNoise2D vn = new ValueNoise2D(tileMap.Width, tileMap.Height);
-                vn.startFrequencyX = 10;
-                vn.startFrequencyY = 10;
-                vn.calculate();
-                float[,] heightMap = vn.getHeightMap();
-                for (int x = 0; x < tileMap.Width; x++)
-                {
-                    for (int y = 0; y < tileMap.Height; y++)
-                    {
-                        tileMap.SetTileType(x, y, heightMap[x, y] > 0.5 ? TileType.Land : TileType.Water);
-                    }
-                }
+            sim.Initialize(sim);
+            simRenderer.Initialize(Content, GraphicsDevice, spriteBatch);
 
-                tileMap.SerializeToFile("tilemap.dat");
-
-            }
 
             float viewportWidth = GraphicsDevice.Viewport.Width;
-            float tileMapWidth = tileMap.GetWorldWidth();
+            float tileMapWidth = sim.TileMap.GetWorldWidth();
             float viewportHeight = GraphicsDevice.Viewport.Height;
-            float tileMapHeight = tileMap.GetWorldHeight();
-            Camera.instanceGameWorld.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
+            float tileMapHeight = sim.TileMap.GetWorldHeight();
+            simRenderer.Camera.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
 
-            Camera.instanceGameWorld.Translation = new Vector2(tileMapWidth / 2, 0);
+            simRenderer.Camera.Translation = new Vector2(tileMapWidth / 2, 0);
 
-            creatureManager.Initialize(this);
-            creatureManager.Deserialize("creatures.dat");
 
-            modules.Add(tileMap);
-            modules.Add(creatureManager);
-
-            Creature.Initialize();
-
-            // TODO: use this.Content to load your game content here
         }
 
         /// <summary>
@@ -196,8 +162,8 @@ namespace EvoNet
             if ((DateTime.UtcNow - lastSerializationTime).TotalSeconds > 10)
             {
                 lastSerializationTime = DateTime.UtcNow;
-                tileMap.SerializeToFile("tilemap.dat");
-                creatureManager.Serialize("creatures.dat");
+                sim.TileMap.SerializeToFile("tilemap.dat");
+                sim.CreatureManager.Serialize("creatures.dat");
             }
 
 
@@ -212,10 +178,7 @@ namespace EvoNet
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            tileMap.Draw(gameTime);
-
-            creatureManager.Draw(gameTime);
+            simRenderer.Draw(gameTime, null);
 
             base.Draw(gameTime);
         }

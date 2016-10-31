@@ -18,7 +18,6 @@ namespace EvoNet.Configuration
 
         public float ScaleFactor { get; set; }
 
-        public float TickInterval { get; set; }
 
         public static GameConfig DefaultConfig
         {
@@ -31,7 +30,6 @@ namespace EvoNet.Configuration
                 config.MoveRightKeys = new List<Keys> { Keys.D, Keys.Right };
                 config.MovementSensitivity = 100.0f;
                 config.ScaleFactor = 0.1f;
-                config.TickInterval = 0.01f;
                 return config;
             }
         }
@@ -58,11 +56,6 @@ namespace EvoNet.Configuration
 
         public static void CheckLoadedConfig(GameConfig config)
         {
-            if (config.TickInterval <= 0)
-            {
-                Console.WriteLine("Reset TickInterval in config from {0} to {1}", config.TickInterval, 0.01f);
-                config.TickInterval = 0.01f;
-            }
         }
     }
 }

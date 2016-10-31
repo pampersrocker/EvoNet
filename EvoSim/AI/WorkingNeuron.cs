@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EvoSim;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,8 +14,8 @@ namespace EvoNet.AI
 
         public void RandomMutation(float MutationRate)
         {
-            Connection c = connections[EvoGame.RandomInt(connections.Count)];
-            c.weight += (float)EvoGame.RandomFloat() * 2 * MutationRate - MutationRate;
+            Connection c = connections[Simulation.RandomInt(connections.Count)];
+            c.weight += (float)Simulation.RandomFloat() * 2 * MutationRate - MutationRate;
         }
 
         public void AddNeuronConnection(Neuron n, float weight)
@@ -41,7 +42,7 @@ namespace EvoNet.AI
         {
             foreach(Connection c in connections)
             {
-                c.weight = (float)EvoGame.RandomFloat() * 2 - 1;
+                c.weight = (float)Simulation.RandomFloat() * 2 - 1;
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using EvoSim;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,9 @@ namespace EvoNet
         {
             get
             {
-                if (game != null)
+                if (simulation != null)
                 {
-                    return game.gameConfiguration.TickInterval;
+                    return simulation.SimulationConfiguration.TickInterval;
                 }
                 else
                 {
@@ -29,11 +30,11 @@ namespace EvoNet
 
         private TimeSpan totalElapsedTime = new TimeSpan();
 
-        public EvoGame game;
+        public Simulation simulation;
 
-        public virtual void Initialize(EvoGame game)
+        public virtual void Initialize(Simulation game)
         {
-            this.game = game;
+            this.simulation = game;
         }
 
         public void NotifyTick(GameTime actualTime)

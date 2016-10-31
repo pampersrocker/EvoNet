@@ -6,11 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
-using EvoNet.Rendering;
 using System.Diagnostics;
 using System.Threading;
 using EvoNet.ThreadingHelper;
 using System.Runtime.CompilerServices;
+using EvoSim;
 
 namespace EvoNet.Objects
 {
@@ -22,22 +22,25 @@ namespace EvoNet.Objects
 
         public static float[] AverageAgeOfLastCreatures = new float[128];
         private int indexForAverageAgeOfLastCreatures = 0;
-        private bool AverageAgeOfLastCreaturesAccurate = false;
+        public bool AverageAgeOfLastCreaturesAccurate = false;
 
-        private float year = 0;
-        private int numberOfDeaths = 0;
+        public float year = 0;
+        public int numberOfDeaths = 0;
 
-        private List<Creature> Creatures = new List<Creature>();
+        private List<Creature> creatures = new List<Creature>();
+        public System.Collections.Generic.List<EvoNet.Objects.Creature> Creatures
+        {
+            get { return creatures; }
+        }
         private List<Creature> CreaturesToKill = new List<Creature>();
         private List<Creature> CreaturesToSpawn = new List<Creature>();
 
         public List<float> AliveCreaturesRecord = new List<float>();
         public List<float> AverageDeathAgeRecord = new List<float>();
 
-        private Creature OldestCreatureAlive;
-        public static Creature SelectedCreature;
+        public Creature OldestCreatureAlive;
+        public Creature SelectedCreature;
 
-        SpriteBatch spriteBatch;
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void AddCreature(Creature c)
@@ -58,7 +61,7 @@ namespace EvoNet.Objects
         {
             foreach (Creature c in CreaturesToSpawn)
             {
-                Creatures.Add(c);
+                creatures.Add(c);
             }
             CreaturesToSpawn.Clear();
         }
@@ -69,15 +72,14 @@ namespace EvoNet.Objects
             foreach (Creature c in CreaturesToKill)
             {
                 AddDeathAge(c.Age);
-                Creatures.Remove(c);
+                creatures.Remove(c);
             }
             CreaturesToKill.Clear();
         }
 
-        public override void Initialize(EvoGame inGame)
+        public override void Initialize(Simulation inGame)
         {
             base.Initialize(inGame);
-            spriteBatch = new SpriteBatch(game.GraphicsDevice);
 
             GenerateCollisionGrid();
         }
@@ -132,13 +134,13 @@ namespace EvoNet.Objects
         {
             for(int i = 0; i< AmountOfCores; i++)
             {
-                int upperBound = Creatures.Count * (i + 1) / AmountOfCores;
-                if (upperBound > Creatures.Count) upperBound = Creatures.Count;
-                int lowerBound = Creatures.Count * i / AmountOfCores;
+                int upperBound = creatures.Count * (i + 1) / AmountOfCores;
+                if (upperBound > creatures.Count) upperBound = creatures.Count;
+                int lowerBound = creatures.Count * i / AmountOfCores;
                 MultithreadingHelper.StartWork((object state)=>{
                     for (int k = lowerBound; k < upperBound; k++)
                     {
-                        Creatures[k].HandleCollisions();
+                        creatures[k].HandleCollisions();
                     }
                     MultithreadingHelper.PulseAndFinish();
                 });
@@ -149,26 +151,26 @@ namespace EvoNet.Objects
 
         protected override void Update(GameTime deltaTime)
         {
-            while (Creatures.Count < 50)
+            while (creatures.Count < 50)
             {
                 Creature justSpawned = new Creature(
                     new Vector2(
-                        EvoGame.RandomFloat() * game.tileMap.GetWorldWidth(),
-                        EvoGame.RandomFloat() * game.tileMap.GetWorldHeight()),
-                    EvoGame.RandomFloat() * Mathf.PI * 2);
-                justSpawned.Manager = this;
-                Creatures.Add(justSpawned);
+                        Simulation.RandomFloat() * simulation.TileMap.GetWorldWidth(),
+                        Simulation.RandomFloat() * simulation.TileMap.GetWorldHeight()),
+                    Simulation.RandomFloat() * Mathf.PI * 2,
+                    this);
+                creatures.Add(justSpawned);
             }
 
             for (int i = 0; i < AmountOfCores; i++)
             {
-                int upperBound = Creatures.Count * (i + 1) / AmountOfCores;
-                if (upperBound > Creatures.Count) upperBound = Creatures.Count;
-                int lowerBound = Creatures.Count * i / AmountOfCores;
+                int upperBound = creatures.Count * (i + 1) / AmountOfCores;
+                if (upperBound > creatures.Count) upperBound = creatures.Count;
+                int lowerBound = creatures.Count * i / AmountOfCores;
                 MultithreadingHelper.StartWork((object state) => {
                     for (int k = lowerBound; k < upperBound; k++)
                     {
-                        Creatures[k].ReadSensors();
+                        creatures[k].ReadSensors();
                     }
                     MultithreadingHelper.PulseAndFinish();
                 });
@@ -176,13 +178,13 @@ namespace EvoNet.Objects
             MultithreadingHelper.WaitForEmptyThreadPool();
             for (int i = 0; i < AmountOfCores; i++)
             {
-                int upperBound = Creatures.Count * (i + 1) / AmountOfCores;
-                if (upperBound > Creatures.Count) upperBound = Creatures.Count;
-                int lowerBound = Creatures.Count * i / AmountOfCores;
+                int upperBound = creatures.Count * (i + 1) / AmountOfCores;
+                if (upperBound > creatures.Count) upperBound = creatures.Count;
+                int lowerBound = creatures.Count * i / AmountOfCores;
                 MultithreadingHelper.StartWork((object state) => {
                     for (int k = lowerBound; k < upperBound; k++)
                     {
-                        Creatures[k].Act(deltaTime);
+                        creatures[k].Act(deltaTime);
                     }
                     MultithreadingHelper.PulseAndFinish();
                 });
@@ -197,11 +199,11 @@ namespace EvoNet.Objects
 
             HandleCollision();
 
-            if (Creatures.Count > 0)
+            if (creatures.Count > 0)
             {
 
-                OldestCreatureAlive = Creatures[0];
-                foreach (Creature c in Creatures)
+                OldestCreatureAlive = creatures[0];
+                foreach (Creature c in creatures)
                 {
                     if (c.Age > OldestCreatureAlive.Age)
                     {
@@ -210,70 +212,10 @@ namespace EvoNet.Objects
                 }
             }
 
-            AliveCreaturesRecord.Add(Creatures.Count);
+            AliveCreaturesRecord.Add(creatures.Count);
         }
 
-        public void Draw(GameTime deltaTime)
-        {
-            foreach (Creature c in Creatures)
-            {
-                c.Draw();
-            }
 
-            DrawGeneralStats();
-        }
-
-        private void DrawGeneralStats()
-        {
-            spriteBatch.Begin();
-            Primitives2D.FillRectangle(spriteBatch, new Rectangle(0, 0, 300, 600), AdditionalColors.TRANSPARENTBLACK);
-            spriteBatch.DrawString(Fonts.FontArial, "#: " + Creatures.Count, new Vector2(20, 20), Color.Red);
-            spriteBatch.DrawString(Fonts.FontArial, "D: " + numberOfDeaths, new Vector2(20, 40), Color.Red);
-            spriteBatch.DrawString(Fonts.FontArial, "max(G): " + Creature.maximumGeneration, new Vector2(20, 60), Color.Red);
-            spriteBatch.DrawString(Fonts.FontArial, "Y: " + year, new Vector2(20, 80), Color.Red);
-            spriteBatch.DrawString(Fonts.FontArial, "LS: " + Creature.oldestCreatureEver.Age + " g: " + Creature.oldestCreatureEver.Generation, new Vector2(20, 100), Color.Red);
-            spriteBatch.DrawString(Fonts.FontArial, "LSA: " + OldestCreatureAlive.Age + " g: " + OldestCreatureAlive.Generation, new Vector2(20, 120), Color.Red);
-            if (AverageAgeOfLastCreaturesAccurate)
-            {
-                float averageDeathAge = CalculateAverageAgeOfLastDeadCreatures();
-                AverageDeathAgeRecord.Add(averageDeathAge);
-                spriteBatch.DrawString(Fonts.FontArial, "AvgDA: " + averageDeathAge, new Vector2(20, 140), Color.Red);
-            }
-
-            if (EvoGame.Instance.inputManager.EnableFastForward)
-            {
-                spriteBatch.DrawString(Fonts.FontArial, "Graph rendering disabled", new Vector2(20, 180), Color.Red);
-                spriteBatch.DrawString(Fonts.FontArial, "during fast forward!", new Vector2(20, 200), Color.Red);
-            }
-            else
-            {
-                spriteBatch.DrawString(Fonts.FontArial, "Creatures Alive Graph ", new Vector2(20, 180), Color.Red);
-	            GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 200, 260, 100), Color.Blue, AliveCreaturesRecord, Fonts.FontArial, true);
-	            spriteBatch.DrawString(Fonts.FontArial, "Average Age on Death Graph ", new Vector2(20, 320), Color.Red);
-	            if (AverageAgeOfLastCreaturesAccurate)
-	                GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 340, 260, 100), Color.Red, AverageDeathAgeRecord, Fonts.FontArial, true);
-	            spriteBatch.DrawString(Fonts.FontArial, "Food Available Graph ", new Vector2(20, 460), Color.Red);
-	            GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 480, 260, 100), Color.Green, EvoGame.Instance.tileMap.FoodRecord, Fonts.FontArial, true);
-
-            }
-
-
-            if(SelectedCreature != null)
-            {
-                Primitives2D.FillRectangle(spriteBatch, new Rectangle(800, 0, 500, 450), AdditionalColors.TRANSPARENTBLACK);
-
-                spriteBatch.DrawString(Fonts.FontArial, "Selected Creature: ", new Vector2(820, 50), Color.Red);
-                spriteBatch.DrawString(Fonts.FontArial, "A: " + SelectedCreature.Age, new Vector2(820, 70), Color.Red);
-                spriteBatch.DrawString(Fonts.FontArial, "E: " + SelectedCreature.Energy, new Vector2(820, 90), Color.Red);
-                spriteBatch.DrawString(Fonts.FontArial, "C: " + SelectedCreature.Children.Count, new Vector2(820, 110), Color.Red);
-                spriteBatch.DrawString(Fonts.FontArial, "G: " + SelectedCreature.Generation, new Vector2(820, 130), Color.Red);
-                spriteBatch.DrawString(Fonts.FontArial, "S: " + (SelectedCreature.Energy > 100 ? "Alive" : "Dead"), new Vector2(820, 150), Color.Red);
-                SelectedCreature.DrawCreature(spriteBatch, SelectedCreature.Pos * -1 + new Vector2(1050, 70));
-                SelectedCreature.Brain.Draw(spriteBatch, new Rectangle(950, 160, 200, 250));
-            }
-
-            spriteBatch.End();
-        }
 
         public void AddDeathAge(float age)
         {
@@ -305,8 +247,8 @@ namespace EvoNet.Objects
                 writer.Write(year);
                 writer.Write(numberOfDeaths);
                 writer.Write(Creature.maximumGeneration);
-                writer.Write(Creatures.Count);
-                foreach (Creature creature in Creatures)
+                writer.Write(creatures.Count);
+                foreach (Creature creature in creatures)
                 {
                     creature.Serialize(writer);
                 }
@@ -331,15 +273,14 @@ namespace EvoNet.Objects
                 int creatureCount = reader.ReadInt32();
                 for (int creatureIndex = 0; creatureIndex < creatureCount; creatureIndex++)
                 {
-                    Creature newCreature = new Creature();
-                    newCreature.Manager = this;
+                    Creature newCreature = new Creature(this);
                     newCreature.Deserialize(reader);
-                    Creatures.Add(newCreature);
+                    creatures.Add(newCreature);
                 }
                 file.Close();
-                foreach (Creature creature in Creatures)
+                foreach (Creature creature in creatures)
                 {
-                    creature.ConnectAncestry(Creatures);
+                    creature.ConnectAncestry(creatures);
                 }
 
             }

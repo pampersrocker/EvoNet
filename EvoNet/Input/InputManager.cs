@@ -1,4 +1,6 @@
 ﻿using EvoNet.Configuration;
+using EvoNet.Rendering;
+using EvoSim;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -18,6 +20,8 @@ namespace EvoNet.Input
         GameConfig gameConfiguration;
         Camera camera;
 
+        EvoGame game;
+
         bool rightMouseDown = false;
         bool oldSpaceDown = false;
         Vector2 oldMousePosition = Vector2.Zero;
@@ -33,12 +37,18 @@ namespace EvoNet.Input
             }
         }
 
-        public override void Initialize(EvoGame ingame)
+        public void Initialize(EvoGame game)
+        {
+            gameConfiguration = game.gameConfiguration;
+            Initialize(game.sim);
+            camera = game.simRenderer.Camera;
+
+            this.game = game;
+        }
+
+        public override void Initialize(Simulation ingame)
         {
             base.Initialize(ingame);
-            game = ingame;
-            gameConfiguration = ingame.gameConfiguration;
-            camera = Camera.instanceGameWorld;
             scrollWheelValue = Mouse.GetState().ScrollWheelValue;
         }
 
@@ -67,12 +77,12 @@ namespace EvoNet.Input
             if (keyboardState.IsKeyDown(Keys.R))
             {
                 float viewportWidth = game.GraphicsDevice.Viewport.Width;
-                float tileMapWidth = game.tileMap.GetWorldWidth();
+                float tileMapWidth = simulation.TileMap.GetWorldWidth();
                 float viewportHeight = game.GraphicsDevice.Viewport.Height;
-                float tileMapHeight = game.tileMap.GetWorldHeight();
-                Camera.instanceGameWorld.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
+                float tileMapHeight = simulation.TileMap.GetWorldHeight();
+                camera.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
 
-                Camera.instanceGameWorld.Translation = new Vector2(tileMapWidth / 2, 0);
+                camera.Translation = new Vector2(tileMapWidth / 2, 0);
             }
 
             oldSpaceDown = spaceDown;

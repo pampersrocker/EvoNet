@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using EvoSim;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.IO;
@@ -12,22 +13,20 @@ namespace EvoNet.Map
 
         float[,] foodValues;
         private TileType[,] types;
-        Rectangle[,] renderRectangles;
-        Rectangle[,] rendersourceRectangles;
+        public TileType[,] Types
+        {
+            get { return types; }
+        }
 
-        Texture2D Water1Texture { get; set; }
-        Texture2D Water2Texture { get; set; }
-        Texture2D GrassTexture { get; set; }
-        Texture2D SandTexture { get; set; }
-        Texture2D BlendMap { get; set; }
-        Effect LandShader { get; set; }
-        Effect WaterShader { get; set; }
+        
 
         float tileSize;
+        public float TileSize
+        {
+            get { return tileSize; }
+        }
         public List<float> FoodRecord = new List<float>();
 
-
-        SpriteBatch spriteBatch;
 
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -44,19 +43,6 @@ namespace EvoNet.Map
             set
             {
                 foodValues = value;
-            }
-        }
-
-        private TileType[,] Types
-        {
-            get
-            {
-                return types;
-            }
-
-            set
-            {
-                types = value;
             }
         }
 
@@ -100,33 +86,19 @@ namespace EvoNet.Map
         /// <param name="inTileSize">Width and Height of a Tile</param>
         /// <param name="renderTextureTileFactor">How many tiles use a single texture until it wraps?
         /// Setting this to a higher value reduces tiled look</param>
-        public TileMap(int width, int height, float inTileSize, int renderTextureTileFactor = 5)
+        public TileMap(int width, int height, float inTileSize)
         {
             Width = width;
             Height = height;
             foodValues = new float[width, height];
             types = new TileType[width, height];
-            renderRectangles = new Rectangle[width, height];
-            rendersourceRectangles = new Rectangle[width, height];
 
-            int textureSize = 512; // Assume we have a 512x512 texture
-            int sourceSize = textureSize / renderTextureTileFactor;
 
             for (int x = 0; x < Width; x++)
             {
                 for (int y = 0; y < Height; y++)
                 {
                     foodValues[x, y] = MAXIMUMFOODPERTILE;
-                    renderRectangles[x, y] = new Rectangle(
-                        (int)(x * inTileSize),
-                        (int)(y * inTileSize),
-                        (int)inTileSize,
-                        (int)inTileSize);
-                    rendersourceRectangles[x, y] = new Rectangle(
-                        x * textureSize / renderTextureTileFactor,
-                        y * textureSize / renderTextureTileFactor,
-                        sourceSize,
-                        sourceSize);
                 }
             }
             tileSize = inTileSize;
@@ -191,24 +163,10 @@ namespace EvoNet.Map
             return food;
         }
 
-        public override void Initialize(EvoGame game)
+        public override void Initialize(Simulation game)
         {
             base.Initialize(game);
-            spriteBatch = new SpriteBatch(game.GraphicsDevice);
 
-            SandTexture = game.Content.Load<Texture2D>("Map/SandTexture");
-            GrassTexture = game.Content.Load<Texture2D>("Map/GrassTexture");
-            BlendMap = game.Content.Load<Texture2D>("Map/BlendMap");
-            Water1Texture = game.Content.Load<Texture2D>("Map/Water1");
-            Water2Texture = game.Content.Load<Texture2D>("Map/Water2");
-            BlendMap = game.Content.Load<Texture2D>("Map/BlendMap");
-            LandShader = game.Content.Load<Effect>("Map/GrassDisplay");
-            WaterShader = game.Content.Load<Effect>("Map/WaterEffect");
-
-            LandShader.Parameters["GrassTexture"].SetValue(GrassTexture);
-            LandShader.Parameters["SandTexture"].SetValue(SandTexture);
-            LandShader.Parameters["BlendMap"].SetValue(BlendMap);
-            WaterShader.Parameters["Water2"].SetValue(Water2Texture);
         }
 
         protected override void Update(GameTime deltaTime)
@@ -280,43 +238,6 @@ namespace EvoNet.Map
             return false;
         }
 
-        public void Draw(GameTime deltaTime)
-        {
-            Matrix? UsedMatrix = null;
-            UsedMatrix = Camera.instanceGameWorld.Matrix;
-
-            // Render land tiles with shader effect to blend between sand and grass
-            spriteBatch.Begin(transformMatrix: UsedMatrix, effect: LandShader);
-            for (int x = 0; x < Width; x++)
-            {
-                for (int y = 0; y < Height; y++)
-                {
-                    if (types[x, y] == TileType.Land)
-                    {
-                        Color color = new Color(0.0f, 0.0f, 1.0f, 1 - foodValues[x, y] / 100.0f);
-                        spriteBatch.Draw(SandTexture, renderRectangles[x, y], rendersourceRectangles[x, y], color);
-                    }
-                }
-            }
-            spriteBatch.End();
-
-            // Render water tiles with animated "water" shader
-            spriteBatch.Begin(transformMatrix: UsedMatrix, effect: WaterShader);
-            WaterShader.Parameters["Time"].SetValue((float)deltaTime.TotalGameTime.TotalSeconds / 3);
-            for (int x = 0; x < Width; x++)
-            {
-                for (int y = 0; y < Height; y++)
-                {
-                    if (types[x, y] == TileType.Water)
-                    {
-                        spriteBatch.Draw(Water1Texture, renderRectangles[x, y], rendersourceRectangles[x, y], Color.White);
-                    }
-                }
-            }
-            spriteBatch.End();
-
-        }
-
         public void SerializeToFile(string fileName)
         {
             FileStream file = File.Open(fileName, FileMode.OpenOrCreate, FileAccess.Write);
@@ -338,7 +259,7 @@ namespace EvoNet.Map
             file.Close();
         }
 
-        public static TileMap DeserializeFromFile(string fileName, EvoGame game)
+        public static TileMap DeserializeFromFile(string fileName, Simulation game)
         {
             try
             {
