@@ -10,9 +10,9 @@ An evolution simulation in .Net
 For the base simulation a TileMap is generated which seperates the tilemap into land and water.
 Land is fertile and grass/food can grow, which grow speed is dependent in its neighboring tiles.
 
-![TileMap](docs/TileMap.PNG)
+![TileMap](docs/EvoNet.gif)
 
-On this world creatures live, eat and reproduce (to be implemented)
+On this world live creatues, which taught themselves to move, eat and reproduce.
 
 ## Project Setup
 
