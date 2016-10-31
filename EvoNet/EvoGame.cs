@@ -36,7 +36,7 @@ namespace EvoNet
         List<UpdateModule> modules = new List<UpdateModule>();
 
         public Simulation sim;
-
+        public SimulationRenderer simRenderer;
         /// <summary>
         /// Default 1x1 white Texture, can be used to draw shapes in any color
         /// </summary>
@@ -74,6 +74,9 @@ namespace EvoNet
 
             modules.Add(sim);
 
+            simRenderer = new SimulationRenderer(sim);
+
+
             inputManager = new InputManager();
             inputManager.Initialize(this);
 
@@ -101,22 +104,18 @@ namespace EvoNet
             RenderHelper.Ini(WhiteTexture, WhiteCircleTexture);
 
             sim.Initialize(sim);
+            simRenderer.Initialize(Content, GraphicsDevice, spriteBatch);
+
 
             float viewportWidth = GraphicsDevice.Viewport.Width;
             float tileMapWidth = sim.TileMap.GetWorldWidth();
             float viewportHeight = GraphicsDevice.Viewport.Height;
             float tileMapHeight = sim.TileMap.GetWorldHeight();
-            Camera.instanceGameWorld.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
+            simRenderer.Camera.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
 
-            Camera.instanceGameWorld.Translation = new Vector2(tileMapWidth / 2, 0);
+            simRenderer.Camera.Translation = new Vector2(tileMapWidth / 2, 0);
 
 
-            //modules.Add(tileMap);
-            //modules.Add(creatureManager);
-
-            Creature.Initialize();
-
-            // TODO: use this.Content to load your game content here
         }
 
         /// <summary>
@@ -179,10 +178,7 @@ namespace EvoNet
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            //tileMap.Draw(gameTime);
-            //
-            //creatureManager.Draw(gameTime);
+            simRenderer.Draw(gameTime, null);
 
             base.Draw(gameTime);
         }

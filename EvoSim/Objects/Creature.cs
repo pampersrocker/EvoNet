@@ -22,8 +22,8 @@ namespace EvoNet.Objects
         private int collisionGridX = 0;
         private int collisionGridY = 0;
 
-        private const int CREATURESIZE = 54;
-        private const int FEELERTIPSIZE = 10;
+        public const int CREATURESIZE = 54;
+        public const int FEELERTIPSIZE = 10;
 
         private const float MAXIMUMFEELERDISTANCE = 100;
         private float feelerOcclusion = 0;
@@ -66,9 +66,7 @@ namespace EvoNet.Objects
         private const float STARTENERGY = 150;
         private const float MINIMUMSURVIVALENERGY = 100;
 
-        private static SpriteBatch spriteBatch = null;
-        private static Texture2D bodyTex = null;
-        private static Texture2D feelerTex = null;
+
 
         public static long currentId;
 
@@ -89,7 +87,10 @@ namespace EvoNet.Objects
 
         private float feelerAngle;
         private Vector2 feelerPos;
-
+        public Microsoft.Xna.Framework.Vector2 FeelerPos
+        {
+            get { return feelerPos; }
+        }
         private float energy_ = 150;
         private object energyLock = new object();
         public float Energy
@@ -195,7 +196,7 @@ namespace EvoNet.Objects
         private object colorLock = new object();
         private Color color_;
         private Color color_inv_;
-        private Color color
+        public Color Color
         {
             get
             {
@@ -212,7 +213,7 @@ namespace EvoNet.Objects
                 }
             }
         }
-        private Color color_inv
+        public Color Color_inv
         {
             get
             {
@@ -233,7 +234,11 @@ namespace EvoNet.Objects
         private Creature mother;
 
         private float timeSinceLastAttack = 0;
-        private const float TIMEBETWEENATTACKS = 0.1f;
+        public float TimeSinceLastAttack
+        {
+            get { return timeSinceLastAttack; }
+        }
+        public const float TIMEBETWEENATTACKS = 0.1f;
 
         private Creature feelerCreature = null;
 
@@ -259,15 +264,6 @@ namespace EvoNet.Objects
             }
         }
 
-        public static void Initialize()
-        {
-            if(spriteBatch == null)
-            {
-                //spriteBatch = EvoGame.spriteBatch;
-                //bodyTex = EvoGame.WhiteCircleTexture;
-                //feelerTex = EvoGame.WhiteCircleTexture;
-            }
-        }
 
         public Creature(Vector2 pos, float viewAngle, CreatureManager manager) :
             this(manager)
@@ -325,12 +321,13 @@ namespace EvoNet.Objects
             brain.RandomizeAllWeights();
             CalculateFeelerPos(MAXIMUMFEELERDISTANCE);
 
-            color = new Color(Simulation.RandomFloat(), Simulation.RandomFloat(), Simulation.RandomFloat());
+            Color = new Color(Simulation.RandomFloat(), Simulation.RandomFloat(), Simulation.RandomFloat());
             GenerateColorInv();
             CalculateCollisionGridPos();
         }
 
-        public Creature(Creature mother)
+        public Creature(Creature mother, CreatureManager manager) :
+            this(manager)
         {
             id = currentId++;
             //this.mother = mother;
@@ -352,9 +349,9 @@ namespace EvoNet.Objects
                 brain.RandomMutation(0.1f);
             }
 
-            int r = mother.color.R;
-            int g = mother.color.G;
-            int b = mother.color.B;
+            int r = mother.Color.R;
+            int g = mother.Color.G;
+            int b = mother.Color.B;
 
             r += Simulation.RandomInt(-5, 6);
             g += Simulation.RandomInt(-5, 6);
@@ -364,12 +361,12 @@ namespace EvoNet.Objects
             g = Mathf.ClampColorValue(g);
             b = Mathf.ClampColorValue(b);
 
-            color = new Color(r, g, b);
+            Color = new Color(r, g, b);
             GenerateColorInv();
 
-            if(CreatureManager.SelectedCreature == null || CreatureManager.SelectedCreature.Energy < 100)
+            if(manager.SelectedCreature == null || manager.SelectedCreature.Energy < 100)
             {
-                CreatureManager.SelectedCreature = this;
+                manager.SelectedCreature = this;
             }
         }
 
@@ -425,9 +422,9 @@ namespace EvoNet.Objects
                 return 0;
             }
             Vector3 vec = new Vector3(
-                color.R - feelerCreature.color.R,
-                color.G - feelerCreature.color.G,
-                color.B - feelerCreature.color.B
+                Color.R - feelerCreature.Color.R,
+                Color.G - feelerCreature.Color.G,
+                Color.B - feelerCreature.Color.B
                 );
 
             vec /= 255f;
@@ -436,7 +433,7 @@ namespace EvoNet.Objects
 
         public void GenerateColorInv()
         {
-            color_inv = new Color(255 - color.R, 255 - color.G, 255 - color.B);
+            Color_inv = new Color(255 - Color.R, 255 - Color.G, 255 - Color.B);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -582,8 +579,7 @@ namespace EvoNet.Objects
 
         public void GiveBirth()
         {
-            Creature child = new Creature(this);
-            child.Manager = Manager;
+            Creature child = new Creature(this, Manager);
             children.Add(child);
             Manager.AddCreature(child);
             Energy -= STARTENERGY;
@@ -601,26 +597,6 @@ namespace EvoNet.Objects
             feelerPos = pos + localFeelerPos;
         }
 
-        public void Draw()
-        {
-            ////lock (this)
-            //{
-            //
-            //    spriteBatch.Begin(transformMatrix: Camera.instanceGameWorld.Matrix);
-            //    DrawCreature(spriteBatch, Vector2.Zero);
-            //
-            //    spriteBatch.End();
-            //}
-        }
-
-        public void DrawCreature(SpriteBatch spriteBatch, Vector2 offset)
-        {
-            //RenderHelper.DrawLine(spriteBatch, pos.X + offset.X, pos.Y + offset.Y, feelerPos.X + offset.X, feelerPos.Y + offset.Y, Color.White);
-            //spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - CREATURESIZE / 2), (int)(pos.Y + offset.Y - CREATURESIZE / 2), CREATURESIZE, CREATURESIZE), color_inv);
-            //spriteBatch.Draw(bodyTex, new Rectangle((int)(pos.X + offset.X - (CREATURESIZE - 4) / 2), (int)(pos.Y + offset.Y - (CREATURESIZE - 4) / 2), CREATURESIZE - 4, CREATURESIZE - 4), color);
-            //spriteBatch.Draw(feelerTex, new Rectangle((int)(feelerPos.X + offset.X - 5), (int)(feelerPos.Y + offset.Y - 5), 10, 10), timeSinceLastAttack > TIMEBETWEENATTACKS ? Color.Blue : Color.Red);
-        }
-
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Serialize(BinaryWriter writer)
         {
@@ -632,7 +608,7 @@ namespace EvoNet.Objects
             writer.Write(Energy);
             writer.Write(age);
             writer.Write(generation);
-            writer.Write(color);
+            writer.Write(Color);
             writer.Write(mother != null ? mother.id : -1);
             writer.Write(children.Count);
             foreach (Creature child in children)
@@ -674,7 +650,7 @@ namespace EvoNet.Objects
             Energy = reader.ReadSingle();
             age = reader.ReadSingle();
             generation = reader.ReadInt32();
-            color = reader.ReadColor();
+            Color = reader.ReadColor();
             motherId = reader.ReadInt64();
             int childrenCount = reader.ReadInt32();
             childIds = new List<long>();

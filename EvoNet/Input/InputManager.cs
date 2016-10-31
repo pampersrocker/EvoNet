@@ -1,4 +1,5 @@
 ﻿using EvoNet.Configuration;
+using EvoNet.Rendering;
 using EvoSim;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -40,13 +41,14 @@ namespace EvoNet.Input
         {
             gameConfiguration = game.gameConfiguration;
             Initialize(game.sim);
+            camera = game.simRenderer.Camera;
+
             this.game = game;
         }
 
         public override void Initialize(Simulation ingame)
         {
             base.Initialize(ingame);
-            camera = Camera.instanceGameWorld;
             scrollWheelValue = Mouse.GetState().ScrollWheelValue;
         }
 
@@ -78,9 +80,9 @@ namespace EvoNet.Input
                 float tileMapWidth = simulation.TileMap.GetWorldWidth();
                 float viewportHeight = game.GraphicsDevice.Viewport.Height;
                 float tileMapHeight = simulation.TileMap.GetWorldHeight();
-                Camera.instanceGameWorld.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
+                camera.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
 
-                Camera.instanceGameWorld.Translation = new Vector2(tileMapWidth / 2, 0);
+                camera.Translation = new Vector2(tileMapWidth / 2, 0);
             }
 
             oldSpaceDown = spaceDown;
