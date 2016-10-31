@@ -58,6 +58,7 @@ namespace EvoNet.Objects
         private const float COST_PERMANENT = 1f;
         private const float COST_WALK = 5f;
         private const float COST_ROTATE = 5f;
+        private const float COST_PER_MEMORY_NEURON = 0.1f;
 
         private const float FOODDROPPERCENTAGE = 0;
 
@@ -165,7 +166,7 @@ namespace EvoNet.Objects
         private const String NAME_IN_WATERONFEELER     = "Water On Feeler";
         private const String NAME_IN_WATERONCREATURE   = "Water On Creature";
         private const String NAME_IN_OSCILATION        = "Oscilation input";
-        private const String NAME_IN_MEMORY1           = "Input Memory #1";
+        private const String NAME_IN_MEMORY            = "Input Memory #";
 
         private const String NAME_OUT_BIRTH       = "Birth";
         private const String NAME_OUT_ROTATE      = "Rotate";
@@ -174,7 +175,7 @@ namespace EvoNet.Objects
         private const String NAME_OUT_ATTACK      = "Attack";
         private const String NAME_OUT_EAT         = "Eat";
         private const String NAME_OUT_OSCILATION  = "Oscilation output";
-        private const String NAME_OUT_MEMORY1     = "Output Memory #1";
+        private const String NAME_OUT_MEMORY      = "Output Memory #";
 
         private InputNeuron inBias              = new InputNeuron();
         private InputNeuron inFoodValuePosition = new InputNeuron();
@@ -187,7 +188,7 @@ namespace EvoNet.Objects
         private InputNeuron inWaterOnFeeler     = new InputNeuron();
         private InputNeuron inWaterOnCreature   = new InputNeuron();
         private InputNeuron inOscilation        = new InputNeuron();
-        private InputNeuron inMemory1           = new InputNeuron();
+        private InputNeuron[] inMemory          = null;
 
         private WorkingNeuron outBirth       = new WorkingNeuron();
         private WorkingNeuron outRotate      = new WorkingNeuron();
@@ -196,7 +197,27 @@ namespace EvoNet.Objects
         private WorkingNeuron outAttack      = new WorkingNeuron();
         private WorkingNeuron outEat         = new WorkingNeuron();
         private WorkingNeuron outOscilation  = new WorkingNeuron();
-        private WorkingNeuron outMemory1     = new WorkingNeuron();
+        private WorkingNeuron[] outMemory    = null;
+
+        private object amountOfMemoryLock = new object();
+        private int amountOfMemory_ = 1;
+        public int AmountOfMemory
+        {
+            get
+            {
+                lock (amountOfMemoryLock)
+                {
+                    return amountOfMemory_;
+                }
+            }
+            set
+            {
+                lock (amountOfMemoryLock)
+                {
+                    amountOfMemory_ = value;
+                }
+            }
+        }
 
         private object oscilationLock = new object();
         private float oscilationValue_;
@@ -308,7 +329,12 @@ namespace EvoNet.Objects
             inWaterOnFeeler    .SetName(NAME_IN_WATERONFEELER);
             inWaterOnCreature  .SetName(NAME_IN_WATERONCREATURE);
             inOscilation       .SetName(NAME_IN_OSCILATION);
-            inMemory1          .SetName(NAME_IN_MEMORY1);
+            inMemory = new InputNeuron[AmountOfMemory];
+            for(int i = 0; i<AmountOfMemory; i++)
+            {
+                inMemory[i] = new InputNeuron();
+                inMemory[i].SetName(NAME_IN_MEMORY + (i + 1));
+            }
 
             outBirth      .SetName(NAME_OUT_BIRTH);
             outRotate     .SetName(NAME_OUT_ROTATE);
@@ -317,7 +343,12 @@ namespace EvoNet.Objects
             outAttack     .SetName(NAME_OUT_ATTACK);
             outEat        .SetName(NAME_OUT_EAT);
             outOscilation .SetName(NAME_OUT_OSCILATION);
-            outMemory1    .SetName(NAME_OUT_MEMORY1);
+            outMemory = new WorkingNeuron[AmountOfMemory];
+            for(int i = 0; i<AmountOfMemory; i++)
+            {
+                outMemory[i] = new WorkingNeuron();
+                outMemory[i].SetName(NAME_OUT_MEMORY + (i + 1));
+            }
 
             brain = new NeuronalNetwork();
 
@@ -332,7 +363,10 @@ namespace EvoNet.Objects
             brain.AddInputNeuron(inWaterOnFeeler);
             brain.AddInputNeuron(inWaterOnCreature);
             brain.AddInputNeuron(inOscilation);
-            brain.AddInputNeuron(inMemory1);
+            for(int i = 0; i<AmountOfMemory; i++)
+            {
+                brain.AddInputNeuron(inMemory[i]);
+            }
 
             brain.GenerateHiddenNeurons(10);
 
@@ -343,7 +377,10 @@ namespace EvoNet.Objects
             brain.AddOutputNeuron(outAttack);
             brain.AddOutputNeuron(outEat);
             brain.AddOutputNeuron(outOscilation);
-            brain.AddOutputNeuron(outMemory1);
+            for(int i = 0; i < AmountOfMemory; i++)
+            {
+                brain.AddOutputNeuron(outMemory[i]);
+            }
 
             brain.GenerateFullMesh();
 
@@ -369,15 +406,86 @@ namespace EvoNet.Objects
             this.viewAngle = Simulation.RandomFloat() * Mathf.PI * 2;
             this.brain = mother.brain.CloneFullMesh();
 
+            AmountOfMemory = mother.AmountOfMemory;
+            inMemory = new InputNeuron[AmountOfMemory];
+            outMemory = new WorkingNeuron[AmountOfMemory];
+
             SetupVariablesFromBrain();
 
 
             CalculateFeelerPos(MAXIMUMFEELERDISTANCE);
+            if(Simulation.RandomFloat() > 0.5f)
+            {
+                MutateConnections();
+            }
+            else
+            {
+                MutateMemory();
+            }
+
+            MutateColor(mother);
+            GenerateColorInv();
+
+            if(manager.SelectedCreature == null || manager.SelectedCreature.Energy < 100)
+            {
+                manager.SelectedCreature = this;
+            }
+        }
+
+        private void MutateMemory()
+        {
+            if(Simulation.RandomFloat() > 0.5f && AmountOfMemory > 0)
+            {
+                //Remove a memory neuron
+                InputNeuron inRemove = inMemory[AmountOfMemory - 1];
+                WorkingNeuron outRemove = outMemory[AmountOfMemory - 1];
+                brain.RemoveInputNeuron(inRemove);
+                brain.RemoveOutputNeuron(outRemove);
+                InputNeuron[] newInputNeurons = new InputNeuron[AmountOfMemory - 1];
+                WorkingNeuron[] newOutputNeurons = new WorkingNeuron[AmountOfMemory - 1];
+                for(int i = 0; i<AmountOfMemory - 1; i++)
+                {
+                    newInputNeurons[i] = inMemory[i];
+                    newOutputNeurons[i] = outMemory[i];
+                }
+                inMemory = newInputNeurons;
+                outMemory = newOutputNeurons;
+                AmountOfMemory--;
+            }
+            else
+            {
+                //Add a memory neuron
+                InputNeuron newIn = new InputNeuron();
+                WorkingNeuron newOut = new WorkingNeuron();
+                newIn.SetName(NAME_IN_MEMORY + (AmountOfMemory + 1));
+                newOut.SetName(NAME_OUT_MEMORY + (AmountOfMemory + 1));
+                brain.AddInputNeuronAndMesh(newIn);
+                brain.AddOutputNeuronAndMesh(newOut);
+                InputNeuron[] newInputNeurons = new InputNeuron[AmountOfMemory + 1];
+                WorkingNeuron[] newOutputNeurons = new WorkingNeuron[AmountOfMemory + 1];
+                for (int i = 0; i < AmountOfMemory; i++)
+                {
+                    newInputNeurons[i] = inMemory[i];
+                    newOutputNeurons[i] = outMemory[i];
+                }
+                newInputNeurons[AmountOfMemory] = newIn;
+                newOutputNeurons[AmountOfMemory] = newOut;
+                inMemory = newInputNeurons;
+                outMemory = newOutputNeurons;
+                AmountOfMemory++;
+            }
+        }
+
+        private void MutateConnections()
+        {
             for (int i = 0; i < 10; i++)
             {
                 brain.RandomMutation(0.1f);
             }
+        }
 
+        private void MutateColor(Creature mother)
+        {
             int r = mother.Color.R;
             int g = mother.Color.G;
             int b = mother.Color.B;
@@ -391,12 +499,6 @@ namespace EvoNet.Objects
             b = Mathf.ClampColorValue(b);
 
             Color = new Color(r, g, b);
-            GenerateColorInv();
-
-            if(manager.SelectedCreature == null || manager.SelectedCreature.Energy < 100)
-            {
-                manager.SelectedCreature = this;
-            }
         }
 
 
@@ -420,7 +522,10 @@ namespace EvoNet.Objects
             inWaterOnFeeler = brain.GetInputNeuronFromName(NAME_IN_WATERONFEELER);
             inWaterOnCreature = brain.GetInputNeuronFromName(NAME_IN_WATERONCREATURE);
             inOscilation = brain.GetInputNeuronFromName(NAME_IN_OSCILATION);
-            inMemory1 = brain.GetInputNeuronFromName(NAME_IN_MEMORY1);
+            for(int i = 0; i<AmountOfMemory; i++)
+            {
+                inMemory[i] = brain.GetInputNeuronFromName(NAME_IN_MEMORY + (i + 1));
+            }
 
             outBirth = brain.GetOutputNeuronFromName(NAME_OUT_BIRTH);
             outRotate = brain.GetOutputNeuronFromName(NAME_OUT_ROTATE);
@@ -429,7 +534,10 @@ namespace EvoNet.Objects
             outAttack = brain.GetOutputNeuronFromName(NAME_OUT_ATTACK);
             outEat = brain.GetOutputNeuronFromName(NAME_OUT_EAT);
             outOscilation = brain.GetOutputNeuronFromName(NAME_OUT_OSCILATION);
-            outMemory1 = brain.GetOutputNeuronFromName(NAME_OUT_MEMORY1);
+            for(int i = 0; i<AmountOfMemory; i++)
+            {
+                outMemory[i] = brain.GetOutputNeuronFromName(NAME_OUT_MEMORY + (i + 1));
+            }
             CalculateCollisionGridPos();
         }
 
@@ -470,7 +578,10 @@ namespace EvoNet.Objects
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void ReadSensors()
         {
-            inMemory1.SetValue(outMemory1.GetValue());
+            for(int i = 0; i<AmountOfMemory; i++)
+            {
+                inMemory[i].SetValue(outMemory[i].GetValue());
+            }
 
             brain.Invalidate();
 
@@ -504,6 +615,9 @@ namespace EvoNet.Objects
             ActAttack(costMult);
 
             OscilationValue += outOscilation.GetValue();
+
+            Energy -= COST_PERMANENT * fixedDeltaTime * costMult;
+            Energy -= COST_PER_MEMORY_NEURON * fixedDeltaTime * costMult;
 
             timeSinceLastAttack += fixedDeltaTime;
             TimeSinceThisWasAttacked += fixedDeltaTime;
@@ -643,6 +757,7 @@ namespace EvoNet.Objects
             writer.Write(generation);
             writer.Write(Color);
             writer.Write(mother != null ? mother.id : -1);
+            writer.Write(AmountOfMemory);
             writer.Write(children.Count);
             foreach (Creature child in children)
             {
@@ -685,6 +800,9 @@ namespace EvoNet.Objects
             generation = reader.ReadInt32();
             Color = reader.ReadColor();
             motherId = reader.ReadInt64();
+            AmountOfMemory = reader.ReadInt32();
+            inMemory = new InputNeuron[AmountOfMemory];
+            outMemory = new WorkingNeuron[AmountOfMemory];
             int childrenCount = reader.ReadInt32();
             childIds = new List<long>();
             for (int childIndex = 0; childIndex< childrenCount; childIndex++)

@@ -44,6 +44,49 @@ namespace EvoNet.AI
             outputNeurons.Add(neuron);
         }
 
+        public void AddInputNeuronAndMesh(InputNeuron neuron)
+        {
+            inputNeurons.Add(neuron);
+            foreach(WorkingNeuron wn in hiddenNeurons)
+            {
+                wn.AddNeuronConnection(new Connection(neuron, 0));
+            }
+        }
+
+        public void AddOutputNeuronAndMesh(WorkingNeuron neuron)
+        {
+            outputNeurons.Add(neuron);
+            foreach(WorkingNeuron wn in hiddenNeurons)
+            {
+                neuron.AddNeuronConnection(new Connection(wn, 0));
+            }
+        }
+
+        public void RemoveInputNeuron(InputNeuron neuron)
+        {
+            inputNeurons.Remove(neuron);
+            foreach(WorkingNeuron wn in hiddenNeurons)
+            {
+                List<Connection> connectionsToRemove = new List<Connection>();
+                foreach(Connection c in wn.GetConnections())
+                {
+                    if (c.entryNeuron == neuron)
+                    {
+                        connectionsToRemove.Add(c);
+                    }
+                }
+                foreach(Connection c in connectionsToRemove)
+                {
+                    wn.GetConnections().Remove(c);
+                }
+            }
+        }
+
+        public void RemoveOutputNeuron(WorkingNeuron neuron)
+        {
+            outputNeurons.Remove(neuron);
+        }
+
         public InputNeuron GetInputNeuronFromIndex(int index)
         {
             return (InputNeuron)inputNeurons[index];
