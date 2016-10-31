@@ -27,11 +27,9 @@ namespace EvoNet
         GraphicsDeviceManager graphics;
         public static SpriteBatch spriteBatch;
 
-        public TileMap tileMap;
         public GameConfig gameConfiguration;
         public InputManager inputManager;
 
-        CreatureManager creatureManager = new CreatureManager();
 
         DateTime lastSerializationTime;
 
@@ -72,6 +70,9 @@ namespace EvoNet
             colorData[0] = Color.White;
             WhiteTexture.SetData(colorData);
 
+            sim = new Simulation();
+
+            modules.Add(sim);
 
             inputManager = new InputManager();
             inputManager.Initialize(this);
@@ -98,42 +99,20 @@ namespace EvoNet
 
 
             RenderHelper.Ini(WhiteTexture, WhiteCircleTexture);
-            tileMap = TileMap.DeserializeFromFile("tilemap.dat", sim);
-            if (tileMap == null)
-            {
-                tileMap = new TileMap(100, 100, 100.0f);
-                tileMap.Initialize(sim);
 
-                ValueNoise2D vn = new ValueNoise2D(tileMap.Width, tileMap.Height);
-                vn.startFrequencyX = 10;
-                vn.startFrequencyY = 10;
-                vn.calculate();
-                float[,] heightMap = vn.getHeightMap();
-                for (int x = 0; x < tileMap.Width; x++)
-                {
-                    for (int y = 0; y < tileMap.Height; y++)
-                    {
-                        tileMap.SetTileType(x, y, heightMap[x, y] > 0.5 ? TileType.Land : TileType.Water);
-                    }
-                }
-
-                tileMap.SerializeToFile("tilemap.dat");
-
-            }
+            sim.Initialize(sim);
 
             float viewportWidth = GraphicsDevice.Viewport.Width;
-            float tileMapWidth = tileMap.GetWorldWidth();
+            float tileMapWidth = sim.TileMap.GetWorldWidth();
             float viewportHeight = GraphicsDevice.Viewport.Height;
-            float tileMapHeight = tileMap.GetWorldHeight();
+            float tileMapHeight = sim.TileMap.GetWorldHeight();
             Camera.instanceGameWorld.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
 
             Camera.instanceGameWorld.Translation = new Vector2(tileMapWidth / 2, 0);
 
-            creatureManager.Initialize(sim);
-            creatureManager.Deserialize("creatures.dat");
 
-            modules.Add(tileMap);
-            modules.Add(creatureManager);
+            //modules.Add(tileMap);
+            //modules.Add(creatureManager);
 
             Creature.Initialize();
 
@@ -184,8 +163,8 @@ namespace EvoNet
             if ((DateTime.UtcNow - lastSerializationTime).TotalSeconds > 10)
             {
                 lastSerializationTime = DateTime.UtcNow;
-                tileMap.SerializeToFile("tilemap.dat");
-                creatureManager.Serialize("creatures.dat");
+                sim.TileMap.SerializeToFile("tilemap.dat");
+                sim.CreatureManager.Serialize("creatures.dat");
             }
 
 
@@ -201,9 +180,9 @@ namespace EvoNet
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            tileMap.Draw(gameTime);
-
-            creatureManager.Draw(gameTime);
+            //tileMap.Draw(gameTime);
+            //
+            //creatureManager.Draw(gameTime);
 
             base.Draw(gameTime);
         }

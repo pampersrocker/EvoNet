@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="Camera.cs" />
     <Compile Include="CameraAlreadyExistException.cs" />
+    <Compile Include="Configuration\GameConfig.cs" />
     <Compile Include="EvoGame.cs" />
     <Compile Include="Input\InputManager.cs" />
     <Compile Include="Program.cs" />

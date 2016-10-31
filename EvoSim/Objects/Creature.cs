@@ -148,8 +148,10 @@ namespace EvoNet.Objects
             }
         }
 
-        private Simulation simulation;
-
+        public EvoSim.Simulation Simulation
+        {
+            get { return Manager.simulation; }
+        }
         private const String NAME_IN_BIAS              = "bias";
         private const String NAME_IN_FOODVALUEPOSITION = "Food Value Position";
         private const String NAME_IN_FOODVALUEFEELER   = "Food Value Feeler";
@@ -267,7 +269,8 @@ namespace EvoNet.Objects
             }
         }
 
-        public Creature(Vector2 pos, float viewAngle)
+        public Creature(Vector2 pos, float viewAngle, CreatureManager manager) :
+            this(manager)
         {
             id = currentId++;
 
@@ -372,8 +375,9 @@ namespace EvoNet.Objects
 
 
         // For deserialization
-        public Creature()
+        public Creature(CreatureManager manager)
         {
+            Manager = manager;
             CalculateCollisionGridPos();
         }
 
@@ -406,8 +410,8 @@ namespace EvoNet.Objects
         {
             lock (this)
             {
-                collisionGridX = (int)((pos.X / simulation.tileMap.GetWorldWidth()) * CreatureManager.COLLISIONGRIDSIZE / 3 + CreatureManager.COLLISIONGRIDSIZE / 3);
-                collisionGridY = (int)((pos.Y / simulation.tileMap.GetWorldHeight()) * CreatureManager.COLLISIONGRIDSIZE / 3 + CreatureManager.COLLISIONGRIDSIZE / 3);
+                collisionGridX = (int)((pos.X / Simulation.TileMap.GetWorldWidth()) * CreatureManager.COLLISIONGRIDSIZE / 3 + CreatureManager.COLLISIONGRIDSIZE / 3);
+                collisionGridY = (int)((pos.Y / Simulation.TileMap.GetWorldHeight()) * CreatureManager.COLLISIONGRIDSIZE / 3 + CreatureManager.COLLISIONGRIDSIZE / 3);
                 collisionGridX = Mathf.Clamp(collisionGridX, 0, CreatureManager.COLLISIONGRIDSIZE - 1);
                 collisionGridY = Mathf.Clamp(collisionGridY, 0, CreatureManager.COLLISIONGRIDSIZE - 1);
                 CreatureManager.AddToCollisionGrid(collisionGridX, collisionGridY, this);
@@ -442,8 +446,8 @@ namespace EvoNet.Objects
 
             brain.Invalidate();
 
-            Tile creatureTile = simulation.tileMap.GetTileAtWorldPosition(pos);
-            Tile feelerTile = simulation.tileMap.GetTileAtWorldPosition(feelerPos);
+            Tile creatureTile = Simulation.TileMap.GetTileAtWorldPosition(pos);
+            Tile feelerTile = Simulation.TileMap.GetTileAtWorldPosition(feelerPos);
 
             inBias.SetValue(1);
             inFoodValuePosition.SetValue(creatureTile.food / TileMap.MAXIMUMFOODPERTILE);
@@ -462,7 +466,7 @@ namespace EvoNet.Objects
         public void Act(GameTime deltaTime)
         {
             float fixedDeltaTime = (float)deltaTime.ElapsedGameTime.TotalSeconds;
-            Tile t = simulation.tileMap.GetTileAtWorldPosition(pos);
+            Tile t = Simulation.TileMap.GetTileAtWorldPosition(pos);
             float costMult = CalculateCostMultiplier(t);
             ActRotate(costMult, fixedDeltaTime);
             ActMove(costMult, fixedDeltaTime);
@@ -496,7 +500,7 @@ namespace EvoNet.Objects
         {
             if (t.IsLand())
             {
-                simulation.tileMap.FoodValues[t.position.X, t.position.Y] += Energy * FOODDROPPERCENTAGE;
+                Simulation.TileMap.FoodValues[t.position.X, t.position.Y] += Energy * FOODDROPPERCENTAGE;
             }
             Manager.RemoveCreature(this);
         }
@@ -558,7 +562,7 @@ namespace EvoNet.Objects
             if(t.type != TileType.None)
             {
                 float eatAmount = GAIN_EAT * eatWish * fixedDeltaTime;
-                Energy += simulation.tileMap.EatOfTile(t.position.X, t.position.Y, eatAmount);
+                Energy += Simulation.TileMap.EatOfTile(t.position.X, t.position.Y, eatAmount);
             }
 
         }

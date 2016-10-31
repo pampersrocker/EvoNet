@@ -62,8 +62,8 @@
     <Compile Include="AI\NeuronalNetworkTest.cs" />
     <Compile Include="AI\NotSameAmountOfNeuronsException.cs" />
     <Compile Include="AI\WorkingNeuron.cs" />
-    <Compile Include="Configuration\GameConfig.cs" />
-    <Compile Include="EvoSim.cs" />
+    <Compile Include="Config\SimulationConfiguration.cs" />
+    <Compile Include="Simulation.cs" />
     <Compile Include="Map\Tile.cs" />
     <Compile Include="Map\TileMap.cs" />
     <Compile Include="Mathf.cs" />
@@ -75,6 +75,7 @@
     <Compile Include="ThreadingHelper\MultithreadingHelper.cs" />
     <Compile Include="UpdateModule.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

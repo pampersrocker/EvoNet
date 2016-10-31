@@ -152,10 +152,10 @@ namespace EvoNet.Objects
             {
                 Creature justSpawned = new Creature(
                     new Vector2(
-                        Simulation.RandomFloat() * simulation.tileMap.GetWorldWidth(),
-                        Simulation.RandomFloat() * simulation.tileMap.GetWorldHeight()),
-                    Simulation.RandomFloat() * Mathf.PI * 2);
-                justSpawned.Manager = this;
+                        Simulation.RandomFloat() * simulation.TileMap.GetWorldWidth(),
+                        Simulation.RandomFloat() * simulation.TileMap.GetWorldHeight()),
+                    Simulation.RandomFloat() * Mathf.PI * 2,
+                    this);
                 Creatures.Add(justSpawned);
             }
 
@@ -330,8 +330,7 @@ namespace EvoNet.Objects
                 int creatureCount = reader.ReadInt32();
                 for (int creatureIndex = 0; creatureIndex < creatureCount; creatureIndex++)
                 {
-                    Creature newCreature = new Creature();
-                    newCreature.Manager = this;
+                    Creature newCreature = new Creature(this);
                     newCreature.Deserialize(reader);
                     Creatures.Add(newCreature);
                 }

@@ -38,6 +38,7 @@ namespace EvoNet.Input
 
         public void Initialize(EvoGame game)
         {
+            gameConfiguration = game.gameConfiguration;
             Initialize(game.sim);
             this.game = game;
         }
@@ -45,7 +46,6 @@ namespace EvoNet.Input
         public override void Initialize(Simulation ingame)
         {
             base.Initialize(ingame);
-            gameConfiguration = ingame.SimulationConfiguration;
             camera = Camera.instanceGameWorld;
             scrollWheelValue = Mouse.GetState().ScrollWheelValue;
         }
@@ -75,9 +75,9 @@ namespace EvoNet.Input
             if (keyboardState.IsKeyDown(Keys.R))
             {
                 float viewportWidth = game.GraphicsDevice.Viewport.Width;
-                float tileMapWidth = game.tileMap.GetWorldWidth();
+                float tileMapWidth = simulation.TileMap.GetWorldWidth();
                 float viewportHeight = game.GraphicsDevice.Viewport.Height;
-                float tileMapHeight = game.tileMap.GetWorldHeight();
+                float tileMapHeight = simulation.TileMap.GetWorldHeight();
                 Camera.instanceGameWorld.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
 
                 Camera.instanceGameWorld.Translation = new Vector2(tileMapWidth / 2, 0);
