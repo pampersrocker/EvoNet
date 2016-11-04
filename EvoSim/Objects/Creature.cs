@@ -58,7 +58,7 @@ namespace EvoNet.Objects
         private const float COST_PERMANENT = 1f;
         private const float COST_WALK = 5f;
         private const float COST_ROTATE = 5f;
-        private const float COST_PER_MEMORY_NEURON = 0.1f;
+        private const float COST_PER_MEMORY_NEURON = 1f;
 
         private const float FOODDROPPERCENTAGE = 0;
 
@@ -414,7 +414,7 @@ namespace EvoNet.Objects
 
 
             CalculateFeelerPos(MAXIMUMFEELERDISTANCE);
-            if(Simulation.RandomFloat() > 0.5f)
+            if(Simulation.RandomFloat() > 0.05f)
             {
                 MutateConnections();
             }
