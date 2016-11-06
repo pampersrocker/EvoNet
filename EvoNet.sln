@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvoNet", "EvoNet\EvoNet.csproj", "{FD3E3906-6D99-454D-9471-EAAFF668D670}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvoNet", "EvoNet\EvoNet.csp
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvoSim", "EvoSim\EvoSim.csproj", "{0CA1D951-1554-408C-9B2A-48FF8EB89588}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvoCommand", "EvoCommand\EvoCommand.csproj", "{5495F0FD-46B7-4326-8357-8B0A569E6F5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +44,18 @@ Global
 		{0CA1D951-1554-408C-9B2A-48FF8EB89588}.Release|x64.Build.0 = Release|Any CPU
 		{0CA1D951-1554-408C-9B2A-48FF8EB89588}.Release|x86.ActiveCfg = Release|Any CPU
 		{0CA1D951-1554-408C-9B2A-48FF8EB89588}.Release|x86.Build.0 = Release|Any CPU
+		{5495F0FD-46B7-4326-8357-8B0A569E6F5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5495F0FD-46B7-4326-8357-8B0A569E6F5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5495F0FD-46B7-4326-8357-8B0A569E6F5B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5495F0FD-46B7-4326-8357-8B0A569E6F5B}.Debug|x64.Build.0 = Debug|Any CPU
+		{5495F0FD-46B7-4326-8357-8B0A569E6F5B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5495F0FD-46B7-4326-8357-8B0A569E6F5B}.Debug|x86.Build.0 = Debug|Any CPU
+		{5495F0FD-46B7-4326-8357-8B0A569E6F5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5495F0FD-46B7-4326-8357-8B0A569E6F5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5495F0FD-46B7-4326-8357-8B0A569E6F5B}.Release|x64.ActiveCfg = Release|Any CPU
+		{5495F0FD-46B7-4326-8357-8B0A569E6F5B}.Release|x64.Build.0 = Release|Any CPU
+		{5495F0FD-46B7-4326-8357-8B0A569E6F5B}.Release|x86.ActiveCfg = Release|Any CPU
+		{5495F0FD-46B7-4326-8357-8B0A569E6F5B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
