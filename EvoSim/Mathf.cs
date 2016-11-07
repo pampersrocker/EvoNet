@@ -128,5 +128,10 @@ namespace EvoNet
         {
             return a > b ? b : a;
         }
+
+        public static float Square(float val)
+        {
+            return val * val;
+        }
     }
 }

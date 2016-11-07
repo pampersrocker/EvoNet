@@ -58,7 +58,7 @@ namespace EvoNet.Objects
         private const float COST_PERMANENT = 1f;
         private const float COST_WALK = 5f;
         private const float COST_ROTATE = 5f;
-        private const float COST_PER_MEMORY_NEURON = 1f;
+        private const float COST_PER_MEMORY_NEURON = 1.5f;
 
         private const float FOODDROPPERCENTAGE = 0;
 
@@ -414,7 +414,7 @@ namespace EvoNet.Objects
 
 
             CalculateFeelerPos(MAXIMUMFEELERDISTANCE);
-            if(Simulation.RandomFloat() > 0.05f)
+            if(Simulation.RandomFloat() > 0.01f)
             {
                 MutateConnections();
             }
@@ -617,7 +617,7 @@ namespace EvoNet.Objects
             //OscilationValue += outOscilation.GetValue();
 
             Energy -= COST_PERMANENT * fixedDeltaTime * costMult;
-            Energy -= COST_PER_MEMORY_NEURON * fixedDeltaTime * costMult;
+            Energy -= COST_PER_MEMORY_NEURON * fixedDeltaTime * costMult * AmountOfMemory;
 
             timeSinceLastAttack += fixedDeltaTime;
             TimeSinceThisWasAttacked += fixedDeltaTime;
