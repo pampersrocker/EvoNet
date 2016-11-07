@@ -20,7 +20,7 @@ namespace EvoNet.Rendering
             get { return network; }
             set { network = value; }
         }
-        private const float NEURONSIZE = 15;
+        public const float NEURONSIZE = 15;
 
         private Neuron GetNeuronUnderMouse()
         {

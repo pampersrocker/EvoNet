@@ -11,7 +11,7 @@ namespace EvoNet.Map
     {
         public const float MAXIMUMFOODPERTILE = 100;
 
-        float[,] foodValues;
+        private float[,] foodValues_;
         private TileType[,] types;
         public TileType[,] Types
         {
@@ -31,18 +31,22 @@ namespace EvoNet.Map
         public int Width { get; private set; }
         public int Height { get; private set; }
 
+        private object foodValuesLock = new object();
         public float[,] FoodValues
         {
-            [MethodImpl(MethodImplOptions.Synchronized)]
             get
             {
-                return foodValues;
+                lock (foodValuesLock)
+                {
+                    return foodValues_;
+                }
             }
-
-            [MethodImpl(MethodImplOptions.Synchronized)]
             set
             {
-                foodValues = value;
+                lock (foodValuesLock)
+                {
+                    foodValues_ = value;
+                }
             }
         }
 
@@ -51,7 +55,7 @@ namespace EvoNet.Map
             types[x, y] = tt;
             if(tt != TileType.Land)
             {
-                foodValues[x, y] = 0;
+                FoodValues[x, y] = 0;
             }
         }
 
@@ -63,7 +67,7 @@ namespace EvoNet.Map
 
                 if (types[x, y] == TileType.Land)
                 {
-                    foodValues[x, y] = foodValue;
+                    FoodValues[x, y] = foodValue;
                     return true;
                 }
             }
@@ -90,7 +94,7 @@ namespace EvoNet.Map
         {
             Width = width;
             Height = height;
-            foodValues = new float[width, height];
+            FoodValues = new float[width, height];
             types = new TileType[width, height];
 
 
@@ -98,7 +102,7 @@ namespace EvoNet.Map
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    foodValues[x, y] = MAXIMUMFOODPERTILE;
+                    FoodValues[x, y] = MAXIMUMFOODPERTILE;
                 }
             }
             tileSize = inTileSize;
@@ -106,7 +110,7 @@ namespace EvoNet.Map
 
         public Tile GetTileInfo(int x, int y)
         {
-            return new Tile(new Point(x, y), types[x, y], foodValues[x, y]);
+            return new Tile(new Point(x, y), types[x, y], FoodValues[x, y]);
         }
 
         public Tile GetTileInfo(Point position)
@@ -115,7 +119,7 @@ namespace EvoNet.Map
             {
                 return new Tile(position, TileType.None, 0);
             }
-            return new Tile(position, types[position.X, position.Y], foodValues[position.X, position.Y]);
+            return new Tile(position, types[position.X, position.Y], FoodValues[position.X, position.Y]);
         }
 
         public Tile GetTileAtWorldPosition(Vector2 position)
@@ -188,8 +192,8 @@ namespace EvoNet.Map
 
         public void Grow(int x, int y, float fixedDeltaTime)
         {
-            foodValues[x, y] += 20f * fixedDeltaTime;
-            if (foodValues[x, y] > MAXIMUMFOODPERTILE) foodValues[x, y] = MAXIMUMFOODPERTILE;
+            FoodValues[x, y] += 20f * fixedDeltaTime;
+            if (FoodValues[x, y] > MAXIMUMFOODPERTILE) FoodValues[x, y] = MAXIMUMFOODPERTILE;
         }
 
         public bool IsFertileToNeighbors(int x, int y)
@@ -202,7 +206,7 @@ namespace EvoNet.Map
             {
                 return true;
             }
-            if (types[x, y] == TileType.Land && foodValues[x, y] > 50)
+            if (types[x, y] == TileType.Land && FoodValues[x, y] > 50)
             {
                 return true;
             }
@@ -213,7 +217,7 @@ namespace EvoNet.Map
         {
             if (types[x, y] == TileType.Land)
             {
-                if (foodValues[x, y] > 50)
+                if (FoodValues[x, y] > 50)
                 {
                     return true;
                 }
@@ -252,7 +256,7 @@ namespace EvoNet.Map
                     writer.Write((int)types[x, y]);
                     if (types[x,y] == TileType.Land)
                     {
-                        writer.Write(foodValues[x, y]);
+                        writer.Write(FoodValues[x, y]);
                     }
                 }
             }

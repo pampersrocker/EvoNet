@@ -165,7 +165,7 @@ namespace EvoNet.Objects
         private const String NAME_IN_WASATTACKED       = "Was Attacked";
         private const String NAME_IN_WATERONFEELER     = "Water On Feeler";
         private const String NAME_IN_WATERONCREATURE   = "Water On Creature";
-        private const String NAME_IN_OSCILATION        = "Oscilation input";
+        //private const String NAME_IN_OSCILATION        = "Oscilation input";
         private const String NAME_IN_MEMORY            = "Input Memory #";
 
         private const String NAME_OUT_BIRTH       = "Birth";
@@ -174,7 +174,7 @@ namespace EvoNet.Objects
         private const String NAME_OUT_FEELERANGLE = "Feeler Angle";
         private const String NAME_OUT_ATTACK      = "Attack";
         private const String NAME_OUT_EAT         = "Eat";
-        private const String NAME_OUT_OSCILATION  = "Oscilation output";
+        //private const String NAME_OUT_OSCILATION  = "Oscilation output";
         private const String NAME_OUT_MEMORY      = "Output Memory #";
 
         private InputNeuron inBias              = new InputNeuron();
@@ -187,7 +187,7 @@ namespace EvoNet.Objects
         private InputNeuron inWasAttacked       = new InputNeuron();
         private InputNeuron inWaterOnFeeler     = new InputNeuron();
         private InputNeuron inWaterOnCreature   = new InputNeuron();
-        private InputNeuron inOscilation        = new InputNeuron();
+        //private InputNeuron inOscilation        = new InputNeuron();
         private InputNeuron[] inMemory          = null;
 
         private WorkingNeuron outBirth       = new WorkingNeuron();
@@ -196,7 +196,7 @@ namespace EvoNet.Objects
         private WorkingNeuron outFeelerAngle = new WorkingNeuron();
         private WorkingNeuron outAttack      = new WorkingNeuron();
         private WorkingNeuron outEat         = new WorkingNeuron();
-        private WorkingNeuron outOscilation  = new WorkingNeuron();
+        //private WorkingNeuron outOscilation  = new WorkingNeuron();
         private WorkingNeuron[] outMemory    = null;
 
         private object amountOfMemoryLock = new object();
@@ -328,7 +328,7 @@ namespace EvoNet.Objects
             inWasAttacked      .SetName(NAME_IN_WASATTACKED);
             inWaterOnFeeler    .SetName(NAME_IN_WATERONFEELER);
             inWaterOnCreature  .SetName(NAME_IN_WATERONCREATURE);
-            inOscilation       .SetName(NAME_IN_OSCILATION);
+            //inOscilation       .SetName(NAME_IN_OSCILATION);
             inMemory = new InputNeuron[AmountOfMemory];
             for(int i = 0; i<AmountOfMemory; i++)
             {
@@ -342,7 +342,7 @@ namespace EvoNet.Objects
             outFeelerAngle.SetName(NAME_OUT_FEELERANGLE);
             outAttack     .SetName(NAME_OUT_ATTACK);
             outEat        .SetName(NAME_OUT_EAT);
-            outOscilation .SetName(NAME_OUT_OSCILATION);
+            //outOscilation .SetName(NAME_OUT_OSCILATION);
             outMemory = new WorkingNeuron[AmountOfMemory];
             for(int i = 0; i<AmountOfMemory; i++)
             {
@@ -362,7 +362,7 @@ namespace EvoNet.Objects
             brain.AddInputNeuron(inWasAttacked);
             brain.AddInputNeuron(inWaterOnFeeler);
             brain.AddInputNeuron(inWaterOnCreature);
-            brain.AddInputNeuron(inOscilation);
+            //brain.AddInputNeuron(inOscilation);
             for(int i = 0; i<AmountOfMemory; i++)
             {
                 brain.AddInputNeuron(inMemory[i]);
@@ -376,7 +376,7 @@ namespace EvoNet.Objects
             brain.AddOutputNeuron(outFeelerAngle);
             brain.AddOutputNeuron(outAttack);
             brain.AddOutputNeuron(outEat);
-            brain.AddOutputNeuron(outOscilation);
+            //brain.AddOutputNeuron(outOscilation);
             for(int i = 0; i < AmountOfMemory; i++)
             {
                 brain.AddOutputNeuron(outMemory[i]);
@@ -521,7 +521,7 @@ namespace EvoNet.Objects
             inWasAttacked = brain.GetInputNeuronFromName(NAME_IN_WASATTACKED);
             inWaterOnFeeler = brain.GetInputNeuronFromName(NAME_IN_WATERONFEELER);
             inWaterOnCreature = brain.GetInputNeuronFromName(NAME_IN_WATERONCREATURE);
-            inOscilation = brain.GetInputNeuronFromName(NAME_IN_OSCILATION);
+            //inOscilation = brain.GetInputNeuronFromName(NAME_IN_OSCILATION);
             for(int i = 0; i<AmountOfMemory; i++)
             {
                 inMemory[i] = brain.GetInputNeuronFromName(NAME_IN_MEMORY + (i + 1));
@@ -533,7 +533,7 @@ namespace EvoNet.Objects
             outFeelerAngle = brain.GetOutputNeuronFromName(NAME_OUT_FEELERANGLE);
             outAttack = brain.GetOutputNeuronFromName(NAME_OUT_ATTACK);
             outEat = brain.GetOutputNeuronFromName(NAME_OUT_EAT);
-            outOscilation = brain.GetOutputNeuronFromName(NAME_OUT_OSCILATION);
+            //outOscilation = brain.GetOutputNeuronFromName(NAME_OUT_OSCILATION);
             for(int i = 0; i<AmountOfMemory; i++)
             {
                 outMemory[i] = brain.GetOutputNeuronFromName(NAME_OUT_MEMORY + (i + 1));
@@ -598,7 +598,7 @@ namespace EvoNet.Objects
             inWasAttacked.SetValue(Mathf.Clamp01(1 - TimeSinceThisWasAttacked));
             inWaterOnFeeler.SetValue(feelerTile.IsLand() ? 0 : 1);
             inWaterOnCreature.SetValue(creatureTile.IsLand() ? 0 : 1);
-            inOscilation.SetValue(Mathf.Sin(OscilationValue));
+            //inOscilation.SetValue(Mathf.Sin(OscilationValue));
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -614,7 +614,7 @@ namespace EvoNet.Objects
             ActEat(costMult, t, fixedDeltaTime);
             ActAttack(costMult);
 
-            OscilationValue += outOscilation.GetValue();
+            //OscilationValue += outOscilation.GetValue();
 
             Energy -= COST_PERMANENT * fixedDeltaTime * costMult;
             Energy -= COST_PER_MEMORY_NEURON * fixedDeltaTime * costMult;
