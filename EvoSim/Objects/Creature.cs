@@ -11,12 +11,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using EvoSim;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvoNet.Objects
 {
 
 
-
+    [Table("Creatures")]
     public class Creature
     {
         private int collisionGridX = 0;
@@ -72,10 +74,12 @@ namespace EvoNet.Objects
 
         public static long currentId;
 
+        [NotMapped]
         public CreatureManager Manager { get; set; }
 
         // Id for serialization
-        private long id;
+        [Key]
+        public long id { get; set; }
 
         private Vector2 pos;
         public Vector2 Pos
