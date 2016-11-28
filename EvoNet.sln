@@ -9,6 +9,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvoNet", "EvoNet\EvoNet.csp
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvoSim", "EvoSim\EvoSim.csproj", "{0CA1D951-1554-408C-9B2A-48FF8EB89588}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FDB45948-2E47-4B4A-93DA-57DB4E0685CC} = {FDB45948-2E47-4B4A-93DA-57DB4E0685CC}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvoStore", "KeyValueStore\EvoStore.csproj", "{FDB45948-2E47-4B4A-93DA-57DB4E0685CC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +47,18 @@ Global
 		{0CA1D951-1554-408C-9B2A-48FF8EB89588}.Release|x64.Build.0 = Release|Any CPU
 		{0CA1D951-1554-408C-9B2A-48FF8EB89588}.Release|x86.ActiveCfg = Release|Any CPU
 		{0CA1D951-1554-408C-9B2A-48FF8EB89588}.Release|x86.Build.0 = Release|Any CPU
+		{FDB45948-2E47-4B4A-93DA-57DB4E0685CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDB45948-2E47-4B4A-93DA-57DB4E0685CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDB45948-2E47-4B4A-93DA-57DB4E0685CC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FDB45948-2E47-4B4A-93DA-57DB4E0685CC}.Debug|x64.Build.0 = Debug|Any CPU
+		{FDB45948-2E47-4B4A-93DA-57DB4E0685CC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FDB45948-2E47-4B4A-93DA-57DB4E0685CC}.Debug|x86.Build.0 = Debug|Any CPU
+		{FDB45948-2E47-4B4A-93DA-57DB4E0685CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDB45948-2E47-4B4A-93DA-57DB4E0685CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDB45948-2E47-4B4A-93DA-57DB4E0685CC}.Release|x64.ActiveCfg = Release|Any CPU
+		{FDB45948-2E47-4B4A-93DA-57DB4E0685CC}.Release|x64.Build.0 = Release|Any CPU
+		{FDB45948-2E47-4B4A-93DA-57DB4E0685CC}.Release|x86.ActiveCfg = Release|Any CPU
+		{FDB45948-2E47-4B4A-93DA-57DB4E0685CC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
