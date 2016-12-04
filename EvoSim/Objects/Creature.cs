@@ -75,7 +75,7 @@ namespace EvoNet.Objects
         public CreatureManager Manager { get; set; }
 
         // Id for serialization
-        private long id;
+        public long id;
 
         private Vector2 pos;
         public Vector2 Pos
@@ -504,6 +504,17 @@ namespace EvoNet.Objects
 
         // For deserialization
         public Creature(CreatureManager manager)
+        {
+            Manager = manager;
+            CalculateCollisionGridPos();
+        }
+
+        // For database
+        public Creature()
+        {
+        }
+
+        public void SetupManager(CreatureManager manager)
         {
             Manager = manager;
             CalculateCollisionGridPos();
