@@ -11,13 +11,16 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using EvoSim;
+using System.Runtime.Serialization;
+using EvoSim.Serialization;
+using System.Security.Permissions;
 
 namespace EvoNet.Objects
 {
 
 
-
-    public class Creature
+    [Serializable]
+    public class Creature : ISerializable
     {
         private int collisionGridX = 0;
         private int collisionGridY = 0;
@@ -71,8 +74,9 @@ namespace EvoNet.Objects
 
 
         public static long currentId;
-
-        public CreatureManager Manager { get; set; }
+        [NonSerialized]
+        private CreatureManager manager;
+        public CreatureManager Manager { get { return manager; } set { manager = value; } }
 
         // Id for serialization
         private long id;
@@ -870,6 +874,48 @@ namespace EvoNet.Objects
             float minDist = (FEELERTIPSIZE + CREATURESIZE) / 2;
             minDist *= minDist;
             return dist < minDist;
+        }
+
+        public Creature(SerializationInfo info, StreamingContext context)
+        {
+            id = info.GetInt64("id");
+            pos = info.GetVector2("pos");
+            viewAngle = info.GetSingle("viewAngle");
+            feelerAngle = info.GetSingle("feelerAngle");
+            Energy = info.GetSingle("Energy");
+            age = info.GetSingle("age");
+            generation = info.GetInt32("generation");
+            Color = info.GetColor("Color");
+            motherId = info.GetInt64("motherId");
+            AmountOfMemory = info.GetInt32("AmountOfMemory");
+            inMemory = new InputNeuron[AmountOfMemory];
+            outMemory = new WorkingNeuron[AmountOfMemory];
+            int childrenCount = info.GetInt32("children.Count");
+            childIds = new List<long>();
+            //for (int childIndex = 0; childIndex < childrenCount; childIndex++)
+            //{
+            //    childIds.Add(reader.ReadInt64());
+            //}
+            brain = info.GetValue("brain", typeof(NeuronalNetwork)) as NeuronalNetwork;
+
+            SetupVariablesFromBrain();
+        }
+
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("id", id);
+            info.AddVector2("pos", pos);
+            info.AddValue("viewAngle", viewAngle);
+            info.AddValue("feelerAngle", feelerAngle);
+            info.AddValue("Energy", Energy);
+            info.AddValue("age", age);
+            info.AddValue("generation", generation);
+            info.AddColor("Color", Color);
+            info.AddValue("mother", mother != null ? mother.id : -1);
+            info.AddValue("AmountOfMemory", AmountOfMemory);
+            info.AddValue("children.Count", children.Count);
+            //info.AddValue("brain", brain);
         }
     }
 }

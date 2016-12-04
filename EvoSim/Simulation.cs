@@ -6,8 +6,11 @@ using EvoSim.Config;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -53,6 +56,7 @@ namespace EvoSim
         {
             get { return tileMap; }
         }
+
         private CreatureManager creatureManager = new CreatureManager();
 
         public EvoNet.Objects.CreatureManager CreatureManager
@@ -91,7 +95,7 @@ namespace EvoSim
 
             }
             creatureManager.Initialize(this);
-            creatureManager.Deserialize("creatures.dat");
+            //creatureManager.Deserialize("creatures.dat");
         }
 
         protected override void Update(GameTime deltaTime)
@@ -99,6 +103,14 @@ namespace EvoSim
 
             tileMap.NotifyTick(deltaTime);
             creatureManager.NotifyTick(deltaTime);
+
+            IFormatter formatter = new BinaryFormatter();
+            Stream stream = new FileStream("creatures.dat",
+                                     FileMode.Create,
+                                     FileAccess.Write, FileShare.None);
+
+            formatter.Serialize(stream, creatureManager.Creatures);
+            stream.Close();
         }
     }
 }

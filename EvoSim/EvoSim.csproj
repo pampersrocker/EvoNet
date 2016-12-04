@@ -63,6 +63,7 @@
     <Compile Include="AI\NotSameAmountOfNeuronsException.cs" />
     <Compile Include="AI\WorkingNeuron.cs" />
     <Compile Include="Config\SimulationConfiguration.cs" />
+    <Compile Include="Serialization\SerializationInfoExtensions.cs" />
     <Compile Include="Simulation.cs" />
     <Compile Include="Map\Tile.cs" />
     <Compile Include="Map\TileMap.cs" />
