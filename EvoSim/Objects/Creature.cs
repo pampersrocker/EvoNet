@@ -80,7 +80,10 @@ namespace EvoNet.Objects
 
         // Id for serialization
         private long id;
-
+        public long Id
+        {
+            get { return id; }
+        }
         private Vector2 pos;
         public Vector2 Pos
         {

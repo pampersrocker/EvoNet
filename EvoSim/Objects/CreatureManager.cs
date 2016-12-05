@@ -251,10 +251,16 @@ namespace EvoNet.Objects
                 creatures = formatter.Deserialize(stream) as List<Creature>;
                 
                 stream.Close();
+                long id = 0;
                 foreach (Creature creature in creatures)
                 {
+                    if (creature.Id > id)
+                    {
+                        id = creature.Id;
+                    }
                     creature.SetupManager(this);
                 }
+                Creature.currentId = id + 1;
 
             }
             catch (System.IO.FileNotFoundException)
