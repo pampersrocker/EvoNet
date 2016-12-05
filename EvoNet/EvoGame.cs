@@ -166,14 +166,8 @@ namespace EvoNet
             {
                 lastSerializationTime = DateTime.UtcNow;
                 sim.TileMap.SerializeToFile("tilemap.dat");
-                //sim.CreatureManager.Serialize("creatures.dat");
-                IFormatter formatter = new BinaryFormatter();
-                Stream stream = new FileStream("creatures.dat",
-                                         FileMode.Create,
-                                         FileAccess.Write, FileShare.None);
-
-                formatter.Serialize(stream, sim.CreatureManager.Creatures);
-                stream.Close();
+                sim.CreatureManager.Serialize("creatures.dat", "graveyard/graveyard");
+                
             }
 
 

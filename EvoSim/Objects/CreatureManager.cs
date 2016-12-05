@@ -34,6 +34,8 @@ namespace EvoNet.Objects
         {
             get { return creatures; }
         }
+
+        private List<Creature> graveyard = new List<Creature>();
         private List<Creature> CreaturesToKill = new List<Creature>();
         private List<Creature> CreaturesToSpawn = new List<Creature>();
 
@@ -74,6 +76,7 @@ namespace EvoNet.Objects
             foreach (Creature c in CreaturesToKill)
             {
                 AddDeathAge(c.Age);
+                graveyard.Add(c);
                 creatures.Remove(c);
             }
             CreaturesToKill.Clear();
@@ -94,6 +97,13 @@ namespace EvoNet.Objects
             }
         }
 
+        public List<Creature> Graveyard
+        {
+            get
+            {
+                return graveyard;
+            }
+        }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public static void AddToCollisionGrid(int x, int y, Creature c)
@@ -267,6 +277,28 @@ namespace EvoNet.Objects
             {
 
             }
+        }
+
+        private void SerializeListToFile(string filename, List<Creature> creatures)
+        {
+            IFormatter formatter = new BinaryFormatter();
+            Stream stream = new FileStream(filename,
+                                     FileMode.Create,
+                                     FileAccess.Write, FileShare.None);
+
+            formatter.Serialize(stream, creatures);
+            stream.Close();
+        }
+
+        public void Serialize(string filename, string graveYardFilenamePrefix)
+        {
+            SerializeListToFile(filename, creatures);
+
+            string graveYardFilenameWithDate = string.Format("{0}_{1}.dat", graveYardFilenamePrefix, DateTime.Now.ToString("yyyy.MM.dd_hh.mm.ss"));
+            string directory =  graveYardFilenameWithDate.Replace(Path.GetFileName(graveYardFilenameWithDate), "");
+            Directory.CreateDirectory(directory);
+            SerializeListToFile(graveYardFilenameWithDate, graveyard);
+            graveyard.Clear();
         }
     }
 }
