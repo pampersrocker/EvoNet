@@ -20,7 +20,7 @@ namespace EvoCommand {
             long i = 0;
             while (true) {
                 lastUpdate = DateTime.UtcNow;
-                update(new GameTime(DateTime.UtcNow - startTime, lastUpdate - lastUpdate));
+                sim.NotifyTick(new GameTime(DateTime.UtcNow - startTime, lastUpdate - lastUpdate));
 
 
                 i++;
@@ -37,10 +37,6 @@ namespace EvoCommand {
                 }
 
             }
-        }
-
-        public static void update(GameTime gametime) {
-
         }
     }
 }
