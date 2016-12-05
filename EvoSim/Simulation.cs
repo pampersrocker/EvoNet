@@ -45,14 +45,14 @@ namespace EvoSim
         }
 
         private TileMap tileMap;
-        public EvoNet.Map.TileMap TileMap
+        public TileMap TileMap
         {
             get { return tileMap; }
         }
 
         private CreatureManager creatureManager = new CreatureManager();
 
-        public EvoNet.Objects.CreatureManager CreatureManager
+        public CreatureManager CreatureManager
         {
             get { return creatureManager; }
             set { creatureManager = value; }

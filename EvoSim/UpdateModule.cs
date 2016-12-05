@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace EvoNet
 {
+    [Serializable]
     public abstract class UpdateModule
     {
         public abstract bool WantsFastForward { get; }
@@ -30,6 +31,7 @@ namespace EvoNet
 
         private TimeSpan totalElapsedTime = new TimeSpan();
 
+        [NonSerialized]
         public Simulation simulation;
 
         public virtual void Initialize(Simulation game)
