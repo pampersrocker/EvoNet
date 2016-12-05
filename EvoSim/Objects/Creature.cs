@@ -741,36 +741,6 @@ namespace EvoNet.Objects
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Deserialize(BinaryReader reader)
-        {
-            string magicString = reader.ReadString();
-            Debug.Assert(magicString == "CreatureBegin");
-            id = reader.ReadInt64();
-            pos = reader.ReadVector2();
-            viewAngle = reader.ReadSingle();
-            feelerAngle = reader.ReadSingle();
-            Energy = reader.ReadSingle();
-            age = reader.ReadSingle();
-            generation = reader.ReadInt32();
-            Color = reader.ReadColor();
-            motherId = reader.ReadInt64();
-            AmountOfMemory = reader.ReadInt32();
-            inMemory = new InputNeuron[AmountOfMemory];
-            outMemory = new WorkingNeuron[AmountOfMemory];
-            int childrenCount = reader.ReadInt32();
-            childIds = new List<long>();
-            for (int childIndex = 0; childIndex< childrenCount; childIndex++)
-            {
-                childIds.Add(reader.ReadInt64());
-            }
-            brain = new NeuronalNetwork();
-            brain.Deserialize(reader);
-
-            SetupVariablesFromBrain();
-        }
-
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public void HandleCollisions()
         {
             feelerOcclusion = 0;

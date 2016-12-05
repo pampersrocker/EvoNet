@@ -17,14 +17,6 @@ namespace EvoNet.AI
         private string name = "NO NAME";
         public abstract float GetValue();
         public abstract Neuron NameCopy();
-        public virtual void Serialize(BinaryWriter writer)
-        {
-            writer.Write(name);
-        }
-        public virtual void Deserialize(BinaryReader reader)
-        {
-            name = reader.ReadString();
-        }
         private Vector2 drawPosition;
         public Vector2 DrawPosition { get { return drawPosition; } set { drawPosition = value; } }
 

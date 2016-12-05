@@ -72,7 +72,6 @@
     <Compile Include="Objects\CreatureManager.cs" />
     <Compile Include="ProceduralGeneration\ValueNoise2D.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Serialization\BinaryFileStreamExtensions.cs" />
     <Compile Include="ThreadingHelper\MultithreadingHelper.cs" />
     <Compile Include="UpdateModule.cs" />
   </ItemGroup>

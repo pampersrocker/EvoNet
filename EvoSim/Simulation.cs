@@ -5,14 +5,7 @@ using EvoNet.ProceduralGeneration;
 using EvoSim.Config;
 using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvoSim
 {
@@ -96,7 +89,6 @@ namespace EvoSim
             }
             creatureManager.Initialize(this);
             creatureManager.Deserialize("creatures.dat");
-            
         }
 
         protected override void Update(GameTime deltaTime)
@@ -105,7 +97,6 @@ namespace EvoSim
             tileMap.NotifyTick(deltaTime);
             creatureManager.NotifyTick(deltaTime);
 
-            
         }
     }
 }

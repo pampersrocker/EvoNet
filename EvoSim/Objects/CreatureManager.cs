@@ -30,7 +30,7 @@ namespace EvoNet.Objects
         public int numberOfDeaths = 0;
 
         private List<Creature> creatures = new List<Creature>();
-        public System.Collections.Generic.List<EvoNet.Objects.Creature> Creatures
+        public List<Creature> Creatures
         {
             get { return creatures; }
         }
