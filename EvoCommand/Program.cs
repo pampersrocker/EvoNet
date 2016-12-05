@@ -32,7 +32,7 @@ namespace EvoCommand {
                 if ((DateTime.UtcNow - lastSerializationTime).TotalSeconds > 10) {
                     lastSerializationTime = DateTime.UtcNow;
                     sim.TileMap.SerializeToFile("tilemap.dat");
-                    sim.CreatureManager.Serialize("creatures.dat");
+                    sim.CreatureManager.Serialize("creatures.dat", "graveyard/graveyard");
                     Console.WriteLine("Save everything.");
                 }
 
