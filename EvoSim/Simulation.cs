@@ -95,7 +95,8 @@ namespace EvoSim
 
             }
             creatureManager.Initialize(this);
-            //creatureManager.Deserialize("creatures.dat");
+            creatureManager.Deserialize("creatures.dat");
+            
         }
 
         protected override void Update(GameTime deltaTime)
@@ -104,13 +105,7 @@ namespace EvoSim
             tileMap.NotifyTick(deltaTime);
             creatureManager.NotifyTick(deltaTime);
 
-            IFormatter formatter = new BinaryFormatter();
-            Stream stream = new FileStream("creatures.dat",
-                                     FileMode.Create,
-                                     FileAccess.Write, FileShare.None);
-
-            formatter.Serialize(stream, creatureManager.Creatures);
-            stream.Close();
+            
         }
     }
 }

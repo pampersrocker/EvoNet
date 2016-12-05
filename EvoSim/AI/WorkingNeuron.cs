@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.Serialization;
 
 namespace EvoNet.AI
 {
+    [Serializable]
     public class WorkingNeuron : Neuron
     {
         private float? value = null;
@@ -82,6 +84,24 @@ namespace EvoNet.AI
                 if (val > strongest) strongest = val;
             }
             return strongest;
+        }
+
+        public WorkingNeuron() : 
+            base()
+        {
+
+        }
+
+        public WorkingNeuron(SerializationInfo info, StreamingContext context):
+            base(info, context)
+        {
+            connections = info.GetValue(nameof(connections), typeof(List<Connection>)) as List<Connection>;
+        }
+
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+            info.AddValue(nameof(connections), connections);
         }
     }
 }

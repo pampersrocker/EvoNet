@@ -281,8 +281,6 @@ namespace EvoNet.Objects
             }
         }
 
-        private Creature mother;
-
         private float timeSinceLastAttack = 0;
         public float TimeSinceLastAttack
         {
@@ -292,19 +290,13 @@ namespace EvoNet.Objects
 
         private Creature feelerCreature = null;
 
-        private List<Creature> children = new List<Creature>();
-        public List<Creature> Children
-        {
-            get
-            {
-                return children;
-            }
-        }
-
         // Temps for deserialization
         private long motherId;
         private List<long> childIds = new List<long>();
-
+        public List<long> Children
+        {
+            get { return childIds; }
+        }
         private int generation = 1;
         public int Generation
         {
@@ -400,7 +392,7 @@ namespace EvoNet.Objects
             this(manager)
         {
             id = currentId++;
-            //this.mother = mother;
+            motherId = mother.id;
             generation = mother.generation + 1;
             if(generation > _maximumGeneration)
             {
@@ -731,7 +723,7 @@ namespace EvoNet.Objects
         public void GiveBirth()
         {
             Creature child = new Creature(this, Manager);
-            children.Add(child);
+            childIds.Add(child.id);
             Manager.AddCreature(child);
             Energy -= STARTENERGY;
         }
@@ -746,48 +738,6 @@ namespace EvoNet.Objects
             float angle = feelerAngle + viewAngle;
             Vector2 localFeelerPos = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle)) * feelerDistance;
             feelerPos = pos + localFeelerPos;
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Serialize(BinaryWriter writer)
-        {
-            writer.Write("CreatureBegin");
-            writer.Write(id);
-            writer.Write(pos);
-            writer.Write(viewAngle);
-            writer.Write(feelerAngle);
-            writer.Write(Energy);
-            writer.Write(age);
-            writer.Write(generation);
-            writer.Write(Color);
-            writer.Write(mother != null ? mother.id : -1);
-            writer.Write(AmountOfMemory);
-            writer.Write(children.Count);
-            foreach (Creature child in children)
-            {
-                writer.Write(child.id);
-            }
-            brain.Serialize(writer);
-        }
-
-        public void ConnectAncestry(List<Creature> allThemCreatures)
-        {
-            if (mother == null)
-            {
-                mother = allThemCreatures.Find((p) => p.id == motherId);
-            }
-            if (childIds != null && children.Count != childIds.Count)
-            {
-                foreach (long childId in childIds)
-                {
-                    Creature child = allThemCreatures.Find((p) => p.id == childId);
-                    if (child != null)
-                    {
-                        children.Add(child);
-                    }
-
-                }
-            }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -878,44 +828,47 @@ namespace EvoNet.Objects
 
         public Creature(SerializationInfo info, StreamingContext context)
         {
-            id = info.GetInt64("id");
-            pos = info.GetVector2("pos");
-            viewAngle = info.GetSingle("viewAngle");
-            feelerAngle = info.GetSingle("feelerAngle");
-            Energy = info.GetSingle("Energy");
-            age = info.GetSingle("age");
-            generation = info.GetInt32("generation");
-            Color = info.GetColor("Color");
-            motherId = info.GetInt64("motherId");
-            AmountOfMemory = info.GetInt32("AmountOfMemory");
+            id = info.GetInt64(nameof(id));
+            pos = info.GetVector2(nameof(pos));
+            viewAngle = info.GetSingle(nameof(viewAngle));
+            feelerAngle = info.GetSingle(nameof(feelerAngle));
+            Energy = info.GetSingle(nameof(Energy));
+            age = info.GetSingle(nameof(age));
+            generation = info.GetInt32(nameof(generation));
+            Color = info.GetColor(nameof(Color));
+            motherId = info.GetInt64(nameof(motherId));
+            AmountOfMemory = info.GetInt32(nameof(AmountOfMemory));
             inMemory = new InputNeuron[AmountOfMemory];
             outMemory = new WorkingNeuron[AmountOfMemory];
-            int childrenCount = info.GetInt32("children.Count");
-            childIds = new List<long>();
-            //for (int childIndex = 0; childIndex < childrenCount; childIndex++)
-            //{
-            //    childIds.Add(reader.ReadInt64());
-            //}
+            childIds = info.GetValue(nameof(childIds), typeof(List<long>)) as List<long>;
             brain = info.GetValue("brain", typeof(NeuronalNetwork)) as NeuronalNetwork;
 
-            SetupVariablesFromBrain();
         }
 
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("id", id);
-            info.AddVector2("pos", pos);
-            info.AddValue("viewAngle", viewAngle);
-            info.AddValue("feelerAngle", feelerAngle);
-            info.AddValue("Energy", Energy);
-            info.AddValue("age", age);
-            info.AddValue("generation", generation);
-            info.AddColor("Color", Color);
-            info.AddValue("mother", mother != null ? mother.id : -1);
-            info.AddValue("AmountOfMemory", AmountOfMemory);
-            info.AddValue("children.Count", children.Count);
-            //info.AddValue("brain", brain);
+            info.AddValue(nameof(id), id);
+            info.AddVector2(nameof(pos), pos);
+            info.AddValue(nameof(viewAngle), viewAngle);
+            info.AddValue(nameof(feelerAngle), feelerAngle);
+            info.AddValue(nameof(Energy), Energy);
+            info.AddValue(nameof(age), age);
+            info.AddValue(nameof(generation), generation);
+            info.AddColor(nameof(Color), Color);
+            info.AddValue(nameof(motherId), motherId);
+            info.AddValue(nameof(AmountOfMemory), AmountOfMemory);
+            info.AddValue(nameof(childIds), childIds);
+            info.AddValue(nameof(brain), brain);
         }
+
+        public void SetupManager(CreatureManager manager)
+        {
+            Manager = manager;
+            CalculateCollisionGridPos();
+            SetupVariablesFromBrain();
+
+        }
+
     }
 }

@@ -12,6 +12,9 @@ using EvoNet.Objects;
 using EvoNet.Rendering;
 using System.Runtime.CompilerServices;
 using EvoSim;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
+using System.Runtime.Serialization;
 
 namespace EvoNet
 {
@@ -163,7 +166,14 @@ namespace EvoNet
             {
                 lastSerializationTime = DateTime.UtcNow;
                 sim.TileMap.SerializeToFile("tilemap.dat");
-                sim.CreatureManager.Serialize("creatures.dat");
+                //sim.CreatureManager.Serialize("creatures.dat");
+                IFormatter formatter = new BinaryFormatter();
+                Stream stream = new FileStream("creatures.dat",
+                                         FileMode.Create,
+                                         FileAccess.Write, FileShare.None);
+
+                formatter.Serialize(stream, sim.CreatureManager.Creatures);
+                stream.Close();
             }
 
 

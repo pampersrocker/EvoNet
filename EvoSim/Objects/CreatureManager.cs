@@ -11,6 +11,8 @@ using System.Threading;
 using EvoNet.ThreadingHelper;
 using System.Runtime.CompilerServices;
 using EvoSim;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
 
 namespace EvoNet.Objects
 {
@@ -237,50 +239,21 @@ namespace EvoNet.Objects
             return ageAverage / AverageAgeOfLastCreatures.Length;
         }
 
-        public void Serialize(string fileName)
-        {
-            try
-            {
-                FileStream file = File.Open(fileName, FileMode.OpenOrCreate, FileAccess.Write);
-                BinaryWriter writer = new BinaryWriter(file);
-                writer.Write(Creature.currentId);
-                writer.Write(year);
-                writer.Write(numberOfDeaths);
-                writer.Write(Creature.maximumGeneration);
-                writer.Write(creatures.Count);
-                foreach (Creature creature in creatures)
-                {
-                    creature.Serialize(writer);
-                }
-                file.Close();
-            }
-            catch (System.IO.FileNotFoundException)
-            {
-
-            }
-        }
-
         public void Deserialize(string fileName)
         {
             try
             {
-                FileStream file = File.Open(fileName, FileMode.Open, FileAccess.Read);
-                BinaryReader reader = new BinaryReader(file);
-                Creature.currentId = reader.ReadInt64();
-                year = reader.ReadSingle();
-                numberOfDeaths = reader.ReadInt32();
-                Creature.maximumGeneration = reader.ReadInt32();
-                int creatureCount = reader.ReadInt32();
-                for (int creatureIndex = 0; creatureIndex < creatureCount; creatureIndex++)
-                {
-                    Creature newCreature = new Creature(this);
-                    newCreature.Deserialize(reader);
-                    creatures.Add(newCreature);
-                }
-                file.Close();
+                IFormatter formatter = new BinaryFormatter();
+                Stream stream = new FileStream(fileName,
+                                         FileMode.Open,
+                                         FileAccess.Read, FileShare.None);
+
+                creatures = formatter.Deserialize(stream) as List<Creature>;
+                
+                stream.Close();
                 foreach (Creature creature in creatures)
                 {
-                    creature.ConnectAncestry(creatures);
+                    creature.SetupManager(this);
                 }
 
             }

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace EvoNet.AI
 {
+    [Serializable]
     public class NeuronalNetwork
     {
         private bool fullMeshGenerated = false;

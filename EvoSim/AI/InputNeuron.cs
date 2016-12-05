@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace EvoNet.AI
 {
+    [Serializable]
     public class InputNeuron : Neuron
     {
         private float value = 0;
@@ -23,6 +25,18 @@ namespace EvoNet.AI
             InputNeuron clone = new InputNeuron();
             clone.SetName(GetName());
             return clone;
+        }
+
+        public InputNeuron() :
+            base()
+        {
+
+        }
+
+        public InputNeuron(SerializationInfo info, StreamingContext context) :
+            base(info, context)
+        {
+        
         }
     }
 }
