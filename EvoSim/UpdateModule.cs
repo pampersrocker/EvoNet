@@ -30,7 +30,10 @@ namespace EvoNet
 
 
         private TimeSpan totalElapsedTime = new TimeSpan();
-
+        public System.TimeSpan TotalElapsedSimulationTime
+        {
+            get { return totalElapsedTime; }
+        }
         [NonSerialized]
         public Simulation simulation;
 

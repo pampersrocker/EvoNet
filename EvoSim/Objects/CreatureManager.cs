@@ -294,7 +294,7 @@ namespace EvoNet.Objects
         {
             SerializeListToFile(filename, creatures);
 
-            string graveYardFilenameWithDate = string.Format("{0}_{1}.dat", graveYardFilenamePrefix, DateTime.Now.ToString("yyyy.MM.dd_hh.mm.ss"));
+            string graveYardFilenameWithDate = string.Format("{0}_{1}.dat", graveYardFilenamePrefix, DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss"));
             string directory =  graveYardFilenameWithDate.Replace(Path.GetFileName(graveYardFilenameWithDate), "");
             Directory.CreateDirectory(directory);
             SerializeListToFile(graveYardFilenameWithDate, graveyard);
