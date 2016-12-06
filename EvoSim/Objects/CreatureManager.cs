@@ -273,7 +273,7 @@ namespace EvoNet.Objects
                 Creature.currentId = id + 1;
 
             }
-            catch (System.IO.FileNotFoundException)
+            catch (FileNotFoundException)
             {
 
             }
