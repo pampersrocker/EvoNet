@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,11 +14,11 @@ namespace EvoSim.ThreadingHelper
         {
             get { return isDone; }
         }
-        protected abstract void Run();
+        protected abstract void Run(GameTime time);
 
-        public void DoTask()
+        public void DoTask(GameTime time)
         {
-            Run();
+            Run(time);
             isDone = true;
         }
 

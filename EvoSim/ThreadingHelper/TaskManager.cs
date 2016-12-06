@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,17 +18,18 @@ namespace EvoSim.ThreadingHelper
         private List<ThreadTaskGroup> completedTaskGroups = new List<ThreadTaskGroup>();
         private List<ThreadTaskGroup> runningTaskGroups = new List<ThreadTaskGroup>();
         private Semaphore workerSemaphore;
+        private GameTime currentTime;
 
         public TaskManager(int threadPoolSize)
         {
             poolSize = threadPoolSize;
+            workerSemaphore = new Semaphore(0, 1024);
             workerThreads = new Thread[poolSize];
             for (int threadIndex = 0; threadIndex < workerThreads.Length; threadIndex++)
             {
                 workerThreads[threadIndex] = new Thread(new ParameterizedThreadStart(ThreadRunner));
                 workerThreads[threadIndex].Start(threadIndex);
             }
-            workerSemaphore = new Semaphore(0, 1024);
         }
 
         private List<ThreadTaskGroup> tasks = new List<ThreadTaskGroup>();
@@ -39,8 +41,9 @@ namespace EvoSim.ThreadingHelper
 
         private bool keepRunning = true;
 
-        public void RunTasks()
+        public void RunTasks(GameTime time)
         {
+            currentTime = time;
             while (pendingTaskGroups.Count > 0 && runningTaskGroups.Count > 0)
             {
                 for (int groupIndex = pendingTaskGroups.Count; groupIndex >= 0; --groupIndex)
@@ -86,6 +89,16 @@ namespace EvoSim.ThreadingHelper
             completedTaskGroups.Clear();
         }
 
+        public void Shutdown()
+        {
+            keepRunning = false;
+            lock (workerQueue)
+            {
+                workerQueue.Clear();
+            }
+            workerSemaphore.Release(poolSize);
+        }
+
         private void ThreadRunner(object state)
         {
             int threadIndex = (int)state;
@@ -101,7 +114,7 @@ namespace EvoSim.ThreadingHelper
                 }
                 if (task!= null)
                 {
-                    task.DoTask();
+                    task.DoTask(currentTime);
                 }
                 else
                 {

@@ -11,6 +11,8 @@ namespace EvoSim.Config
     public class SimulationConfiguration
     {
         public float TickInterval { get; set; }
+        public int NumThreads { get; set; }
+        public int NumCreatureTasks { get; set; }
 
 
         public static SimulationConfiguration DefaultConfig
@@ -19,6 +21,7 @@ namespace EvoSim.Config
             {
                 SimulationConfiguration config = new SimulationConfiguration();
                 config.TickInterval = 0.01f;
+                config.NumCreatureTasks = 16;
                 return config;
             }
         }

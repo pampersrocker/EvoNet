@@ -3,6 +3,7 @@ using EvoNet.Map;
 using EvoNet.Objects;
 using EvoNet.ProceduralGeneration;
 using EvoSim.Config;
+using EvoSim.ThreadingHelper;
 using Microsoft.Xna.Framework;
 using System;
 using System.Runtime.CompilerServices;
@@ -29,6 +30,11 @@ namespace EvoSim
             return GlobalRandom.Next(max);
         }
 
+        TaskManager taskManager;
+        public TaskManager TaskManager
+        {
+            get { return taskManager; }
+        }
         SimulationConfiguration simulationConfiguration;
         public SimulationConfiguration SimulationConfiguration
         {
@@ -62,8 +68,13 @@ namespace EvoSim
             base.Initialize(simulation);
 
             simulationConfiguration = SimulationConfiguration.LoadConfigOrDefault();
-
-
+            int poolSize = simulationConfiguration.NumThreads;
+            if (poolSize == 0)
+            {
+                poolSize = Environment.ProcessorCount;
+            }
+            poolSize = Math.Max(1, poolSize);
+            taskManager = new TaskManager(poolSize);
             tileMap = TileMap.DeserializeFromFile("tilemap.dat", this);
             if (tileMap == null)
             {
@@ -97,6 +108,18 @@ namespace EvoSim
             tileMap.NotifyTick(deltaTime);
             creatureManager.NotifyTick(deltaTime);
 
+            taskManager.ResetTaskGroups(); ;
+            taskManager.RunTasks(deltaTime);
+
+        }
+
+        public override void Shutdown()
+        {
+            base.Shutdown();
+            tileMap.Shutdown();
+            creatureManager.Shutdown();
+
+            taskManager.Shutdown();
         }
     }
 }

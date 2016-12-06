@@ -72,6 +72,12 @@
     <Compile Include="Objects\CreatureManager.cs" />
     <Compile Include="ProceduralGeneration\ValueNoise2D.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tasks\CreatureActTask.cs" />
+    <Compile Include="Tasks\CreatureHandleCollisionTask.cs" />
+    <Compile Include="Tasks\CreatureReadSensorTask.cs" />
+    <Compile Include="Tasks\CreatureTask.cs" />
+    <Compile Include="Tasks\SimulationArrayTask.cs" />
+    <Compile Include="Tasks\SimulationTask.cs" />
     <Compile Include="ThreadingHelper\MultithreadingHelper.cs" />
     <Compile Include="ThreadingHelper\TaskManager.cs" />
     <Compile Include="ThreadingHelper\ThreadTask.cs" />

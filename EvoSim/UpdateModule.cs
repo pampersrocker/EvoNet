@@ -50,5 +50,7 @@ namespace EvoNet
         }
 
         protected abstract void Update(GameTime deltaTime);
+
+        public virtual void Shutdown() { }
     }
 }

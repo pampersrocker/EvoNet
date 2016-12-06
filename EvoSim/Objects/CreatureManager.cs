@@ -13,6 +13,8 @@ using System.Runtime.CompilerServices;
 using EvoSim;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
+using EvoSim.ThreadingHelper;
+using EvoSim.Tasks;
 
 namespace EvoNet.Objects
 {
@@ -87,6 +89,33 @@ namespace EvoNet.Objects
             base.Initialize(inGame);
 
             GenerateCollisionGrid();
+        }
+
+        private void CreateTasks()
+        {
+            ThreadTaskGroup readSensorGroup = new ThreadTaskGroup();
+            for (int taskIndex = 0; taskIndex < simulation.SimulationConfiguration.NumCreatureTasks; taskIndex++)
+            {
+                CreatureReadSensorTask task = new CreatureReadSensorTask(simulation, taskIndex, simulation.SimulationConfiguration.NumCreatureTasks);
+                readSensorGroup.AddTask(task);
+            }
+            simulation.TaskManager.AddGroup(readSensorGroup);
+            ThreadTaskGroup actGroup = new ThreadTaskGroup();
+            for (int taskIndex = 0; taskIndex < simulation.SimulationConfiguration.NumCreatureTasks; taskIndex++)
+            {
+                CreatureActTask task = new CreatureActTask(simulation, taskIndex, simulation.SimulationConfiguration.NumCreatureTasks);
+                actGroup.AddTask(task);
+            }
+            actGroup.AddDependency(readSensorGroup);
+            simulation.TaskManager.AddGroup(actGroup);
+            ThreadTaskGroup collisionGroup = new ThreadTaskGroup();
+            for (int taskIndex = 0; taskIndex < simulation.SimulationConfiguration.NumCreatureTasks; taskIndex++)
+            {
+                CreatureHandleCollisionTask task = new CreatureHandleCollisionTask(simulation, taskIndex, simulation.SimulationConfiguration.NumCreatureTasks);
+                collisionGroup.AddTask(task);
+            }
+            collisionGroup.AddDependency(actGroup);
+            simulation.TaskManager.AddGroup(collisionGroup);
         }
 
         public override bool WantsFastForward

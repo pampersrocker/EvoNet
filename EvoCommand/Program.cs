@@ -95,6 +95,7 @@ namespace EvoCommand
             Console.WriteLine("Simulation finished, saving....");
             sim.TileMap.SerializeToFile("tilemap.dat");
             sim.CreatureManager.Serialize("creatures.dat", "graveyard/graveyard");
+            sim.Shutdown();
             string finalInfo = FormatStatisticsInfo("Ran simulation for", time, sim, Iteration, creaturesUpdateCycles, graveYardSize, saveCount);
             Console.WriteLine(finalInfo);
             Console.CursorVisible = true;
