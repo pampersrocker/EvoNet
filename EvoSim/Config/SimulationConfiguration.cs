@@ -21,7 +21,7 @@ namespace EvoSim.Config
             {
                 SimulationConfiguration config = new SimulationConfiguration();
                 config.TickInterval = 0.01f;
-                config.NumCreatureTasks = 16;
+                config.NumCreatureTasks = 8;
                 return config;
             }
         }
@@ -52,6 +52,11 @@ namespace EvoSim.Config
             {
                 Console.WriteLine("Reset TickInterval in config from {0} to {1}", config.TickInterval, 0.01f);
                 config.TickInterval = 0.01f;
+            }
+
+            if (config.NumCreatureTasks == 0)
+            {
+                config.NumCreatureTasks = Environment.ProcessorCount;
             }
         }
     }

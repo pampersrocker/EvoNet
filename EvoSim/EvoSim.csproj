@@ -76,6 +76,8 @@
     <Compile Include="Tasks\CreatureHandleCollisionTask.cs" />
     <Compile Include="Tasks\CreatureReadSensorTask.cs" />
     <Compile Include="Tasks\CreatureTask.cs" />
+    <Compile Include="Tasks\MergeCreatureArraysTask.cs" />
+    <Compile Include="Tasks\SimpleSimulationTask.cs" />
     <Compile Include="Tasks\SimulationArrayTask.cs" />
     <Compile Include="Tasks\SimulationTask.cs" />
     <Compile Include="ThreadingHelper\MultithreadingHelper.cs" />

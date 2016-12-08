@@ -49,20 +49,6 @@ namespace EvoNet.Objects
 
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void AddCreature(Creature c)
-        {
-            CreaturesToSpawn.Add(c);
-        }
-
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public void RemoveCreature(Creature c)
-        {
-            CreaturesToKill.Add(c);
-        }
-
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
         private void MergeCreaturesAndSpawnCreatures()
         {
             foreach (Creature c in CreaturesToSpawn)
@@ -89,16 +75,36 @@ namespace EvoNet.Objects
             base.Initialize(inGame);
 
             GenerateCollisionGrid();
+
+            CreateTasks();
         }
 
         private void CreateTasks()
         {
+            ThreadTaskGroup spawnCreaturesGroup = new ThreadTaskGroup();
+            spawnCreaturesGroup.AddTask(new SimpleSimulationTask(simulation,
+                (Simulation sim, GameTime time) => 
+                {
+                    while (creatures.Count < 50)
+                    {
+                        Creature justSpawned = new Creature(
+                            new Vector2(
+                                Simulation.RandomFloat() * simulation.TileMap.GetWorldWidth(),
+                                Simulation.RandomFloat() * simulation.TileMap.GetWorldHeight()),
+                            Simulation.RandomFloat() * Mathf.PI * 2,
+                            this);
+                        creatures.Add(justSpawned);
+                    }
+                }));
+            simulation.TaskManager.AddGroup(spawnCreaturesGroup);
+
             ThreadTaskGroup readSensorGroup = new ThreadTaskGroup();
             for (int taskIndex = 0; taskIndex < simulation.SimulationConfiguration.NumCreatureTasks; taskIndex++)
             {
                 CreatureReadSensorTask task = new CreatureReadSensorTask(simulation, taskIndex, simulation.SimulationConfiguration.NumCreatureTasks);
                 readSensorGroup.AddTask(task);
             }
+            readSensorGroup.AddDependency(spawnCreaturesGroup);
             simulation.TaskManager.AddGroup(readSensorGroup);
             ThreadTaskGroup actGroup = new ThreadTaskGroup();
             for (int taskIndex = 0; taskIndex < simulation.SimulationConfiguration.NumCreatureTasks; taskIndex++)
@@ -108,14 +114,54 @@ namespace EvoNet.Objects
             }
             actGroup.AddDependency(readSensorGroup);
             simulation.TaskManager.AddGroup(actGroup);
+
+            ThreadTaskGroup mergeAndSpawnGroup = new ThreadTaskGroup();
+            MergeCreatureArraysTask mergeTask = new MergeCreatureArraysTask(simulation, actGroup);
+            mergeAndSpawnGroup.AddTask(mergeTask);
+            mergeAndSpawnGroup.AddDependency(actGroup);
+            simulation.TaskManager.AddGroup(mergeAndSpawnGroup);
+
             ThreadTaskGroup collisionGroup = new ThreadTaskGroup();
             for (int taskIndex = 0; taskIndex < simulation.SimulationConfiguration.NumCreatureTasks; taskIndex++)
             {
                 CreatureHandleCollisionTask task = new CreatureHandleCollisionTask(simulation, taskIndex, simulation.SimulationConfiguration.NumCreatureTasks);
                 collisionGroup.AddTask(task);
             }
-            collisionGroup.AddDependency(actGroup);
+            collisionGroup.AddDependency(mergeAndSpawnGroup);
             simulation.TaskManager.AddGroup(collisionGroup);
+
+            ThreadTaskGroup cleanupAndStatisticsGroup = new ThreadTaskGroup();
+            cleanupAndStatisticsGroup.AddDependency(collisionGroup);
+            simulation.TaskManager.AddGroup(cleanupAndStatisticsGroup);
+            cleanupAndStatisticsGroup.AddTask(new SimpleSimulationTask(simulation, 
+                (Simulation sim, GameTime time) => 
+                {
+                    ResetCollisionGrid();
+                }));
+
+            cleanupAndStatisticsGroup.AddTask(new SimpleSimulationTask(simulation,
+                (Simulation sim, GameTime time) =>
+                {
+                    // Collect some statistics
+                    year += (float)time.ElapsedGameTime.TotalSeconds;
+                    AliveCreaturesRecord.Add(creatures.Count);
+                }));
+            cleanupAndStatisticsGroup.AddTask(new SimpleSimulationTask(simulation,
+                 (Simulation sim, GameTime time) =>
+                 {
+                     if (creatures.Count > 0)
+                     {
+
+                         OldestCreatureAlive = creatures[0];
+                         foreach (Creature c in creatures)
+                         {
+                             if (c.Age > OldestCreatureAlive.Age)
+                             {
+                                 OldestCreatureAlive = c;
+                             }
+                         }
+                     }
+                 }));
         }
 
         public override bool WantsFastForward
@@ -192,6 +238,7 @@ namespace EvoNet.Objects
 
         protected override void Update(GameTime deltaTime)
         {
+            return; // All is done in the tasks now
             while (creatures.Count < 50)
             {
                 Creature justSpawned = new Creature(

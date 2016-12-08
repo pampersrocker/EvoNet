@@ -108,7 +108,7 @@ namespace EvoSim
             tileMap.NotifyTick(deltaTime);
             creatureManager.NotifyTick(deltaTime);
 
-            taskManager.ResetTaskGroups(); ;
+            taskManager.ResetTaskGroups();
             taskManager.RunTasks(deltaTime);
 
         }

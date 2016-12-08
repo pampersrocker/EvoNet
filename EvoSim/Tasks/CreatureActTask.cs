@@ -20,6 +20,7 @@ namespace EvoSim.Tasks
             base.Run(time);
             for (int creatureIndex = lowerBound; creatureIndex < upperBound; creatureIndex++)
             {
+                sim.CreatureManager.Creatures[creatureIndex].CurrentTask = this;
                 sim.CreatureManager.Creatures[creatureIndex].Act(time);
             }
         }

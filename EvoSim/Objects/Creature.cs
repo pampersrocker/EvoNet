@@ -14,6 +14,7 @@ using EvoSim;
 using System.Runtime.Serialization;
 using EvoSim.Serialization;
 using System.Security.Permissions;
+using EvoSim.Tasks;
 
 namespace EvoNet.Objects
 {
@@ -600,7 +601,12 @@ namespace EvoNet.Objects
             //inOscilation.SetValue(Mathf.Sin(OscilationValue));
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
+        CreatureTask currentTask;
+        internal CreatureTask CurrentTask
+        {
+            get { return currentTask; }
+            set { currentTask = value; }
+        }
         public void Act(GameTime deltaTime)
         {
             float fixedDeltaTime = (float)deltaTime.ElapsedGameTime.TotalSeconds;
@@ -645,7 +651,7 @@ namespace EvoNet.Objects
             {
                 Simulation.TileMap.FoodValues[t.position.X, t.position.Y] += Energy * FOODDROPPERCENTAGE;
             }
-            Manager.RemoveCreature(this);
+            currentTask.RemoveCreature(this);
         }
 
         private void ActAttack(float costMult)
@@ -727,7 +733,7 @@ namespace EvoNet.Objects
         {
             Creature child = new Creature(this, Manager);
             childIds.Add(child.id);
-            Manager.AddCreature(child);
+            currentTask.AddCreature(child);
             Energy -= STARTENERGY;
         }
 

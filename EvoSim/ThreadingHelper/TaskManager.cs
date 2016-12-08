@@ -32,11 +32,9 @@ namespace EvoSim.ThreadingHelper
             }
         }
 
-        private List<ThreadTaskGroup> tasks = new List<ThreadTaskGroup>();
-
         public void AddGroup(ThreadTaskGroup group)
         {
-            tasks.Add(group);
+            pendingTaskGroups.Add(group);
         }
 
         private bool keepRunning = true;
@@ -44,9 +42,9 @@ namespace EvoSim.ThreadingHelper
         public void RunTasks(GameTime time)
         {
             currentTime = time;
-            while (pendingTaskGroups.Count > 0 && runningTaskGroups.Count > 0)
+            while (pendingTaskGroups.Count > 0 || runningTaskGroups.Count > 0)
             {
-                for (int groupIndex = pendingTaskGroups.Count; groupIndex >= 0; --groupIndex)
+                for (int groupIndex = pendingTaskGroups.Count-1; groupIndex >= 0; --groupIndex)
                 {
                     if (pendingTaskGroups[groupIndex].CanBeQueued())
                     {
@@ -63,7 +61,7 @@ namespace EvoSim.ThreadingHelper
                         }
                     }
                 }
-                for (int runningGroupIndex = runningTaskGroups.Count; runningGroupIndex >= 0; --runningGroupIndex)
+                for (int runningGroupIndex = runningTaskGroups.Count-1; runningGroupIndex >= 0; --runningGroupIndex)
                 {
                     if (runningTaskGroups[runningGroupIndex].IsDone())
                     {
