@@ -38,7 +38,14 @@ namespace EvoSim.Tasks
                         sim.CreatureManager.Creatures.Add(creature);
                     }
                     creatureTask.CreaturesToSpawn.Clear();
+                    if (sim.CreatureManager.Creatures.Count > 50)
+                    {
+
+
+                        sim.CreatureManager.Creatures.RemoveRange(50, sim.CreatureManager.Creatures.Count-51);
+                    }
                 }
+
             }
         }
     }

@@ -7,6 +7,7 @@ using EvoSim.ThreadingHelper;
 using Microsoft.Xna.Framework;
 using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace EvoSim
 {
@@ -74,7 +75,8 @@ namespace EvoSim
                 poolSize = Environment.ProcessorCount;
             }
             poolSize = Math.Max(1, poolSize);
-            taskManager = new TaskManager(poolSize);
+            ThreadPool.SetMaxThreads(poolSize, poolSize);
+            taskManager = new TaskManager();
             tileMap = TileMap.DeserializeFromFile("tilemap.dat", this);
             if (tileMap == null)
             {
@@ -119,7 +121,7 @@ namespace EvoSim
             tileMap.Shutdown();
             creatureManager.Shutdown();
 
-            taskManager.Shutdown();
+            //taskManager.Shutdown();
         }
     }
 }

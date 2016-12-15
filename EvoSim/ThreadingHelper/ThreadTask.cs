@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EvoSim.ThreadingHelper
@@ -15,6 +16,15 @@ namespace EvoSim.ThreadingHelper
             get { return isDone; }
         }
         protected abstract void Run(GameTime time);
+        public WaitCallback Callback;
+        public ThreadTask()
+        {
+            Callback = new WaitCallback(p =>
+            {
+
+                DoTask((GameTime)p);
+            });
+        }
 
         public void DoTask(GameTime time)
         {

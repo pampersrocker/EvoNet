@@ -1,4 +1,6 @@
 ﻿using EvoSim;
+using EvoSim.Tasks;
+using EvoSim.ThreadingHelper;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -174,23 +176,55 @@ namespace EvoNet.Map
         {
             base.Initialize(game);
 
+            ThreadTaskGroup growGroup = new ThreadTaskGroup();
+            int divider = 4;
+            int numTilesPerTaskX = Width / divider;
+            int numTilesPerTaskY = Height / divider;
+            for (int taskX = 0; taskX < Width / divider-1; taskX++)
+            {
+                for (int taskY = 0; taskY < Height/divider-1; taskY++)
+                {
+                    Action<Simulation, GameTime> action = (Simulation sim, GameTime time) =>
+                    {
+                        float deltaTime = (float)time.ElapsedGameTime.TotalSeconds;
+                        for (int tileOffsetX = 0; tileOffsetX < numTilesPerTaskX; tileOffsetX++)
+                        {
+                            for (int tileOffsetY = 0; tileOffsetY < numTilesPerTaskY; tileOffsetY++)
+                            {
+                                int tileIndexX = taskX * numTilesPerTaskX + tileOffsetX;
+                                int tileIndexY = taskY * numTilesPerTaskY + tileOffsetY;
+                                if (IsFertile(tileIndexX, tileIndexY))
+                                {
+                                    Grow(tileIndexX, tileIndexY, deltaTime);
+                                }
+                            }
+                        }
+                    };
+                    SimpleSimulationTask task = new SimpleSimulationTask(simulation, action);
+                    growGroup.AddTask(task);
+
+                }
+            }
+
+            simulation.TaskManager.AddGroup(growGroup);
+
         }
 
         protected override void Update(GameTime deltaTime)
         {
-            float fixedDeltaTime = (float)deltaTime.ElapsedGameTime.TotalSeconds;
-            for (int i = 0; i < Width; i++)
-            {
-                for (int k = 0; k < Height; k++)
-                {
-                    if (IsFertile(i, k))
-                    {
-                        Grow(i, k, fixedDeltaTime);
-                    }
-                }
-            }
-
-            FoodRecord.Add(CalculateFoodAvailable());
+            //float fixedDeltaTime = (float)deltaTime.ElapsedGameTime.TotalSeconds;
+            //for (int i = 0; i < Width; i++)
+            //{
+            //    for (int k = 0; k < Height; k++)
+            //    {
+            //        if (IsFertile(i, k))
+            //        {
+            //            Grow(i, k, fixedDeltaTime);
+            //        }
+            //    }
+            //}
+            //
+            //FoodRecord.Add(CalculateFoodAvailable());
         }
 
         public void Grow(int x, int y, float fixedDeltaTime)
