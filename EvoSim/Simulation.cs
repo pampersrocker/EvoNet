@@ -75,13 +75,12 @@ namespace EvoSim
                 poolSize = Environment.ProcessorCount;
             }
             poolSize = Math.Max(1, poolSize);
-            ThreadPool.SetMaxThreads(poolSize, poolSize);
+            //ThreadPool.SetMaxThreads(poolSize, poolSize);
             taskManager = new TaskManager();
             tileMap = TileMap.DeserializeFromFile("tilemap.dat", this);
             if (tileMap == null)
             {
                 tileMap = new TileMap(100, 100, 100.0f);
-                tileMap.Initialize(this);
 
                 ValueNoise2D vn = new ValueNoise2D(tileMap.Width, tileMap.Height);
                 vn.startFrequencyX = 10;
@@ -100,6 +99,8 @@ namespace EvoSim
 
 
             }
+            tileMap.Initialize(this);
+
             creatureManager.Initialize(this);
             creatureManager.Deserialize("creatures.dat");
         }

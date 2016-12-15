@@ -64,7 +64,6 @@ namespace EvoNet.Map
             }
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public bool SetFoodValue(int x, int y, float foodValue)
         {
             if (x >= 0 && x < Width && y >= 0 && y < Height)
@@ -133,7 +132,6 @@ namespace EvoNet.Map
             return GetTileInfo(position.ToPoint());
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public float EatOfTile(int x, int y, float eatAmount)
         {
             float foodVal = FoodValues[x, y];
@@ -172,18 +170,23 @@ namespace EvoNet.Map
             return food;
         }
 
+        [NonSerialized]
+        public ThreadTaskGroup growGroup;
+
         public override void Initialize(Simulation game)
         {
             base.Initialize(game);
 
-            ThreadTaskGroup growGroup = new ThreadTaskGroup();
+            growGroup = new ThreadTaskGroup();
             int divider = 4;
             int numTilesPerTaskX = Width / divider;
             int numTilesPerTaskY = Height / divider;
-            for (int taskX = 0; taskX < Width / divider-1; taskX++)
+            for (int taskX = 0; taskX < (Width / numTilesPerTaskX); taskX++)
             {
-                for (int taskY = 0; taskY < Height/divider-1; taskY++)
+                for (int taskY = 0; taskY < (Height/ numTilesPerTaskY); taskY++)
                 {
+                    int closureTaskX = taskX;
+                    int closureTaskY = taskY;
                     Action<Simulation, GameTime> action = (Simulation sim, GameTime time) =>
                     {
                         float deltaTime = (float)time.ElapsedGameTime.TotalSeconds;
@@ -191,11 +194,14 @@ namespace EvoNet.Map
                         {
                             for (int tileOffsetY = 0; tileOffsetY < numTilesPerTaskY; tileOffsetY++)
                             {
-                                int tileIndexX = taskX * numTilesPerTaskX + tileOffsetX;
-                                int tileIndexY = taskY * numTilesPerTaskY + tileOffsetY;
-                                if (IsFertile(tileIndexX, tileIndexY))
+                                int tileIndexX = closureTaskX * numTilesPerTaskX + tileOffsetX;
+                                int tileIndexY = closureTaskY * numTilesPerTaskY + tileOffsetY;
+                                if (tileIndexX < Width && tileIndexY < Height)
                                 {
-                                    Grow(tileIndexX, tileIndexY, deltaTime);
+                                    if (IsFertile(tileIndexX, tileIndexY))
+                                    {
+                                        Grow(tileIndexX, tileIndexY, deltaTime);
+                                    }
                                 }
                             }
                         }
@@ -205,26 +211,13 @@ namespace EvoNet.Map
 
                 }
             }
-
+            growGroup.AddTask(new SimpleSimulationTask(simulation, (sim, time) => { FoodRecord.Add(CalculateFoodAvailable()); }));
             simulation.TaskManager.AddGroup(growGroup);
 
         }
 
         protected override void Update(GameTime deltaTime)
         {
-            //float fixedDeltaTime = (float)deltaTime.ElapsedGameTime.TotalSeconds;
-            //for (int i = 0; i < Width; i++)
-            //{
-            //    for (int k = 0; k < Height; k++)
-            //    {
-            //        if (IsFertile(i, k))
-            //        {
-            //            Grow(i, k, fixedDeltaTime);
-            //        }
-            //    }
-            //}
-            //
-            //FoodRecord.Add(CalculateFoodAvailable());
         }
 
         public void Grow(int x, int y, float fixedDeltaTime)

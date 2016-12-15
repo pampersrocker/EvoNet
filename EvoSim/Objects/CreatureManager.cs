@@ -96,6 +96,7 @@ namespace EvoNet.Objects
                         creatures.Add(justSpawned);
                     }
                 }));
+            //spawnCreaturesGroup.AddDependency(simulation.TileMap.growGroup);
             simulation.TaskManager.AddGroup(spawnCreaturesGroup);
 
             ThreadTaskGroup readSensorGroup = new ThreadTaskGroup();
@@ -238,69 +239,6 @@ namespace EvoNet.Objects
 
         protected override void Update(GameTime deltaTime)
         {
-            return; // All is done in the tasks now
-            while (creatures.Count < 50)
-            {
-                Creature justSpawned = new Creature(
-                    new Vector2(
-                        Simulation.RandomFloat() * simulation.TileMap.GetWorldWidth(),
-                        Simulation.RandomFloat() * simulation.TileMap.GetWorldHeight()),
-                    Simulation.RandomFloat() * Mathf.PI * 2,
-                    this);
-                creatures.Add(justSpawned);
-            }
-
-            for (int i = 0; i < AmountOfCores; i++)
-            {
-                int upperBound = creatures.Count * (i + 1) / AmountOfCores;
-                if (upperBound > creatures.Count) upperBound = creatures.Count;
-                int lowerBound = creatures.Count * i / AmountOfCores;
-                MultithreadingHelper.StartWork((object state) => {
-                    for (int k = lowerBound; k < upperBound; k++)
-                    {
-                        creatures[k].ReadSensors();
-                    }
-                    MultithreadingHelper.PulseAndFinish();
-                });
-            }
-            MultithreadingHelper.WaitForEmptyThreadPool();
-            for (int i = 0; i < AmountOfCores; i++)
-            {
-                int upperBound = creatures.Count * (i + 1) / AmountOfCores;
-                if (upperBound > creatures.Count) upperBound = creatures.Count;
-                int lowerBound = creatures.Count * i / AmountOfCores;
-                MultithreadingHelper.StartWork((object state) => {
-                    for (int k = lowerBound; k < upperBound; k++)
-                    {
-                        creatures[k].Act(deltaTime);
-                    }
-                    MultithreadingHelper.PulseAndFinish();
-                });
-            }
-            MultithreadingHelper.WaitForEmptyThreadPool();
-            numberOfDeaths += CreaturesToKill.Count;
-
-            RemoveCreaturesFromDeathList();
-            MergeCreaturesAndSpawnCreatures();
-            
-            year += (float)deltaTime.ElapsedGameTime.TotalSeconds;
-
-            HandleCollision();
-
-            if (creatures.Count > 0)
-            {
-
-                OldestCreatureAlive = creatures[0];
-                foreach (Creature c in creatures)
-                {
-                    if (c.Age > OldestCreatureAlive.Age)
-                    {
-                        OldestCreatureAlive = c;
-                    }
-                }
-            }
-
-            AliveCreaturesRecord.Add(creatures.Count);
         }
 
 

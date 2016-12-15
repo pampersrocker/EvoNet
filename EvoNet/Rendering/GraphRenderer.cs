@@ -13,6 +13,10 @@ namespace EvoNet.Rendering
 
         public static void RenderGraph(SpriteBatch spriteBatch, Rectangle rect, Color barColor, List<float> data, SpriteFont font = null, bool normalized = false)
         {
+            if (data.Count == 0)
+            {
+                return;
+            }
             float widthPerBar = (float)rect.Width / data.Count;
             int drawWidth = (int)(widthPerBar < 1 ? 1 : widthPerBar);
             float currentX = 0;

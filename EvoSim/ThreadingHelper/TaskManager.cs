@@ -11,9 +11,7 @@ namespace EvoSim.ThreadingHelper
 {
     public class TaskManager
     {
-        readonly int poolSize;
 
-        private Thread[] workerThreads;
         private List<ThreadTaskGroup> pendingTaskGroups = new List<ThreadTaskGroup>();
         private List<ThreadTaskGroup> completedTaskGroups = new List<ThreadTaskGroup>();
         private List<ThreadTaskGroup> runningTaskGroups = new List<ThreadTaskGroup>();
@@ -27,8 +25,6 @@ namespace EvoSim.ThreadingHelper
         {
             pendingTaskGroups.Add(group);
         }
-
-        private bool keepRunning = true;
 
         public void RunTasks(GameTime time)
         {
