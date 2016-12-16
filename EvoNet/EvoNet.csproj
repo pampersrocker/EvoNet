@@ -78,6 +78,15 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Controls\EvoSimControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Forms\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Rendering\Camera.cs" />
     <Compile Include="Configuration\GameConfig.cs" />
     <Compile Include="EvoGame.cs" />
@@ -94,8 +103,17 @@
     <Compile Include="Rendering\SpritebatchExtensions.cs" />
     <Compile Include="Rendering\RenderHelper.cs" />
     <Compile Include="Rendering\TileMapRenderer.cs" />
+    <Compile Include="WinFormsContentLoading\ContentBuilder.cs" />
+    <Compile Include="WinFormsContentLoading\ErrorLogger.cs" />
+    <Compile Include="WinFormsGraphicsDevice\GraphicsDeviceControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WinFormsGraphicsDevice\GraphicsDeviceService.cs" />
+    <Compile Include="WinFormsGraphicsDevice\ServiceContainer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Build.Engine" />
+    <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="OpenTK">
       <HintPath>$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\DesktopGL\OpenTK.dll</HintPath>
     </Reference>
@@ -106,6 +124,9 @@
       <HintPath>$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\DesktopGL\MonoGame.Framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="YamlDotNet, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\YamlDotNet.4.0.0\lib\net35\YamlDotNet.dll</HintPath>
@@ -113,6 +134,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Forms\MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Icon.ico" />
     <Content Include="OpenTK.dll.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

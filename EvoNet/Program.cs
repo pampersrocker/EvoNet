@@ -1,5 +1,7 @@
 ﻿using EvoNet.AI;
+using EvoNet.Forms;
 using System;
+using System.Windows.Forms;
 
 namespace EvoNet
 {
@@ -14,8 +16,12 @@ namespace EvoNet
         [STAThread]
         static void Main()
         {
-            using (var game = new EvoGame())
-                game.Run();
+            using (var myForm = new MainForm())
+            {
+                Application.Run(myForm);
+            }
+            //using (var game = new EvoGame())
+            //    game.Run();
         }
     }
 }
