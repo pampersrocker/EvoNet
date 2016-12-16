@@ -85,7 +85,7 @@ namespace EvoNet.Objects
             spawnCreaturesGroup.AddTask(new SimpleSimulationTask(simulation,
                 (Simulation sim, GameTime time) => 
                 {
-                    while (creatures.Count < 50)
+                    while (creatures.Count < sim.SimulationConfiguration.MinCreatures)
                     {
                         Creature justSpawned = new Creature(
                             new Vector2(
