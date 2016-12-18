@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,14 +9,14 @@ namespace EvoSim.Tasks
 {
     class SimpleSimulationTask : SimulationTask
     {
-        Action<Simulation, GameTime> action;
-        public SimpleSimulationTask(Simulation sim, Action<Simulation, GameTime> action) : 
+        Action<Simulation, float> action;
+        public SimpleSimulationTask(Simulation sim, Action<Simulation, float> action) :
             base(sim)
         {
             this.action = action;
         }
 
-        protected override void Run(GameTime time)
+        protected override void Run(float time)
         {
             action?.Invoke(sim, time);
         }

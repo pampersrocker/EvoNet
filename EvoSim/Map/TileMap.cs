@@ -1,7 +1,6 @@
 ﻿using EvoSim;
 using EvoSim.Tasks;
 using EvoSim.ThreadingHelper;
-using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
+using System.Drawing;
 
 namespace EvoNet.Map
 {
@@ -131,7 +131,7 @@ namespace EvoNet.Map
     public Tile GetTileAtWorldPosition(Vector2 position)
     {
       position /= tileSize;
-      return GetTileInfo(position.ToPoint());
+      return GetTileInfo(new Point((int)position.X, (int)position.Y));
     }
 
     public float EatOfTile(int x, int y, float eatAmount)
@@ -189,9 +189,9 @@ namespace EvoNet.Map
         {
           int closureTaskX = taskX;
           int closureTaskY = taskY;
-          Action<Simulation, GameTime> action = (Simulation sim, GameTime time) =>
+          Action<Simulation, float> action = (Simulation sim, float time) =>
           {
-            float deltaTime = (float)time.ElapsedGameTime.TotalSeconds;
+            float deltaTime = (float)time;
             for (int tileOffsetX = 0; tileOffsetX < numTilesPerTaskX; tileOffsetX++)
             {
               for (int tileOffsetY = 0; tileOffsetY < numTilesPerTaskY; tileOffsetY++)
@@ -220,7 +220,7 @@ namespace EvoNet.Map
 
     }
 
-    protected override void Update(GameTime deltaTime)
+    protected override void Update(float deltaTime)
     {
     }
 

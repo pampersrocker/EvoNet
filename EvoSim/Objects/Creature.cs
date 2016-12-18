@@ -4,8 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EvoNet.AI;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using EvoNet.Map;
 using System.Diagnostics;
 using System.IO;
@@ -97,7 +95,7 @@ namespace EvoNet.Objects
 
         private float feelerAngle;
         private Vector2 feelerPos;
-        public Microsoft.Xna.Framework.Vector2 FeelerPos
+        public Vector2 FeelerPos
         {
             get { return feelerPos; }
         }
@@ -387,7 +385,7 @@ namespace EvoNet.Objects
             brain.RandomizeAllWeights();
             CalculateFeelerPos(MAXIMUMFEELERDISTANCE);
 
-            Color = new Color(Simulation.RandomFloat(), Simulation.RandomFloat(), Simulation.RandomFloat());
+            Color = Color.FromFloat(Simulation.RandomFloat(), Simulation.RandomFloat(), Simulation.RandomFloat());
             GenerateColorInv();
             CalculateCollisionGridPos();
         }
@@ -498,7 +496,7 @@ namespace EvoNet.Objects
             g = Mathf.ClampColorValue(g);
             b = Mathf.ClampColorValue(b);
 
-            Color = new Color(r, g, b);
+            Color = new Color(r, g, b, 255);
         }
 
 
@@ -572,7 +570,7 @@ namespace EvoNet.Objects
 
         public void GenerateColorInv()
         {
-            Color_inv = new Color(255 - Color.R, 255 - Color.G, 255 - Color.B);
+            Color_inv = new Color(255 - Color.R, 255 - Color.G, 255 - Color.B, 255);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -607,9 +605,9 @@ namespace EvoNet.Objects
             get { return currentTask; }
             set { currentTask = value; }
         }
-        public void Act(GameTime deltaTime)
+        public void Act(float deltaTime)
         {
-            float fixedDeltaTime = (float)deltaTime.ElapsedGameTime.TotalSeconds;
+            float fixedDeltaTime = deltaTime;
             Tile t = Simulation.TileMap.GetTileAtWorldPosition(pos);
             float costMult = CalculateCostMultiplier(t);
             ActRotate(costMult, fixedDeltaTime);

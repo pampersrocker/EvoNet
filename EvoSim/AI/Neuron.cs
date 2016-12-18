@@ -1,6 +1,5 @@
-﻿using EvoSim.Serialization;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
+﻿using EvoSim;
+using EvoSim.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,9 +19,8 @@ namespace EvoNet.AI
         private Vector2 drawPosition;
         public Vector2 DrawPosition { get { return drawPosition; } set { drawPosition = value; } }
 
-        public bool IsMouseOverDrawPosition(float NeuronSize, MouseState ms)
+        public bool IsMouseOverDrawPosition(float NeuronSize, Vector2 mousePos)
         {
-            Vector2 mousePos = new Vector2(ms.Position.X , ms.Position.Y);
             Vector2 to = DrawPosition - mousePos;
             return to.LengthSquared() < NeuronSize * NeuronSize;
         }

@@ -1,10 +1,8 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Xna.Framework.Graphics;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
@@ -83,7 +81,7 @@ namespace EvoNet.Objects
         {
             ThreadTaskGroup spawnCreaturesGroup = new ThreadTaskGroup();
             spawnCreaturesGroup.AddTask(new SimpleSimulationTask(simulation,
-                (Simulation sim, GameTime time) => 
+                (Simulation sim, float time) => 
                 {
                     while (creatures.Count < sim.SimulationConfiguration.MinCreatures)
                     {
@@ -135,20 +133,20 @@ namespace EvoNet.Objects
             cleanupAndStatisticsGroup.AddDependency(collisionGroup);
             simulation.TaskManager.AddGroup(cleanupAndStatisticsGroup);
             cleanupAndStatisticsGroup.AddTask(new SimpleSimulationTask(simulation, 
-                (Simulation sim, GameTime time) => 
+                (Simulation sim, float time) => 
                 {
                     ResetCollisionGrid();
                 }));
 
             cleanupAndStatisticsGroup.AddTask(new SimpleSimulationTask(simulation,
-                (Simulation sim, GameTime time) =>
+                (Simulation sim, float time) =>
                 {
                     // Collect some statistics
-                    year += (float)time.ElapsedGameTime.TotalSeconds;
+                    year += time;
                     AliveCreaturesRecord.Add(creatures.Count);
                 }));
             cleanupAndStatisticsGroup.AddTask(new SimpleSimulationTask(simulation,
-                 (Simulation sim, GameTime time) =>
+                 (Simulation sim, float time) =>
                  {
                      if (creatures.Count > 0)
                      {
@@ -237,7 +235,7 @@ namespace EvoNet.Objects
             ResetCollisionGrid();
         }
 
-        protected override void Update(GameTime deltaTime)
+        protected override void Update(float deltaTime)
         {
         }
 

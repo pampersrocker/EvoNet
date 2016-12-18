@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
+
 using EvoNet.Objects;
 
 namespace EvoSim.Tasks
@@ -13,13 +13,13 @@ namespace EvoSim.Tasks
     {
         ThreadTaskGroup creatureActTaskGroup;
 
-        public MergeCreatureArraysTask(Simulation sim, ThreadTaskGroup actTaskGroup) : 
+        public MergeCreatureArraysTask(Simulation sim, ThreadTaskGroup actTaskGroup) :
             base(sim)
         {
             creatureActTaskGroup = actTaskGroup;
         }
 
-        protected override void Run(GameTime time)
+        protected override void Run(float time)
         {
             foreach (ThreadTask task in creatureActTaskGroup.Tasks)
             {

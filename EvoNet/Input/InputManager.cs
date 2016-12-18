@@ -9,6 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Vector2 = Microsoft.Xna.Framework.Vector2;
+
 namespace EvoNet.Input
 {
 
@@ -52,7 +54,7 @@ namespace EvoNet.Input
             scrollWheelValue = Mouse.GetState().ScrollWheelValue;
         }
 
-        protected override void Update(GameTime gameTime)
+        protected override void Update(float gameTime)
         {
 
             if (!game.IsActive)
@@ -82,16 +84,16 @@ namespace EvoNet.Input
                 float tileMapHeight = simulation.TileMap.GetWorldHeight();
                 camera.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
 
-                camera.Translation = new Vector2(tileMapWidth / 2, 0);
+                camera.Translation = new Microsoft.Xna.Framework.Vector2(tileMapWidth / 2, 0);
             }
 
             oldSpaceDown = spaceDown;
             scrollWheelValue = mouseState.ScrollWheelValue;
 
-            oldMousePosition = mouseState.Position.ToVector2();
+            oldMousePosition = new Vector2(mouseState.X, mouseState.Y);
         }
 
-        private void DoMovement(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState)
+        private void DoMovement(float gameTime, KeyboardState keyboardState, MouseState mouseState)
         {
             Vector2 movement = Vector2.Zero;
             bool moveUp = false;
@@ -147,11 +149,11 @@ namespace EvoNet.Input
             {
                 movement -= Vector2.UnitX * gameConfiguration.MovementSensitivity;
             }
-            movement *= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            movement *= gameTime;
 
             if (camera != null)
             {
-                camera.Move(movement);
+                camera.Move(new Microsoft.Xna.Framework.Vector2(movement.X, movement.Y));
             }
 
 
@@ -161,10 +163,10 @@ namespace EvoNet.Input
                 if (!rightMouseDown)
                 {
                     rightMouseDown = true;
-                    oldMousePosition = mouseState.Position.ToVector2();
+                    oldMousePosition = new Vector2(mouseState.X, mouseState.Y);
                 }
 
-                Vector2 delta = mouseState.Position.ToVector2() - oldMousePosition;
+                Vector2 delta = new Vector2(mouseState.X, mouseState.Y) - oldMousePosition;
                 camera.Move(delta / camera.Scale);
             }
             else
@@ -175,12 +177,12 @@ namespace EvoNet.Input
             int deltaScrollWheelValue = mouseState.ScrollWheelValue - scrollWheelValue;
 
             // Track where we are before scale
-            Vector2 mousePositionBeforeScale = Vector2.Transform(mouseState.Position.ToVector2(), Matrix.Invert(camera.Matrix));
+            Vector2 mousePositionBeforeScale = Vector2.Transform(new Vector2(mouseState.X, mouseState.Y), Matrix.Invert(camera.Matrix));
 
             camera.Scale += (gameConfiguration.ScaleFactor * (deltaScrollWheelValue / 120.0f)) / (camera.Scale < 1 ? 1 / camera.Scale : camera.Scale);
 
             // Track where we are after scale
-            Vector2 mousePositionAfterScale = Vector2.Transform(mouseState.Position.ToVector2(), Matrix.Invert(camera.Matrix));
+            Vector2 mousePositionAfterScale = Vector2.Transform(new Vector2(mouseState.X, mouseState.Y), Matrix.Invert(camera.Matrix));
 
             // Adjust screen position with respect to scale to achieve zoom to Mouse cursor functionality
             camera.Move((mousePositionAfterScale - mousePositionBeforeScale) );

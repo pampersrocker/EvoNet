@@ -20,8 +20,8 @@ namespace EvoNet
             {
                 Application.Run(myForm);
             }
-            //using (var game = new EvoGame())
-            //    game.Run();
+            using (var game = new EvoGame())
+                game.Run();
         }
     }
 }

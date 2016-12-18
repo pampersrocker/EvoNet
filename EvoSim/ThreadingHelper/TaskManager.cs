@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+﻿
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ namespace EvoSim.ThreadingHelper
         private List<ThreadTaskGroup> pendingTaskGroups = new List<ThreadTaskGroup>();
         private List<ThreadTaskGroup> completedTaskGroups = new List<ThreadTaskGroup>();
         private List<ThreadTaskGroup> runningTaskGroups = new List<ThreadTaskGroup>();
-        private GameTime currentTime;
+        private float currentTime;
 
         public TaskManager()
         {
@@ -26,7 +26,7 @@ namespace EvoSim.ThreadingHelper
             pendingTaskGroups.Add(group);
         }
 
-        public void RunTasks(GameTime time)
+        public void RunTasks(float time)
         {
             currentTime = time;
             while (pendingTaskGroups.Count > 0 || runningTaskGroups.Count > 0)

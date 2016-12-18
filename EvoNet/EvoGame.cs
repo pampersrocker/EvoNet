@@ -1,7 +1,5 @@
 ﻿using EvoNet.Configuration;
 using EvoNet.Input;
-using EvoNet.Map;
-using EvoNet.ProceduralGeneration;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -15,6 +13,8 @@ using EvoSim;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Runtime.Serialization;
+
+using Color = Microsoft.Xna.Framework.Color;
 
 namespace EvoNet
 {
@@ -116,7 +116,7 @@ namespace EvoNet
             float tileMapHeight = sim.TileMap.GetWorldHeight();
             simRenderer.Camera.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
 
-            simRenderer.Camera.Translation = new Vector2(tileMapWidth / 2, 0);
+            simRenderer.Camera.Translation = new Microsoft.Xna.Framework.Vector2(tileMapWidth / 2, 0);
 
 
         }
@@ -141,7 +141,7 @@ namespace EvoNet
                 Exit();
             foreach (var module in modules)
             {
-                module.NotifyTick(gameTime);
+                module.NotifyTick((float)gameTime.ElapsedGameTime.TotalSeconds);
             }
 
             if (inputManager.EnableFastForward)
@@ -155,7 +155,7 @@ namespace EvoNet
                         if (module.WantsFastForward)
                         {
 
-                            module.NotifyTick(gameTime);
+                            module.NotifyTick((float)gameTime.ElapsedGameTime.TotalSeconds);
                         }
                     }
                 }
@@ -167,7 +167,7 @@ namespace EvoNet
                 lastSerializationTime = DateTime.UtcNow;
                 sim.TileMap.SerializeToFile("tilemap.dat");
                 sim.CreatureManager.Serialize("creatures.dat", "graveyard/graveyard");
-                
+
             }
 
 

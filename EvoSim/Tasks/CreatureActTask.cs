@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +14,7 @@ namespace EvoSim.Tasks
 
         }
 
-        protected override void Run(GameTime time)
+        protected override void Run(float time)
         {
             base.Run(time);
             for (int creatureIndex = lowerBound; creatureIndex < upperBound; creatureIndex++)

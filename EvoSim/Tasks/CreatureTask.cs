@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
 using EvoNet.Objects;
 
 namespace EvoSim.Tasks
@@ -44,7 +43,7 @@ namespace EvoSim.Tasks
 
         }
 
-        protected override void Run(GameTime time)
+        protected override void Run(float time)
         {
             upperBound = sim.CreatureManager.Creatures.Count * (taskIndex + 1) / numTasks;
             if (upperBound > sim.CreatureManager.Creatures.Count)

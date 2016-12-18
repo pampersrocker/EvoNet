@@ -1,5 +1,4 @@
 ﻿using EvoSim;
-using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,14 +41,14 @@ namespace EvoNet
             this.simulation = game;
         }
 
-        public void NotifyTick(GameTime actualTime)
+        public void NotifyTick(float actualTime)
         {
             totalElapsedTime += TimeSpan.FromSeconds(FixedUpdateTime);
-            GameTime deltaTime = new GameTime(totalElapsedTime, TimeSpan.FromSeconds(FixedUpdateTime));
+            float deltaTime = FixedUpdateTime;
             Update(deltaTime);
         }
 
-        protected abstract void Update(GameTime deltaTime);
+        protected abstract void Update(float deltaTime);
 
         public virtual void Shutdown() { }
     }

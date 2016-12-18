@@ -4,7 +4,6 @@ using EvoNet.Objects;
 using EvoNet.ProceduralGeneration;
 using EvoSim.Config;
 using EvoSim.ThreadingHelper;
-using Microsoft.Xna.Framework;
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -112,7 +111,7 @@ namespace EvoSim
       creatureManager.Deserialize("creatures.dat");
     }
 
-    protected override void Update(GameTime deltaTime)
+    protected override void Update(float deltaTime)
     {
 
       tileMap.NotifyTick(deltaTime);

@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,18 +15,18 @@ namespace EvoSim.ThreadingHelper
         {
             get { return isDone; }
         }
-        protected abstract void Run(GameTime time);
+        protected abstract void Run(float time);
         public WaitCallback Callback;
         public ThreadTask()
         {
             Callback = new WaitCallback(p =>
             {
 
-                DoTask((GameTime)p);
+                DoTask((float)p);
             });
         }
 
-        public void DoTask(GameTime time)
+        public void DoTask(float time)
         {
             Run(time);
             isDone = true;

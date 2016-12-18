@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
+
 
 namespace EvoSim.Tasks
 {
@@ -11,7 +11,7 @@ namespace EvoSim.Tasks
     {
         protected int taskIndex;
         protected int numTasks;
-        
+
 
         public SimulationArrayTask(Simulation sim, int inTaskIndex, int inNumTasks) :
             base(sim)

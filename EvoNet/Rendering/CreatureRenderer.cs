@@ -40,7 +40,7 @@ namespace EvoNet.Rendering
 
         public void Draw(GameTime deltaTime, Camera camera)
         {
-            spriteBatch.Begin(transformMatrix: camera.Matrix);
+            spriteBatch.Begin( SpriteSortMode.Deferred, null, null, null, null, null, camera.Matrix);
             foreach (Creature c in manager.Creatures)
             {
                 DrawCreature(c);
@@ -96,7 +96,7 @@ namespace EvoNet.Rendering
                 spriteBatch.DrawString(Fonts.FontArial, "C: " + selectedCreature.Children.Count, new Vector2(820, 110), Color.Red);
                 spriteBatch.DrawString(Fonts.FontArial, "G: " + selectedCreature.Generation, new Vector2(820, 130), Color.Red);
                 spriteBatch.DrawString(Fonts.FontArial, "S: " + (selectedCreature.Energy > 100 ? "Alive" : "Dead"), new Vector2(820, 150), Color.Red);
-                DrawCreature(selectedCreature, selectedCreature.Pos * -1 + new Vector2(1050, 70));
+                DrawCreature(selectedCreature, selectedCreature.Pos.ToXNA() * -1 + new Vector2(1050, 70));
                 networkRenderer.Network = selectedCreature.Brain;
                 networkRenderer.Draw(spriteBatch, new Rectangle(950, 160, 200, (int)(250 + selectedCreature.AmountOfMemory * NeuralNetworkRenderer.NEURONSIZE)));
             }
@@ -106,9 +106,9 @@ namespace EvoNet.Rendering
 
         private void DrawCreature(Creature c, Vector2 offset = new Vector2())
         {
-            spriteBatch.DrawLine(c.Pos + offset, c.FeelerPos +offset, Color.White);
-            spriteBatch.Draw(bodyTex, new Rectangle((int)(c.Pos.X + offset.X - Creature.CREATURESIZE / 2), (int)(c.Pos.Y + offset.Y - Creature.CREATURESIZE / 2), Creature.CREATURESIZE, Creature.CREATURESIZE), c.Color_inv);
-            spriteBatch.Draw(bodyTex, new Rectangle((int)(c.Pos.X + offset.X - (Creature.CREATURESIZE - 4) / 2), (int)(c.Pos.Y + offset.Y - (Creature.CREATURESIZE - 4) / 2), Creature.CREATURESIZE - 4, Creature.CREATURESIZE - 4), c.Color);
+            spriteBatch.DrawLine(c.Pos.ToXNA() + offset, c.FeelerPos.ToXNA() +offset, Color.White);
+            spriteBatch.Draw(bodyTex, new Rectangle((int)(c.Pos.X + offset.X - Creature.CREATURESIZE / 2), (int)(c.Pos.Y + offset.Y - Creature.CREATURESIZE / 2), Creature.CREATURESIZE, Creature.CREATURESIZE), c.Color_inv.ToXNA());
+            spriteBatch.Draw(bodyTex, new Rectangle((int)(c.Pos.X + offset.X - (Creature.CREATURESIZE - 4) / 2), (int)(c.Pos.Y + offset.Y - (Creature.CREATURESIZE - 4) / 2), Creature.CREATURESIZE - 4, Creature.CREATURESIZE - 4), c.Color.ToXNA());
             spriteBatch.Draw(feelerTex, new Rectangle((int)(c.FeelerPos.X + offset.X - 5), (int)(c.FeelerPos.Y + offset.Y - 5), 10, 10), c.TimeSinceLastAttack > Creature.TIMEBETWEENATTACKS ? Color.Blue : Color.Red);
         }
 

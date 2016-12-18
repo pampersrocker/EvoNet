@@ -41,7 +41,7 @@ namespace EvoNet.Rendering
         public void Draw(GameTime deltaTime, Camera camera)
         {
             // Render land tiles with shader effect to blend between sand and grass
-            spriteBatch.Begin(transformMatrix: camera.Matrix, effect: LandShader);
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, LandShader, camera.Matrix);
             for (int x = 0; x < tileMap.Width; x++)
             {
                 for (int y = 0; y < tileMap.Height; y++)
@@ -56,7 +56,7 @@ namespace EvoNet.Rendering
             spriteBatch.End();
 
             // Render water tiles with animated "water" shader
-            spriteBatch.Begin(transformMatrix: camera.Matrix, effect: WaterShader);
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, WaterShader, camera.Matrix);
             WaterShader.Parameters["Time"].SetValue((float)deltaTime.TotalGameTime.TotalSeconds / 3);
             for (int x = 0; x < tileMap.Width; x++)
             {

@@ -1,5 +1,4 @@
 ﻿using EvoSim;
-using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +12,7 @@ namespace EvoCommand
     {
         static bool keepRunnig = true;
 
-        private static string FormatStatisticsInfo(string stringPrefix, GameTime time, Simulation sim, long Iteration, long creaturesUpdateCycles, long graveYardSize, int saveCount)
+        private static string FormatStatisticsInfo(string stringPrefix, TimeSpan time, Simulation sim, long Iteration, long creaturesUpdateCycles, long graveYardSize, int saveCount)
         {
             string statisticsInfo = string.Format(
                 "{0} {1:dd\\d\\ hh\\:mm\\:ss}:\n" +
@@ -23,14 +22,14 @@ namespace EvoCommand
                 "{7:n0} Creatures lived their live and are put on the graveyard ({8:#,000.00} deaths/s).\n" +
                 "Saved {9} times.\n",
                 stringPrefix,
-                time.TotalGameTime,
+                time,
                 sim.TotalElapsedSimulationTime,
                 Iteration,
-                Iteration / time.TotalGameTime.TotalSeconds,
+                Iteration / time.TotalSeconds,
                 creaturesUpdateCycles,
-                creaturesUpdateCycles / time.TotalGameTime.TotalSeconds,
+                creaturesUpdateCycles / time.TotalSeconds,
                 graveYardSize + sim.CreatureManager.Graveyard.Count,
-                (graveYardSize + sim.CreatureManager.Graveyard.Count) / time.TotalGameTime.TotalSeconds,
+                (graveYardSize + sim.CreatureManager.Graveyard.Count) / time.TotalSeconds,
                 saveCount
             );
             return statisticsInfo;
@@ -47,7 +46,7 @@ namespace EvoCommand
             DateTime lastSerializationTime = DateTime.UtcNow;
             DateTime lastConsoleUpdate = DateTime.UtcNow;
             long Iteration = 0;
-            GameTime time = new GameTime();
+            TimeSpan elapsedTime = new TimeSpan();
             long creaturesUpdateCycles = 0;
             int saveCount = 0;
             Console.CancelKeyPress += Console_CancelKeyPress;
@@ -60,11 +59,10 @@ namespace EvoCommand
             while (keepRunnig)
             {
                 DateTime now = DateTime.UtcNow;
-                time.ElapsedGameTime = now - lastUpdate;
                 lastUpdate = DateTime.UtcNow;
-                time.TotalGameTime = now - startTime;
+                elapsedTime = now - startTime;
                 creaturesUpdateCycles += sim.CreatureManager.Creatures.Count;
-                sim.NotifyTick(time);
+                sim.NotifyTick((float)elapsedTime.TotalSeconds);
 
 
                 Iteration++;
@@ -74,7 +72,7 @@ namespace EvoCommand
                 {
                     lastConsoleUpdate = DateTime.UtcNow;
                     Console.SetCursorPosition(initialcursorPositionX,initialcursorPositionY);
-                    string statisticsInfo = FormatStatisticsInfo("Running simulation for", time, sim, Iteration, creaturesUpdateCycles, graveYardSize, saveCount);
+                    string statisticsInfo = FormatStatisticsInfo("Running simulation for", elapsedTime, sim, Iteration, creaturesUpdateCycles, graveYardSize, saveCount);
                     Console.Write(
                         "\r" + 
                         statisticsInfo +
@@ -96,7 +94,7 @@ namespace EvoCommand
             sim.TileMap.SerializeToFile("tilemap.dat");
             sim.CreatureManager.Serialize("creatures.dat", "graveyard/graveyard");
             sim.Shutdown();
-            string finalInfo = FormatStatisticsInfo("Ran simulation for", time, sim, Iteration, creaturesUpdateCycles, graveYardSize, saveCount);
+            string finalInfo = FormatStatisticsInfo("Ran simulation for", elapsedTime, sim, Iteration, creaturesUpdateCycles, graveYardSize, saveCount);
             Console.WriteLine(finalInfo);
             Console.CursorVisible = true;
 

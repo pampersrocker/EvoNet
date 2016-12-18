@@ -27,21 +27,21 @@ namespace EvoNet.Rendering
             MouseState ms = Mouse.GetState();
             foreach (Neuron n in Network.InputNeurons)
             {
-                if (n.IsMouseOverDrawPosition(NEURONSIZE, ms))
+                if (n.IsMouseOverDrawPosition(NEURONSIZE, new EvoSim.Vector2(ms.X, ms.Y)))
                 {
                     return n;
                 }
             }
             foreach (Neuron n in Network.HiddenNeurons)
             {
-                if (n.IsMouseOverDrawPosition(NEURONSIZE, ms))
+                if (n.IsMouseOverDrawPosition(NEURONSIZE, new EvoSim.Vector2(ms.X, ms.Y)))
                 {
                     return n;
                 }
             }
             foreach (Neuron n in Network.OutputNeurons)
             {
-                if (n.IsMouseOverDrawPosition(NEURONSIZE, ms))
+                if (n.IsMouseOverDrawPosition(NEURONSIZE, new EvoSim.Vector2(ms.X, ms.Y)))
                 {
                     return n;
                 }
@@ -81,7 +81,7 @@ namespace EvoNet.Rendering
             float currentY = yMin;
             for (int i = 0; i < layer.Count; i++)
             {
-                layer[i].DrawPosition = new Vector2(x, currentY);
+                layer[i].DrawPosition = new EvoSim.Vector2(x, currentY);
                 currentY += distanceBetweenNeurons;
             }
         }
