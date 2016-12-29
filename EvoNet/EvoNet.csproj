@@ -120,6 +120,10 @@
       <Project>{0ca1d951-1554-408c-9b2a-48ff8eb89588}</Project>
       <Name>EvoSim</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Graph\Graph.csproj">
+      <Project>{434896CF-A010-41E4-96D6-B404FCCBC115}</Project>
+      <Name>Graph</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Forms\MainForm.resx">
@@ -129,6 +133,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Providers\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />

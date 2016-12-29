@@ -35,6 +35,9 @@ namespace WinFormsGraphicsDevice
         bool activated = true;
         bool initialized;
 
+        public event Action<GameTime> OnUpdate;
+
+
         public bool Activated
         {
             get { return activated; }
@@ -62,6 +65,7 @@ namespace WinFormsGraphicsDevice
             {
                 UpdateGameTime();
                 Update(gametime);
+                OnUpdate(gametime);
                 //Draw(gametime);
                 base.Refresh();
             }
