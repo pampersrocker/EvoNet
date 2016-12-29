@@ -58,8 +58,14 @@ namespace EvoNet.Rendering
             spriteBatch.DrawString(Fonts.FontArial, "D: " + manager.numberOfDeaths, new Vector2(20, 40), Color.Red);
             spriteBatch.DrawString(Fonts.FontArial, "max(G): " + Creature.maximumGeneration, new Vector2(20, 60), Color.Red);
             spriteBatch.DrawString(Fonts.FontArial, "Y: " + manager.year, new Vector2(20, 80), Color.Red);
-            spriteBatch.DrawString(Fonts.FontArial, "LS: " + Creature.oldestCreatureEver.Age + " g: " + Creature.oldestCreatureEver.Generation, new Vector2(20, 100), Color.Red);
-            spriteBatch.DrawString(Fonts.FontArial, "LSA: " + manager.OldestCreatureAlive.Age + " g: " + manager.OldestCreatureAlive.Generation, new Vector2(20, 120), Color.Red);
+            if (Creature.oldestCreatureEver != null)
+            {
+                spriteBatch.DrawString(Fonts.FontArial, "LS: " + Creature.oldestCreatureEver.Age + " g: " + Creature.oldestCreatureEver.Generation, new Vector2(20, 100), Color.Red);
+            }
+            if (manager.OldestCreatureAlive != null)
+            {
+                spriteBatch.DrawString(Fonts.FontArial, "LSA: " + manager.OldestCreatureAlive.Age + " g: " + manager.OldestCreatureAlive.Generation, new Vector2(20, 120), Color.Red);
+            }
             if (manager.AverageAgeOfLastCreaturesAccurate)
             {
                 float averageDeathAge = manager.CalculateAverageAgeOfLastDeadCreatures();
@@ -67,7 +73,7 @@ namespace EvoNet.Rendering
                 spriteBatch.DrawString(Fonts.FontArial, "AvgDA: " + averageDeathAge, new Vector2(20, 140), Color.Red);
             }
 
-            if (EvoGame.Instance.inputManager.EnableFastForward)
+            if (false)
             {
                 spriteBatch.DrawString(Fonts.FontArial, "Graph rendering disabled", new Vector2(20, 180), Color.Red);
                 spriteBatch.DrawString(Fonts.FontArial, "during fast forward!", new Vector2(20, 200), Color.Red);

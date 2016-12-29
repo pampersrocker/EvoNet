@@ -34,10 +34,12 @@
             // evoSimControl1
             // 
             this.evoSimControl1.Activated = true;
+            this.evoSimControl1.Content = null;
+            this.evoSimControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.evoSimControl1.IgnoreFocus = false;
-            this.evoSimControl1.Location = new System.Drawing.Point(12, 44);
+            this.evoSimControl1.Location = new System.Drawing.Point(0, 0);
             this.evoSimControl1.Name = "evoSimControl1";
-            this.evoSimControl1.Size = new System.Drawing.Size(267, 114);
+            this.evoSimControl1.Size = new System.Drawing.Size(284, 261);
             this.evoSimControl1.TabIndex = 0;
             this.evoSimControl1.Text = "evoSimControl1";
             // 

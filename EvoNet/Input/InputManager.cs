@@ -22,12 +22,12 @@ namespace EvoNet.Input
         GameConfig gameConfiguration;
         Camera camera;
 
-        EvoGame game;
-
         bool rightMouseDown = false;
         bool oldSpaceDown = false;
         Vector2 oldMousePosition = Vector2.Zero;
         int scrollWheelValue;
+
+        SimulationRenderer renderer;
 
         public bool EnableFastForward { get; private set; }
 
@@ -39,13 +39,13 @@ namespace EvoNet.Input
             }
         }
 
-        public void Initialize(EvoGame game)
+        public void Initialize(GameConfig config, Simulation sim, SimulationRenderer renderer)
         {
-            gameConfiguration = game.gameConfiguration;
-            Initialize(game.sim);
-            camera = game.simRenderer.Camera;
+            gameConfiguration = config;
+            Initialize(sim);
+            camera = renderer.Camera;
+            this.renderer = renderer;
 
-            this.game = game;
         }
 
         public override void Initialize(Simulation ingame)
@@ -57,11 +57,11 @@ namespace EvoNet.Input
         protected override void Update(float gameTime)
         {
 
-            if (!game.IsActive)
-            {
-                scrollWheelValue = Mouse.GetState().ScrollWheelValue;
-                return;
-            }
+            //if (!game.IsActive)
+            //{
+            //    scrollWheelValue = Mouse.GetState().ScrollWheelValue;
+            //    return;
+            //}
             KeyboardState keyboardState = Keyboard.GetState();
             MouseState mouseState = Mouse.GetState();
 
@@ -78,9 +78,9 @@ namespace EvoNet.Input
 
             if (keyboardState.IsKeyDown(Keys.R))
             {
-                float viewportWidth = game.GraphicsDevice.Viewport.Width;
+                float viewportWidth = renderer.GraphicsDevice.Viewport.Width;
                 float tileMapWidth = simulation.TileMap.GetWorldWidth();
-                float viewportHeight = game.GraphicsDevice.Viewport.Height;
+                float viewportHeight = renderer.GraphicsDevice.Viewport.Height;
                 float tileMapHeight = simulation.TileMap.GetWorldHeight();
                 camera.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
 

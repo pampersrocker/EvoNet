@@ -248,8 +248,14 @@ namespace WinFormsGraphicsDevice
 
             viewport.MinDepth = 0;
             viewport.MaxDepth = 1;
-
-            GraphicsDevice.Viewport = viewport;
+            try
+            {
+                GraphicsDevice.Viewport = viewport;
+            }
+            catch (System.Exception ex)
+            {
+                return ex.ToString();
+            }
 
             return null;
         }
@@ -313,6 +319,10 @@ namespace WinFormsGraphicsDevice
                 {
                     graphicsDeviceService.ResetDevice(ClientSize.Width,
                                                       ClientSize.Height);
+                    PresentationParameters pp = GraphicsDevice.PresentationParameters;
+                    pp.BackBufferWidth = Math.Max(ClientSize.Width, pp.BackBufferWidth);
+                    pp.BackBufferHeight =Math.Max(ClientSize.Height, pp.BackBufferHeight);
+                    graphicsDeviceService.GraphicsDevice.Reset(pp);
                 }
                 catch (Exception e)
                 {

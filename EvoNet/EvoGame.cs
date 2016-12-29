@@ -26,7 +26,7 @@ namespace EvoNet
 
 
 
-        public static EvoGame Instance;
+        //public static EvoGame Instance;
         GraphicsDeviceManager graphics;
         public static SpriteBatch spriteBatch;
 
@@ -53,7 +53,7 @@ namespace EvoNet
             graphics.PreferredBackBufferHeight = 720;
             IsMouseVisible = true;
             Content.RootDirectory = "Content";
-            Instance = this;
+            //Instance = this;
             IsFixedTimeStep = true;
         }
 
@@ -81,7 +81,7 @@ namespace EvoNet
 
 
             inputManager = new InputManager();
-            inputManager.Initialize(this);
+            inputManager.Initialize(gameConfiguration, sim, simRenderer);
 
             modules.Add(inputManager);
 

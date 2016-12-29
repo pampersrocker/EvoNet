@@ -14,6 +14,12 @@ namespace EvoNet.Rendering
         TileMapRenderer tileMapRenderer;
         CreatureRenderer creatureRenderer;
 
+        GraphicsDevice graphicsDevice;
+        public GraphicsDevice GraphicsDevice
+        {
+            get { return graphicsDevice; }
+            set { graphicsDevice = value; }
+        }
         public SimulationRenderer(Simulation inSimulation)
         {
             simulation = inSimulation;
@@ -23,6 +29,7 @@ namespace EvoNet.Rendering
 
         public void Initialize(ContentManager content, GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
         {
+            this.graphicsDevice = graphicsDevice;
             tileMapRenderer = new TileMapRenderer(simulation.TileMap);
 
             tileMapRenderer.Initialize(content, graphicsDevice, spriteBatch);
