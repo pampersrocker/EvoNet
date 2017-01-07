@@ -116,7 +116,7 @@ namespace EvoNet.Rendering
             spriteBatch.Draw(bodyTex, new Rectangle((int)(c.Pos.X + offset.X - Creature.CREATURESIZE / 2), (int)(c.Pos.Y + offset.Y - Creature.CREATURESIZE / 2), Creature.CREATURESIZE, Creature.CREATURESIZE), c.Color_inv.ToXNA());
             spriteBatch.Draw(bodyTex, new Rectangle((int)(c.Pos.X + offset.X - (Creature.CREATURESIZE - 4) / 2), (int)(c.Pos.Y + offset.Y - (Creature.CREATURESIZE - 4) / 2), Creature.CREATURESIZE - 4, Creature.CREATURESIZE - 4), c.Color.ToXNA());
             spriteBatch.Draw(feelerTex, new Rectangle((int)(c.FeelerPos.X + offset.X - 5), (int)(c.FeelerPos.Y + offset.Y - 5), 10, 10), c.TimeSinceLastAttack > Creature.TIMEBETWEENATTACKS ? Color.Blue : Color.Red);
-            Vector2 eyePos = c.Pos + c.Forward * 15;
+            EvoSim.Vector2 eyePos = c.Pos + c.Forward * 15;
             int eyeSize = 10;
             spriteBatch.Draw(bodyTex, new Rectangle((int)(eyePos.X - eyeSize/2), (int)(eyePos.Y - eyeSize/2), eyeSize, eyeSize), Color.Black);
         }
