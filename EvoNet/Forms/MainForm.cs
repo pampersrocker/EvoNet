@@ -48,15 +48,18 @@ namespace EvoNet.Forms
             }
         }
 
+        DateTime fictionalDate = DateTime.Now;
+
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (TileMap.FoodRecord.Count > lastFoodIndex)
+            while (lastFoodIndex < TileMap.FoodRecord.Count)
             {
-                float Value = TileMap.FoodRecord.Skip(lastFoodIndex).Average();
-                lastFoodIndex = TileMap.FoodRecord.Count;
-                foodValueList.Add(new GraphTimeDoubleValue(DateTime.Now, Value));
-                FoodGraph.Refresh();
+                fictionalDate += TimeSpan.FromSeconds(TileMap.FixedUpdateTime);
+                float Value = TileMap.FoodRecord[lastFoodIndex];
+                lastFoodIndex++;
+                foodValueList.Add(new GraphTimeDoubleValue(fictionalDate, Value));
             }
+            FoodGraph.Refresh();
         }
     }
 }
