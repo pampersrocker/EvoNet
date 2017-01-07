@@ -86,9 +86,7 @@ namespace EvoNet.Objects
                     while (creatures.Count < sim.SimulationConfiguration.MinCreatures)
                     {
                         Creature justSpawned = new Creature(
-                            new Vector2(
-                                Simulation.RandomFloat() * simulation.TileMap.GetWorldWidth(),
-                                Simulation.RandomFloat() * simulation.TileMap.GetWorldHeight()),
+                            sim.RandomWorldPosition(),
                             Simulation.RandomFloat() * Mathf.PI * 2,
                             this);
                         creatures.Add(justSpawned);
