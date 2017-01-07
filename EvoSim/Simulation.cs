@@ -21,6 +21,12 @@ namespace EvoSim
       return (float)GlobalRandom.NextDouble();
     }
     [MethodImpl(MethodImplOptions.Synchronized)]
+    public Vector2 RandomWorldPosition()
+    {
+            return new Vector2(Simulation.RandomFloat() * TileMap.GetWorldWidth(),
+                               Simulation.RandomFloat() * TileMap.GetWorldHeight());
+    }
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public static int RandomInt(int min, int max)
     {
       return GlobalRandom.Next(min, max);

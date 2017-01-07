@@ -54,7 +54,7 @@ namespace EvoNet.Objects
         }
 
         private const float MINAGETOGIVEBIRTH = 4f;
-        private const float COST_EAT = 10f;
+        private const float COST_EAT = 1f;
         private const float COST_ATTACK = 10f;
         private const float GAIN_EAT = 100f;
         private const float DESTROYED_ATTACK = 110f;
@@ -141,6 +141,15 @@ namespace EvoNet.Objects
             }
         }
 
+        private Vector2 forward = new Vector2();
+        public Vector2 Forward
+        {
+            get
+            {
+                return forward;
+            }
+        }
+
         private float age = 0;
         public float Age
         {
@@ -179,6 +188,7 @@ namespace EvoNet.Objects
         private const String NAME_OUT_BIRTH       = "Birth";
         private const String NAME_OUT_ROTATE      = "Rotate";
         private const String NAME_OUT_FORWARD     = "Forward";
+        private const String NAME_OUT_STRAFE      = "Strafe";
         private const String NAME_OUT_FEELERANGLE = "Feeler Angle";
         private const String NAME_OUT_ATTACK      = "Attack";
         private const String NAME_OUT_EAT         = "Eat";
@@ -201,6 +211,7 @@ namespace EvoNet.Objects
         private WorkingNeuron outBirth       = new WorkingNeuron();
         private WorkingNeuron outRotate      = new WorkingNeuron();
         private WorkingNeuron outForward     = new WorkingNeuron();
+        private WorkingNeuron outStrafe      = new WorkingNeuron();
         private WorkingNeuron outFeelerAngle = new WorkingNeuron();
         private WorkingNeuron outAttack      = new WorkingNeuron();
         private WorkingNeuron outEat         = new WorkingNeuron();
@@ -339,6 +350,7 @@ namespace EvoNet.Objects
             outBirth      .SetName(NAME_OUT_BIRTH);
             outRotate     .SetName(NAME_OUT_ROTATE);
             outForward    .SetName(NAME_OUT_FORWARD);
+            outStrafe     .SetName(NAME_OUT_STRAFE);
             outFeelerAngle.SetName(NAME_OUT_FEELERANGLE);
             outAttack     .SetName(NAME_OUT_ATTACK);
             outEat        .SetName(NAME_OUT_EAT);
@@ -373,6 +385,7 @@ namespace EvoNet.Objects
             brain.AddOutputNeuron(outBirth);
             brain.AddOutputNeuron(outRotate);
             brain.AddOutputNeuron(outForward);
+            brain.AddOutputNeuron(outStrafe);
             brain.AddOutputNeuron(outFeelerAngle);
             brain.AddOutputNeuron(outAttack);
             brain.AddOutputNeuron(outEat);
@@ -530,6 +543,7 @@ namespace EvoNet.Objects
             outBirth = brain.GetOutputNeuronFromName(NAME_OUT_BIRTH);
             outRotate = brain.GetOutputNeuronFromName(NAME_OUT_ROTATE);
             outForward = brain.GetOutputNeuronFromName(NAME_OUT_FORWARD);
+            outStrafe = brain.GetOutputNeuronFromName(NAME_OUT_STRAFE);
             outFeelerAngle = brain.GetOutputNeuronFromName(NAME_OUT_FEELERANGLE);
             outAttack = brain.GetOutputNeuronFromName(NAME_OUT_ATTACK);
             outEat = brain.GetOutputNeuronFromName(NAME_OUT_EAT);
@@ -613,7 +627,15 @@ namespace EvoNet.Objects
             Tile t = Simulation.TileMap.GetTileAtWorldPosition(pos);
             float costMult = CalculateCostMultiplier(t);
             ActRotate(costMult, fixedDeltaTime);
-            ActMove(costMult, fixedDeltaTime);
+            forward = new Vector2(Mathf.Sin(viewAngle), Mathf.Cos(viewAngle));
+            if(Mathf.Abs(outForward.GetValue()) > Mathf.Abs(outStrafe.GetValue()))
+            {
+                ActMove(costMult, fixedDeltaTime, forward);
+            }
+            else
+            {
+                ActStrafe(costMult, fixedDeltaTime, forward);
+            }
             ActBirth();
             ActFeelerRotate();
             ActEat(costMult, t, fixedDeltaTime);
@@ -676,13 +698,23 @@ namespace EvoNet.Objects
             Energy -= Mathf.Abs(rotateForce * COST_ROTATE * fixedDeltaTime * costMult);
         }
 
-        private void ActMove(float costMult, float fixedDeltaTime)
+        private void ActMove(float costMult, float fixedDeltaTime, Vector2 forwardVector)
         {
-            Vector2 forwardVector = new Vector2(Mathf.Sin(viewAngle), Mathf.Cos(viewAngle)) * MOVESPEED * fixedDeltaTime;
+            Vector2 moveVector = forwardVector * MOVESPEED * fixedDeltaTime;
             float forwardForce = Mathf.ClampNegPos(outForward.GetValue());
             forwardVector *= forwardForce;
             this.pos += forwardVector;
             Energy -= Mathf.Abs(forwardForce * COST_WALK * fixedDeltaTime * costMult);
+        }
+
+        private void ActStrafe(float costMult, float fixedDeltaTime, Vector2 forwardVector)
+        {
+            Vector2 strafeVector = new Vector2(forwardVector.Y, -forwardVector.X);
+            strafeVector *= MOVESPEED * fixedDeltaTime;
+            float strafeForce = Mathf.ClampNegPos(outStrafe.GetValue());
+            strafeVector *= strafeForce;
+            this.pos += strafeVector;
+            Energy -= Mathf.Abs(strafeForce * COST_WALK * fixedDeltaTime * costMult);
         }
 
         private void ActBirth()
