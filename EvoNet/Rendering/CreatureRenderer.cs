@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using EvoNet.Objects;
+using EvoSim.Objects;
 
 namespace EvoNet.Rendering
 {
@@ -73,7 +74,7 @@ namespace EvoNet.Rendering
                 spriteBatch.DrawString(Fonts.FontArial, "AvgDA: " + averageDeathAge, new Vector2(20, 140), Color.Red);
             }
 
-            if (false)
+            if (true)
             {
                 spriteBatch.DrawString(Fonts.FontArial, "Graph rendering disabled", new Vector2(20, 180), Color.Red);
                 spriteBatch.DrawString(Fonts.FontArial, "during fast forward!", new Vector2(20, 200), Color.Red);
@@ -112,10 +113,16 @@ namespace EvoNet.Rendering
 
         private void DrawCreature(Creature c, Vector2 offset = new Vector2())
         {
-            spriteBatch.DrawLine(c.Pos.ToXNA() + offset, c.FeelerPos.ToXNA() +offset, Color.White);
+            for(int i = 0; i<c.AmountOfFeelers; i++)
+            {
+                spriteBatch.DrawLine(c.Pos.ToXNA() + offset, c.Feelers[i].FeelerPos.ToXNA() + offset, Color.White);
+            }
             spriteBatch.Draw(bodyTex, new Rectangle((int)(c.Pos.X + offset.X - Creature.CREATURESIZE / 2), (int)(c.Pos.Y + offset.Y - Creature.CREATURESIZE / 2), Creature.CREATURESIZE, Creature.CREATURESIZE), c.Color_inv.ToXNA());
             spriteBatch.Draw(bodyTex, new Rectangle((int)(c.Pos.X + offset.X - (Creature.CREATURESIZE - 4) / 2), (int)(c.Pos.Y + offset.Y - (Creature.CREATURESIZE - 4) / 2), Creature.CREATURESIZE - 4, Creature.CREATURESIZE - 4), c.Color.ToXNA());
-            spriteBatch.Draw(feelerTex, new Rectangle((int)(c.FeelerPos.X + offset.X - 5), (int)(c.FeelerPos.Y + offset.Y - 5), 10, 10), c.TimeSinceLastAttack > Creature.TIMEBETWEENATTACKS ? Color.Blue : Color.Red);
+            for(int i = 0; i<c.AmountOfFeelers; i++)
+            {
+                spriteBatch.Draw(feelerTex, new Rectangle((int)(c.Feelers[i].FeelerPos.X + offset.X - 5), (int)(c.Feelers[i].FeelerPos.Y + offset.Y - 5), 10, 10), c.Feelers[i].TimeSinceLastAttack > Feeler.TIMEBETWEENATTACKS ? Color.Blue : Color.Red);
+            }
             EvoSim.Vector2 eyePos = c.Pos + c.Forward * 15;
             int eyeSize = 10;
             spriteBatch.Draw(bodyTex, new Rectangle((int)(eyePos.X - eyeSize/2), (int)(eyePos.Y - eyeSize/2), eyeSize, eyeSize), Color.Black);

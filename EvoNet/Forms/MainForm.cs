@@ -50,7 +50,8 @@ namespace EvoNet.Forms
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            float Value = TileMap.FoodRecord.Skip(lastFoodIndex).Average();
+            //float Value = TileMap.FoodRecord.Skip(lastFoodIndex).Average();
+            float Value = 1;
             lastFoodIndex = TileMap.FoodRecord.Count;
             foodValueList.Add(new GraphTimeDoubleValue(DateTime.Now, Value));
             FoodGraph.Refresh();
