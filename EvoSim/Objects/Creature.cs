@@ -68,7 +68,7 @@ namespace EvoNet.Objects
         }
 
         public const float MINAGETOGIVEBIRTH = 4f;
-        public const float COST_EAT = 10f;
+        public const float COST_EAT = 1f;
         public const float COST_ATTACK = 10f;
         public const float GAIN_EAT = 100f;
         public const float DESTROYED_ATTACK = 110f;
@@ -798,7 +798,9 @@ namespace EvoNet.Objects
             inMemory = new InputNeuron[AmountOfMemory];
             outMemory = new WorkingNeuron[AmountOfMemory];
             childIds = info.GetValue(nameof(childIds), typeof(List<long>)) as List<long>;
+            amountOfFeelers = info.GetInt32(nameof(amountOfFeelers));
             brain = info.GetValue("brain", typeof(NeuronalNetwork)) as NeuronalNetwork;
+
 
             SetupFeelers(true);
 
@@ -817,6 +819,7 @@ namespace EvoNet.Objects
             info.AddValue(nameof(motherId), motherId);
             info.AddValue(nameof(AmountOfMemory), AmountOfMemory);
             info.AddValue(nameof(childIds), childIds);
+            info.AddValue(nameof(amountOfFeelers), amountOfFeelers);
             info.AddValue(nameof(brain), brain);
         }
 
