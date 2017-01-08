@@ -75,6 +75,9 @@
     <Compile Include="Controls\EvoSimControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\GraphControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="EvoGame.cs" />
     <Compile Include="Forms\MainForm.cs">
       <SubType>Form</SubType>

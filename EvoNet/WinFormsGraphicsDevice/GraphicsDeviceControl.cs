@@ -65,7 +65,7 @@ namespace WinFormsGraphicsDevice
             {
                 UpdateGameTime();
                 Update(gametime);
-                OnUpdate(gametime);
+                OnUpdate?.Invoke(gametime);
                 //Draw(gametime);
                 base.Refresh();
             }
@@ -275,7 +275,11 @@ namespace WinFormsGraphicsDevice
         {
             try
             {
-                GraphicsDevice.Present();
+                // Present only the viewable part of the backbuffer of this control
+                Rectangle sourceRectangle = new Rectangle(0, 0, ClientSize.Width,
+                                                                ClientSize.Height);
+
+                GraphicsDevice.Present(sourceRectangle, null, this.Handle);
             }
             catch
             {
