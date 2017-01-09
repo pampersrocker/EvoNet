@@ -99,7 +99,7 @@ namespace EvoNet.AI
                     return neuron;
                 }
             }
-            return null;
+            throw new NullReferenceException();
         }
 
         public WorkingNeuron GetHiddenNeuronFromIndex(int index)
@@ -116,7 +116,7 @@ namespace EvoNet.AI
                     return wn;
                 }
             }
-            return null;
+            throw new NullReferenceException();
         }
 
         public WorkingNeuron GetOutputNeuronFromIndex(int index)
@@ -133,7 +133,7 @@ namespace EvoNet.AI
                     return wn;
                 }
             }
-            return null;
+            throw new NullReferenceException();
         }
 
         public void GenerateHiddenNeurons(int amount)

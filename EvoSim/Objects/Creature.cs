@@ -13,6 +13,7 @@ using System.Runtime.Serialization;
 using EvoSim.Serialization;
 using System.Security.Permissions;
 using EvoSim.Tasks;
+using EvoSim.Objects;
 
 namespace EvoNet.Objects
 {
@@ -21,14 +22,29 @@ namespace EvoNet.Objects
     [Serializable]
     public class Creature : ISerializable
     {
-        private int collisionGridX = 0;
-        private int collisionGridY = 0;
+        public int collisionGridX = 0;
+        public int collisionGridY = 0;
 
         public const int CREATURESIZE = 54;
-        public const int FEELERTIPSIZE = 10;
+        
+        private int amountOfFeelers = 1;
+        private Feeler[] feelers;
 
-        private const float MAXIMUMFEELERDISTANCE = 100;
-        private float feelerOcclusion = 0;
+        public int AmountOfFeelers
+        {
+            get
+            {
+                return amountOfFeelers;
+            }
+        }
+        public Feeler[] Feelers
+        {
+            get
+            {
+                return feelers;
+            }
+        }
+
 
         private static int _maximumGeneration = 1;
         public static int maximumGeneration
@@ -51,16 +67,16 @@ namespace EvoNet.Objects
             }
         }
 
-        private const float MINAGETOGIVEBIRTH = 4f;
-        private const float COST_EAT = 1f;
-        private const float COST_ATTACK = 10f;
-        private const float GAIN_EAT = 100f;
-        private const float DESTROYED_ATTACK = 110f;
-        private const float GAIN_ATTACK = 50f;
-        private const float COST_PERMANENT = 1f;
-        private const float COST_WALK = 5f;
-        private const float COST_ROTATE = 5f;
-        private const float COST_PER_MEMORY_NEURON = 1.5f;
+        public const float MINAGETOGIVEBIRTH = 4f;
+        public const float COST_EAT = 1f;
+        public const float COST_ATTACK = 10f;
+        public const float GAIN_EAT = 100f;
+        public const float DESTROYED_ATTACK = 110f;
+        public const float GAIN_ATTACK = 50f;
+        public const float COST_PERMANENT = 1f;
+        public const float COST_WALK = 5f;
+        public const float COST_ROTATE = 5f;
+        public const float COST_PER_MEMORY_NEURON = 1.5f;
 
         private const float FOODDROPPERCENTAGE = 0;
 
@@ -92,13 +108,14 @@ namespace EvoNet.Objects
             }
         }
         private float viewAngle;
-
-        private float feelerAngle;
-        private Vector2 feelerPos;
-        public Vector2 FeelerPos
+        public float ViewAngle
         {
-            get { return feelerPos; }
+            get
+            {
+                return viewAngle;
+            }
         }
+        
         private float energy_ = 150;
         private object energyLock = new object();
         public float Energy
@@ -170,38 +187,34 @@ namespace EvoNet.Objects
         {
             get { return Manager.simulation; }
         }
-        private const String NAME_IN_BIAS              = "bias";
-        private const String NAME_IN_FOODVALUEPOSITION = "Food Value Position";
-        private const String NAME_IN_FOODVALUEFEELER   = "Food Value Feeler";
-        private const String NAME_IN_OCCLUSIONFEELER   = "Occlusion Feeler";
-        private const String NAME_IN_ENERGY            = "Energy";
-        private const String NAME_IN_AGE               = "Age";
-        private const String NAME_IN_GENETICDIFFERENCE = "Genetic Difference";
-        private const String NAME_IN_WASATTACKED       = "Was Attacked";
-        private const String NAME_IN_WATERONFEELER     = "Water On Feeler";
-        private const String NAME_IN_WATERONCREATURE   = "Water On Creature";
+        public const String NAME_IN_BIAS              = "bias";
+        public const String NAME_IN_FOODVALUEPOSITION = "Food Value Position";
+        public const String NAME_IN_FOODVALUEFEELER   = "Food Value Feeler";
+        public const String NAME_IN_OCCLUSIONFEELER   = "Occlusion Feeler";
+        public const String NAME_IN_ENERGY            = "Energy";
+        public const String NAME_IN_AGE               = "Age";
+        public const String NAME_IN_GENETICDIFFERENCE = "Genetic Difference";
+        public const String NAME_IN_WASATTACKED       = "Was Attacked";
+        public const String NAME_IN_WATERONFEELER     = "Water On Feeler";
+        public const String NAME_IN_WATERONCREATURE   = "Water On Creature";
         //private const String NAME_IN_OSCILATION        = "Oscilation input";
-        private const String NAME_IN_MEMORY            = "Input Memory #";
+        public const String NAME_IN_MEMORY            = "Input Memory #";
 
-        private const String NAME_OUT_BIRTH       = "Birth";
-        private const String NAME_OUT_ROTATE      = "Rotate";
-        private const String NAME_OUT_FORWARD     = "Forward";
-        private const String NAME_OUT_STRAFE      = "Strafe";
-        private const String NAME_OUT_FEELERANGLE = "Feeler Angle";
-        private const String NAME_OUT_ATTACK      = "Attack";
-        private const String NAME_OUT_EAT         = "Eat";
+        public const String NAME_OUT_BIRTH       = "Birth";
+        public const String NAME_OUT_ROTATE      = "Rotate";
+        public const String NAME_OUT_FORWARD     = "Forward";
+        public const String NAME_OUT_STRAFE      = "Strafe";
+        public const String NAME_OUT_FEELERANGLE = "Feeler Angle";
+        public const String NAME_OUT_ATTACK      = "Attack";
+        public const String NAME_OUT_EAT         = "Eat";
         //private const String NAME_OUT_OSCILATION  = "Oscilation output";
-        private const String NAME_OUT_MEMORY      = "Output Memory #";
+        public const String NAME_OUT_MEMORY      = "Output Memory #";
 
         private InputNeuron inBias              = new InputNeuron();
         private InputNeuron inFoodValuePosition = new InputNeuron();
-        private InputNeuron inFoodValueFeeler   = new InputNeuron();
-        private InputNeuron inOcclusionFeeler   = new InputNeuron();
         private InputNeuron inEnergy            = new InputNeuron();
         private InputNeuron inAge               = new InputNeuron();
-        private InputNeuron inGeneticDifference = new InputNeuron();
         private InputNeuron inWasAttacked       = new InputNeuron();
-        private InputNeuron inWaterOnFeeler     = new InputNeuron();
         private InputNeuron inWaterOnCreature   = new InputNeuron();
         //private InputNeuron inOscilation        = new InputNeuron();
         private InputNeuron[] inMemory          = null;
@@ -210,8 +223,6 @@ namespace EvoNet.Objects
         private WorkingNeuron outRotate      = new WorkingNeuron();
         private WorkingNeuron outForward     = new WorkingNeuron();
         private WorkingNeuron outStrafe      = new WorkingNeuron();
-        private WorkingNeuron outFeelerAngle = new WorkingNeuron();
-        private WorkingNeuron outAttack      = new WorkingNeuron();
         private WorkingNeuron outEat         = new WorkingNeuron();
         //private WorkingNeuron outOscilation  = new WorkingNeuron();
         private WorkingNeuron[] outMemory    = null;
@@ -294,14 +305,8 @@ namespace EvoNet.Objects
             }
         }
 
-        private float timeSinceLastAttack = 0;
-        public float TimeSinceLastAttack
-        {
-            get { return timeSinceLastAttack; }
-        }
-        public const float TIMEBETWEENATTACKS = 0.1f;
+        
 
-        private Creature feelerCreature = null;
 
         // Temps for deserialization
         private long motherId;
@@ -329,13 +334,9 @@ namespace EvoNet.Objects
             this.viewAngle = viewAngle;
             inBias             .SetName(NAME_IN_BIAS);
             inFoodValuePosition.SetName(NAME_IN_FOODVALUEPOSITION);
-            inFoodValueFeeler  .SetName(NAME_IN_FOODVALUEFEELER);
-            inOcclusionFeeler  .SetName(NAME_IN_OCCLUSIONFEELER);
             inEnergy           .SetName(NAME_IN_ENERGY);
             inAge              .SetName(NAME_IN_AGE);
-            inGeneticDifference.SetName(NAME_IN_GENETICDIFFERENCE);
             inWasAttacked      .SetName(NAME_IN_WASATTACKED);
-            inWaterOnFeeler    .SetName(NAME_IN_WATERONFEELER);
             inWaterOnCreature  .SetName(NAME_IN_WATERONCREATURE);
             //inOscilation       .SetName(NAME_IN_OSCILATION);
             inMemory = new InputNeuron[AmountOfMemory];
@@ -349,8 +350,6 @@ namespace EvoNet.Objects
             outRotate     .SetName(NAME_OUT_ROTATE);
             outForward    .SetName(NAME_OUT_FORWARD);
             outStrafe     .SetName(NAME_OUT_STRAFE);
-            outFeelerAngle.SetName(NAME_OUT_FEELERANGLE);
-            outAttack     .SetName(NAME_OUT_ATTACK);
             outEat        .SetName(NAME_OUT_EAT);
             //outOscilation .SetName(NAME_OUT_OSCILATION);
             outMemory = new WorkingNeuron[AmountOfMemory];
@@ -364,13 +363,9 @@ namespace EvoNet.Objects
 
             brain.AddInputNeuron(inBias);
             brain.AddInputNeuron(inFoodValuePosition);
-            brain.AddInputNeuron(inFoodValueFeeler);
-            brain.AddInputNeuron(inOcclusionFeeler);
             brain.AddInputNeuron(inEnergy);
             brain.AddInputNeuron(inAge);
-            brain.AddInputNeuron(inGeneticDifference);
             brain.AddInputNeuron(inWasAttacked);
-            brain.AddInputNeuron(inWaterOnFeeler);
             brain.AddInputNeuron(inWaterOnCreature);
             //brain.AddInputNeuron(inOscilation);
             for(int i = 0; i<AmountOfMemory; i++)
@@ -384,8 +379,6 @@ namespace EvoNet.Objects
             brain.AddOutputNeuron(outRotate);
             brain.AddOutputNeuron(outForward);
             brain.AddOutputNeuron(outStrafe);
-            brain.AddOutputNeuron(outFeelerAngle);
-            brain.AddOutputNeuron(outAttack);
             brain.AddOutputNeuron(outEat);
             //brain.AddOutputNeuron(outOscilation);
             for(int i = 0; i < AmountOfMemory; i++)
@@ -393,14 +386,17 @@ namespace EvoNet.Objects
                 brain.AddOutputNeuron(outMemory[i]);
             }
 
+
+            SetupFeelers(false);
+
             brain.GenerateFullMesh();
 
             brain.RandomizeAllWeights();
-            CalculateFeelerPos(MAXIMUMFEELERDISTANCE);
 
             Color = Color.FromFloat(Simulation.RandomFloat(), Simulation.RandomFloat(), Simulation.RandomFloat());
             GenerateColorInv();
             CalculateCollisionGridPos();
+
         }
 
         public Creature(Creature mother, CreatureManager manager) :
@@ -418,13 +414,14 @@ namespace EvoNet.Objects
             this.brain = mother.brain.CloneFullMesh();
 
             AmountOfMemory = mother.AmountOfMemory;
+            amountOfFeelers = mother.AmountOfFeelers;
             inMemory = new InputNeuron[AmountOfMemory];
             outMemory = new WorkingNeuron[AmountOfMemory];
 
+            SetupFeelers(true);
             SetupVariablesFromBrain();
 
-
-            CalculateFeelerPos(MAXIMUMFEELERDISTANCE);
+            
             if(Simulation.RandomFloat() > 0.01f)
             {
                 MutateConnections();
@@ -434,12 +431,26 @@ namespace EvoNet.Objects
                 MutateMemory();
             }
 
+            if(Simulation.RandomFloat() < 0.1f)
+            {
+                AddFeeler();
+            }
+
             MutateColor(mother);
             GenerateColorInv();
 
             if(manager.SelectedCreature == null || manager.SelectedCreature.Energy < 100)
             {
                 manager.SelectedCreature = this;
+            }
+        }
+
+        private void SetupFeelers(bool isChild)
+        {
+            feelers = new Feeler[amountOfFeelers];
+            for(int i = 0; i<amountOfFeelers; i++)
+            {
+                feelers[i] = new Feeler(this, i, isChild);
             }
         }
 
@@ -487,6 +498,20 @@ namespace EvoNet.Objects
             }
         }
 
+        private void AddFeeler()
+        {
+            Feeler newFeeler = new Feeler(this, AmountOfFeelers, true);
+            Feeler[] newFeelers = new Feeler[AmountOfFeelers + 1];
+            for(int i = 0; i<AmountOfFeelers; i++)
+            {
+                newFeelers[i] = feelers[i];
+            }
+            newFeeler.AddAndMesh();
+            newFeelers[AmountOfFeelers] = newFeeler;
+            feelers = newFeelers;
+            amountOfFeelers++;
+        }
+
         private void MutateConnections()
         {
             for (int i = 0; i < 10; i++)
@@ -522,15 +547,15 @@ namespace EvoNet.Objects
 
         private void SetupVariablesFromBrain()
         {
+            for(int i = 0; i<amountOfFeelers; i++)
+            {
+                feelers[i].SetupVariablesFromBrain(i);
+            }
             inBias = brain.GetInputNeuronFromName(NAME_IN_BIAS);
             inFoodValuePosition = brain.GetInputNeuronFromName(NAME_IN_FOODVALUEPOSITION);
-            inFoodValueFeeler = brain.GetInputNeuronFromName(NAME_IN_FOODVALUEFEELER);
-            inOcclusionFeeler = brain.GetInputNeuronFromName(NAME_IN_OCCLUSIONFEELER);
             inEnergy = brain.GetInputNeuronFromName(NAME_IN_ENERGY);
             inAge = brain.GetInputNeuronFromName(NAME_IN_AGE);
-            inGeneticDifference = brain.GetInputNeuronFromName(NAME_IN_GENETICDIFFERENCE);
             inWasAttacked = brain.GetInputNeuronFromName(NAME_IN_WASATTACKED);
-            inWaterOnFeeler = brain.GetInputNeuronFromName(NAME_IN_WATERONFEELER);
             inWaterOnCreature = brain.GetInputNeuronFromName(NAME_IN_WATERONCREATURE);
             //inOscilation = brain.GetInputNeuronFromName(NAME_IN_OSCILATION);
             for(int i = 0; i<AmountOfMemory; i++)
@@ -542,8 +567,6 @@ namespace EvoNet.Objects
             outRotate = brain.GetOutputNeuronFromName(NAME_OUT_ROTATE);
             outForward = brain.GetOutputNeuronFromName(NAME_OUT_FORWARD);
             outStrafe = brain.GetOutputNeuronFromName(NAME_OUT_STRAFE);
-            outFeelerAngle = brain.GetOutputNeuronFromName(NAME_OUT_FEELERANGLE);
-            outAttack = brain.GetOutputNeuronFromName(NAME_OUT_ATTACK);
             outEat = brain.GetOutputNeuronFromName(NAME_OUT_EAT);
             //outOscilation = brain.GetOutputNeuronFromName(NAME_OUT_OSCILATION);
             for(int i = 0; i<AmountOfMemory; i++)
@@ -566,21 +589,7 @@ namespace EvoNet.Objects
             }
         }
 
-        private float CalculateGeneticDifferencToFeelerCreature()
-        {
-            if(feelerCreature == null)
-            {
-                return 0;
-            }
-            Vector3 vec = new Vector3(
-                Color.R - feelerCreature.Color.R,
-                Color.G - feelerCreature.Color.G,
-                Color.B - feelerCreature.Color.B
-                );
-
-            vec /= 255f;
-            return vec.Length();
-        }
+        
 
         public void GenerateColorInv()
         {
@@ -598,19 +607,19 @@ namespace EvoNet.Objects
             brain.Invalidate();
 
             Tile creatureTile = Simulation.TileMap.GetTileAtWorldPosition(pos);
-            Tile feelerTile = Simulation.TileMap.GetTileAtWorldPosition(feelerPos);
 
             inBias.SetValue(1);
             inFoodValuePosition.SetValue(creatureTile.food / TileMap.MAXIMUMFOODPERTILE);
-            inFoodValueFeeler.SetValue(feelerTile.food / TileMap.MAXIMUMFOODPERTILE);
-            inOcclusionFeeler.SetValue(feelerOcclusion);
+            for(int i = 0; i<amountOfFeelers; i++)
+            {
+                feelers[i].ReadSensors(Simulation);
+            }
             inEnergy.SetValue((Energy - MINIMUMSURVIVALENERGY) / (STARTENERGY - MINIMUMSURVIVALENERGY));
             inAge.SetValue(age / 10f);
-            inGeneticDifference.SetValue(CalculateGeneticDifferencToFeelerCreature());
             inWasAttacked.SetValue(Mathf.Clamp01(1 - TimeSinceThisWasAttacked));
-            inWaterOnFeeler.SetValue(feelerTile.IsLand() ? 0 : 1);
             inWaterOnCreature.SetValue(creatureTile.IsLand() ? 0 : 1);
             //inOscilation.SetValue(Mathf.Sin(OscilationValue));
+
         }
 
         CreatureTask currentTask;
@@ -637,14 +646,16 @@ namespace EvoNet.Objects
             ActBirth();
             ActFeelerRotate();
             ActEat(costMult, t, fixedDeltaTime);
-            ActAttack(costMult);
+            for(int i = 0; i<amountOfFeelers; i++)
+            {
+                feelers[i].ActAttack(costMult, fixedDeltaTime);
+            }
 
             //OscilationValue += outOscilation.GetValue();
 
             Energy -= COST_PERMANENT * fixedDeltaTime * costMult;
             Energy -= COST_PER_MEMORY_NEURON * fixedDeltaTime * costMult * AmountOfMemory;
 
-            timeSinceLastAttack += fixedDeltaTime;
             TimeSinceThisWasAttacked += fixedDeltaTime;
             age += fixedDeltaTime;
 
@@ -674,20 +685,7 @@ namespace EvoNet.Objects
             currentTask.RemoveCreature(this);
         }
 
-        private void ActAttack(float costMult)
-        {
-            if(outAttack.GetValue() > 0 && timeSinceLastAttack > TIMEBETWEENATTACKS)
-            {
-                timeSinceLastAttack = 0;
-                Energy -= COST_ATTACK;
-                if(feelerCreature != null)
-                {
-                    feelerCreature.Energy -= DESTROYED_ATTACK;
-                    feelerCreature.TimeSinceThisWasAttacked = 0;
-                    this.Energy += GAIN_ATTACK;
-                }
-            }
-        }
+        
 
         private void ActRotate(float costMult, float fixedDeltaTime)
         {
@@ -723,7 +721,10 @@ namespace EvoNet.Objects
 
         private void ActFeelerRotate()
         {
-            feelerAngle = Mathf.ClampNegPos(outFeelerAngle.GetValue()) * Mathf.PI;
+            for(int i = 0; i<amountOfFeelers; i++)
+            {
+                feelers[i].ActFeelerRotate();
+            }
         }
 
         private void ActEat(float costMult, Tile creatureTile, float fixedDeltaTime)
@@ -772,67 +773,15 @@ namespace EvoNet.Objects
             return Energy > STARTENERGY + MINIMUMSURVIVALENERGY * 1.1f && Age > MINAGETOGIVEBIRTH;
         }
 
-        public void CalculateFeelerPos(float feelerDistance)
-        {
-            float angle = feelerAngle + viewAngle;
-            Vector2 localFeelerPos = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle)) * feelerDistance;
-            feelerPos = pos + localFeelerPos;
-        }
+        
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void HandleCollisions()
         {
-            feelerOcclusion = 0;
-            feelerCreature = null;
-            CalculateFeelerPos(MAXIMUMFEELERDISTANCE);
-            for (int i = collisionGridX - 1; i <= collisionGridX + 1; i++)
+            for (int i = 0; i < amountOfFeelers; i++)
             {
-                for (int k = collisionGridY - 1; k <= collisionGridY + 1; k++)
-                {
-                    if (i >= 0 && k >= 0 && i < CreatureManager.COLLISIONGRIDSIZE && k < CreatureManager.COLLISIONGRIDSIZE)
-                    {
-                        List<Creature> collisionList = CreatureManager.GetCollisionGridList(i, k);
-                        HandleCollisionsWithList(collisionList);
-                    }
-                }
+                feelers[i].HandleCollisions();
             }
-        }
-
-        private void HandleCollisionsWithList(List<Creature> creatures)
-        {
-            for(int i = 0; i<creatures.Count; i++)
-            {
-                Creature c = creatures[i];
-                if(c != null) HandleCollisionWithCreature(c);
-            }
-        }
-
-        private void HandleCollisionWithCreature(Creature c)
-        {
-            if (this == c) return;
-            if(feelerOcclusion != 1) HandleCollisionWithCreatureEye(c);
-        }
-
-        private void HandleCollisionWithCreatureEye(Creature c)
-        {
-            for(float t = 0; t<= 1 - feelerOcclusion; t += 0.1f)
-            {
-                CalculateFeelerPos(MAXIMUMFEELERDISTANCE * t);
-                if (IsMyFeelerCollidingWithCreature(c))
-                {
-                    feelerOcclusion = 1 - t;
-                    feelerCreature = c;
-                    return;
-                }
-            }
-        }
-
-        private bool IsMyFeelerCollidingWithCreature(Creature c)
-        {
-            float dist = (this.feelerPos - c.pos).LengthSquared();
-            float minDist = (FEELERTIPSIZE + CREATURESIZE) / 2;
-            minDist *= minDist;
-            return dist < minDist;
         }
 
         public Creature(SerializationInfo info, StreamingContext context)
@@ -840,7 +789,6 @@ namespace EvoNet.Objects
             id = info.GetInt64(nameof(id));
             pos = info.GetVector2(nameof(pos));
             viewAngle = info.GetSingle(nameof(viewAngle));
-            feelerAngle = info.GetSingle(nameof(feelerAngle));
             Energy = info.GetSingle(nameof(Energy));
             age = info.GetSingle(nameof(age));
             generation = info.GetInt32(nameof(generation));
@@ -850,7 +798,11 @@ namespace EvoNet.Objects
             inMemory = new InputNeuron[AmountOfMemory];
             outMemory = new WorkingNeuron[AmountOfMemory];
             childIds = info.GetValue(nameof(childIds), typeof(List<long>)) as List<long>;
+            amountOfFeelers = info.GetInt32(nameof(amountOfFeelers));
             brain = info.GetValue("brain", typeof(NeuronalNetwork)) as NeuronalNetwork;
+
+
+            SetupFeelers(true);
 
         }
 
@@ -860,7 +812,6 @@ namespace EvoNet.Objects
             info.AddValue(nameof(id), id);
             info.AddVector2(nameof(pos), pos);
             info.AddValue(nameof(viewAngle), viewAngle);
-            info.AddValue(nameof(feelerAngle), feelerAngle);
             info.AddValue(nameof(Energy), Energy);
             info.AddValue(nameof(age), age);
             info.AddValue(nameof(generation), generation);
@@ -868,6 +819,7 @@ namespace EvoNet.Objects
             info.AddValue(nameof(motherId), motherId);
             info.AddValue(nameof(AmountOfMemory), AmountOfMemory);
             info.AddValue(nameof(childIds), childIds);
+            info.AddValue(nameof(amountOfFeelers), amountOfFeelers);
             info.AddValue(nameof(brain), brain);
         }
 
