@@ -22,6 +22,7 @@ namespace EvoNet.Controls
     {
         public VertexBuffer VertexAreaBuffer;
         public IndexBuffer IndexAreaBuffer;
+        public VertexBuffer VertexLineBuffer;
         public int NumElements;
     }
 
@@ -34,6 +35,11 @@ namespace EvoNet.Controls
             InternalVertexDeclaration = new VertexDeclaration(
                 new VertexElement(0, VertexElementFormat.Vector2, VertexElementUsage.Position, 0)
             );
+        }
+
+        public VertexPosition2(Vector2 Position)
+        {
+            this.Position = Position;
         }
 
         VertexDeclaration IVertexType.VertexDeclaration
@@ -70,7 +76,8 @@ namespace EvoNet.Controls
             Effect = manager.Load<Effect>("Color");
         }
 
-        List<VertexPosition2> vertexCache = new List<VertexPosition2>();
+        List<VertexPosition2> vertexAreaCache = new List<VertexPosition2>();
+        List<VertexPosition2> vertexLineCache = new List<VertexPosition2>();
         List<int> indexCache = new List<int>();
 
         private void DrawGraph(IGraphValueList graph)
@@ -112,7 +119,8 @@ namespace EvoNet.Controls
                     return ((float)((alpha - minX) / (maxX - minX)) - 0.5f) * 2.0f;
                 };
 
-                vertexCache.Clear();
+                vertexAreaCache.Clear();
+                vertexLineCache.Clear();
                 indexCache.Clear();
 
                 VertexPosition2 upperPoint = new VertexPosition2();
@@ -121,18 +129,43 @@ namespace EvoNet.Controls
                 upperPoint.Position = new Vector2(-1, GetRelativeY(graph[0].DisplayValue));
                 lowerPoint.Position = new Vector2(-1, -1);
 
-                vertexCache.Add(upperPoint);
-                vertexCache.Add(lowerPoint);
+                vertexAreaCache.Add(upperPoint);
+                vertexAreaCache.Add(lowerPoint);
+
+                float lineWidth = (5.0f / Height) / 2.0f;
+                Vector2 lineWidthOffset = new Vector2(0.0f, lineWidth/2.0f);
+
+                vertexLineCache.Add(new VertexPosition2(upperPoint.Position + lineWidthOffset));
+                vertexLineCache.Add(new VertexPosition2(upperPoint.Position - lineWidthOffset));
+
                 CurrentVertexIndex = 2;
+
+                Vector2 lastUpperPoint;
+
                 for (int GraphIndex = 1; GraphIndex < graph.Count; GraphIndex++)
                 {
                     float x = GetRelativeX(graph[GraphIndex].DisplayPosition);
                     float y = GetRelativeY(graph[GraphIndex].DisplayValue);
+
+                    lastUpperPoint = upperPoint.Position;
+
                     upperPoint.Position = new Vector2(x, y);
                     lowerPoint.Position = new Vector2(x, -1);
-                    vertexCache.Add(upperPoint);
-                    vertexCache.Add(lowerPoint);
+                    vertexAreaCache.Add(upperPoint);
+                    vertexAreaCache.Add(lowerPoint);
 
+                    // Calculate orthogonal vector of direction from last point to this one,
+                    // so the line keeps its thickness along slopes
+                    // Without this sloped graphs would get very thin
+                    Vector2 dirFromLastPoint = upperPoint.Position - lastUpperPoint;
+                    dirFromLastPoint.Normalize();
+                    Vector2 orthogonalDir = new Vector2(-dirFromLastPoint.Y, dirFromLastPoint.X);
+
+                    vertexLineCache.Add(new VertexPosition2(upperPoint.Position + orthogonalDir * lineWidth));
+                    vertexLineCache.Add(new VertexPosition2(upperPoint.Position - orthogonalDir * lineWidth));
+
+                    // Counter Clockwise Tris get culled in our current setting
+                    // So draw 2 triangles in clockwise order
                     // -2---+0
                     //  |   /|
                     //  |  / |
@@ -154,22 +187,41 @@ namespace EvoNet.Controls
                     CurrentVertexIndex += 2;
 
                 }
+                cache.VertexLineBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPosition2), CurrentVertexIndex, BufferUsage.WriteOnly);
+                cache.VertexLineBuffer.SetData(vertexLineCache.ToArray());
 
                 cache.VertexAreaBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPosition2), CurrentVertexIndex, BufferUsage.WriteOnly);
-                cache.VertexAreaBuffer.SetData(vertexCache.ToArray());
+                cache.VertexAreaBuffer.SetData(vertexAreaCache.ToArray());
                 cache.IndexAreaBuffer = new IndexBuffer(GraphicsDevice, IndexElementSize.ThirtyTwoBits, indexCache.Count, BufferUsage.WriteOnly);
                 cache.IndexAreaBuffer.SetData(indexCache.ToArray());
 
                 cache.NumElements = graph.Count;
                 graphCaches[graph] = cache;
             }
-            Effect.Parameters["Color"].SetValue(new Vector4((float)graph.Color.R / 255.0f, graph.Color.G / 255.0f, graph.Color.B /255.0f, (float)graph.PlaneAlpha));
+            Effect.Parameters["Color"].SetValue(
+                new Vector4(
+                    graph.Color.R / 255.0f,
+                    graph.Color.G / 255.0f,
+                    graph.Color.B / 255.0f,
+                    (float)graph.PlaneAlpha));
             GraphicsDevice.Indices = cache.IndexAreaBuffer;
             GraphicsDevice.SetVertexBuffer(cache.VertexAreaBuffer);
             foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
             {
                 pass.Apply();
                 GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, cache.VertexAreaBuffer.VertexCount, 0, cache.IndexAreaBuffer.IndexCount / 3);
+            }
+            Effect.Parameters["Color"].SetValue(
+                new Vector4(
+                    graph.Color.R / 255.0f,
+                    graph.Color.G / 255.0f,
+                    graph.Color.B / 255.0f,
+                    (float)graph.GraphAlpha));
+            GraphicsDevice.SetVertexBuffer(cache.VertexLineBuffer);
+            foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, cache.VertexLineBuffer.VertexCount, 0, cache.IndexAreaBuffer.IndexCount / 3);
             }
         }
 
