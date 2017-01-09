@@ -60,11 +60,11 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.FoodGraph = new Graph.Graph();
+            this.NumberOfCreaturesAliveGraph = new EvoNet.Controls.GraphControl();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.evoSimControl1 = new EvoNet.Controls.EvoSimControl();
-            this.NumberOfCreaturesAliveGraph = new EvoNet.Controls.GraphControl();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.menuStrip1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -316,6 +316,17 @@
             this.FoodGraph.Size = new System.Drawing.Size(291, 276);
             this.FoodGraph.TabIndex = 1;
             // 
+            // NumberOfCreaturesAliveGraph
+            // 
+            this.NumberOfCreaturesAliveGraph.Activated = true;
+            this.NumberOfCreaturesAliveGraph.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.NumberOfCreaturesAliveGraph.IgnoreFocus = true;
+            this.NumberOfCreaturesAliveGraph.Location = new System.Drawing.Point(3, 3);
+            this.NumberOfCreaturesAliveGraph.Name = "NumberOfCreaturesAliveGraph";
+            this.NumberOfCreaturesAliveGraph.Size = new System.Drawing.Size(291, 276);
+            this.NumberOfCreaturesAliveGraph.TabIndex = 2;
+            this.NumberOfCreaturesAliveGraph.Text = "graphControl1";
+            // 
             // timer1
             // 
             this.timer1.Enabled = true;
@@ -350,17 +361,6 @@
             this.evoSimControl1.Size = new System.Drawing.Size(631, 564);
             this.evoSimControl1.TabIndex = 2;
             this.evoSimControl1.Text = "evoSimControl1";
-            // 
-            // NumberOfCreaturesAliveGraph
-            // 
-            this.NumberOfCreaturesAliveGraph.Activated = true;
-            this.NumberOfCreaturesAliveGraph.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.NumberOfCreaturesAliveGraph.IgnoreFocus = false;
-            this.NumberOfCreaturesAliveGraph.Location = new System.Drawing.Point(3, 3);
-            this.NumberOfCreaturesAliveGraph.Name = "NumberOfCreaturesAliveGraph";
-            this.NumberOfCreaturesAliveGraph.Size = new System.Drawing.Size(291, 276);
-            this.NumberOfCreaturesAliveGraph.TabIndex = 2;
-            this.NumberOfCreaturesAliveGraph.Text = "graphControl1";
             // 
             // MainForm
             // 

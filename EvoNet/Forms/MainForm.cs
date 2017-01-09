@@ -20,8 +20,8 @@ namespace EvoNet.Forms
             InitializeComponent();
 
             foodValueList.Color = Color.Green;
-            FoodGraph.Add("Food", foodValueList);
-
+            //FoodGraph.Add("Food", foodValueList);
+            NumberOfCreaturesAliveGraph.Add("Food", foodValueList);
             evoSimControl1.OnUpdate += EvoSimControl1_OnUpdate;
 
         }
