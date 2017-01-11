@@ -111,6 +111,10 @@ namespace EvoNet.Controls
 
                 Func<decimal, float> GetRelativeY = (decimal alpha) =>
                 {
+                    if(minY == maxY)
+                    {
+                        return 0.0f;
+                    }
                     return ((float)((alpha - minY) / (maxY - minY)) - 0.5f) * 2.0f;
                 };
 

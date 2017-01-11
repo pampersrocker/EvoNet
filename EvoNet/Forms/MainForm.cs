@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using EvoNet.Controls;
 using Graph;
 using EvoNet.Map;
+using EvoNet.Objects;
 
 namespace EvoNet.Forms
 {
@@ -20,8 +21,10 @@ namespace EvoNet.Forms
             InitializeComponent();
 
             foodValueList.Color = Color.Green;
+            numberCreaturesAlive.Color = Color.Red;
             //FoodGraph.Add("Food", foodValueList);
             NumberOfCreaturesAliveGraph.Add("Food", foodValueList);
+            NumberOfCreaturesAliveGraph.Add("Creatures", numberCreaturesAlive);
             evoSimControl1.OnUpdate += EvoSimControl1_OnUpdate;
 
         }
@@ -32,7 +35,9 @@ namespace EvoNet.Forms
         }
 
         GraphValueList foodValueList = new GraphValueList();
+        GraphValueList numberCreaturesAlive = new GraphValueList();
         int lastFoodIndex = 0;
+        int lastCreatureIndex = 0;
 
         private void exitToolStripMenuItem1_Click(object sender, EventArgs e)
         {
@@ -48,18 +53,34 @@ namespace EvoNet.Forms
             }
         }
 
-        DateTime fictionalDate = DateTime.Now;
+        private CreatureManager CreatureManager
+        {
+            get
+            {
+                return evoSimControl1.sim.CreatureManager;
+            }
+        }
+
+        DateTime fictionalDateForFood = DateTime.Now;
+        DateTime fictionalDateForCreatures = DateTime.Now;
 
         private void timer1_Tick(object sender, EventArgs e)
         {
             while (lastFoodIndex < TileMap.FoodRecord.Count)
             {
-                fictionalDate += TimeSpan.FromSeconds(TileMap.FixedUpdateTime);
+                fictionalDateForFood += TimeSpan.FromSeconds(TileMap.FixedUpdateTime);
                 float Value = TileMap.FoodRecord[lastFoodIndex];
                 lastFoodIndex++;
-                foodValueList.Add(new GraphTimeDoubleValue(fictionalDate, Value));
+                foodValueList.Add(new GraphTimeDoubleValue(fictionalDateForFood, Value));
             }
-            FoodGraph.Refresh();
+            while (lastCreatureIndex < CreatureManager.AliveCreaturesRecord.Count)
+            {
+                fictionalDateForCreatures += TimeSpan.FromSeconds(CreatureManager.FixedUpdateTime);
+                float Value = CreatureManager.AliveCreaturesRecord[lastCreatureIndex];
+                lastCreatureIndex++;
+                numberCreaturesAlive.Add(new GraphTimeDoubleValue(fictionalDateForCreatures, Value));
+            }
+            //FoodGraph.Refresh();
         }
     }
 }
