@@ -20,11 +20,10 @@ namespace EvoNet.Forms
         {
             InitializeComponent();
 
-            foodValueList.Color = Color.Green;
             numberCreaturesAlive.Color = Color.Red;
-            //FoodGraph.Add("Food", foodValueList);
-            NumberOfCreaturesAliveGraph.Add("Food", foodValueList);
+            foodValueList.Color = Color.Green;
             NumberOfCreaturesAliveGraph.Add("Creatures", numberCreaturesAlive);
+            NumberOfCreaturesAliveGraph.Add("Food", foodValueList);
             evoSimControl1.OnUpdate += EvoSimControl1_OnUpdate;
 
         }
