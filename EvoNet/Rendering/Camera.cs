@@ -9,6 +9,7 @@ namespace EvoNet.Rendering
 {
     public class Camera
     {
+
         Vector2 translation;
         public Vector2 Translation
         {
@@ -36,7 +37,7 @@ namespace EvoNet.Rendering
             get { return scale; }
             set
             {
-                scale = value;
+                scale = Mathf.Max(value, MinScale);
                 matrixNeedsUpdate = true;
             }
         }
@@ -49,6 +50,9 @@ namespace EvoNet.Rendering
                 return cachedMatrix;
             }
         }
+
+        public float MinScale { get; set; }
+
         bool matrixNeedsUpdate;
 
         public void ConditionalUpdateMatrix()

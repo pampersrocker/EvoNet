@@ -46,6 +46,15 @@ namespace EvoNet.Input
             camera = renderer.Camera;
             this.renderer = renderer;
 
+
+            float viewportWidth = renderer.GraphicsDevice.Viewport.Width;
+            float tileMapWidth = sim.TileMap.GetWorldWidth();
+            float viewportHeight = renderer.GraphicsDevice.Viewport.Height;
+            float tileMapHeight = sim.TileMap.GetWorldHeight();
+            renderer.Camera.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
+            renderer.Camera.MinScale = renderer.Camera.Scale;
+            renderer.Camera.Translation = new Microsoft.Xna.Framework.Vector2(tileMapWidth / 2, 0);
+
         }
 
         public override void Initialize(Simulation ingame)
@@ -91,6 +100,20 @@ namespace EvoNet.Input
             scrollWheelValue = mouseState.ScrollWheelValue;
 
             oldMousePosition = new Vector2(mouseState.X, mouseState.Y);
+        }
+
+        public void Zoom(float zoomFactor, Vector2 mousePos)
+        {
+            // Track where we are before scale
+            Vector2 mousePositionBeforeScale = Vector2.Transform(mousePos, Matrix.Invert(camera.Matrix));
+
+            camera.Scale += (gameConfiguration.ScaleFactor * zoomFactor) / (camera.Scale < 1 ? 1 / camera.Scale : camera.Scale);
+
+            // Track where we are after scale
+            Vector2 mousePositionAfterScale = Vector2.Transform(mousePos, Matrix.Invert(camera.Matrix));
+
+            // Adjust screen position with respect to scale to achieve zoom to Mouse cursor functionality
+            camera.Move((mousePositionAfterScale - mousePositionBeforeScale));
         }
 
         private void DoMovement(float gameTime, KeyboardState keyboardState, MouseState mouseState)
@@ -176,16 +199,13 @@ namespace EvoNet.Input
 
             int deltaScrollWheelValue = mouseState.ScrollWheelValue - scrollWheelValue;
 
-            // Track where we are before scale
-            Vector2 mousePositionBeforeScale = Vector2.Transform(new Vector2(mouseState.X, mouseState.Y), Matrix.Invert(camera.Matrix));
+            
 
-            camera.Scale += (gameConfiguration.ScaleFactor * (deltaScrollWheelValue / 120.0f)) / (camera.Scale < 1 ? 1 / camera.Scale : camera.Scale);
+            float zoomFactor = (deltaScrollWheelValue / 120.0f);
 
-            // Track where we are after scale
-            Vector2 mousePositionAfterScale = Vector2.Transform(new Vector2(mouseState.X, mouseState.Y), Matrix.Invert(camera.Matrix));
+            Zoom(zoomFactor, new Vector2(mouseState.X, mouseState.Y));
 
-            // Adjust screen position with respect to scale to achieve zoom to Mouse cursor functionality
-            camera.Move((mousePositionAfterScale - mousePositionBeforeScale) );
+            
         }
     }
 }

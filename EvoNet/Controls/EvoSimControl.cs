@@ -18,6 +18,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 using Color = Microsoft.Xna.Framework.Color;
+using Vector2 = Microsoft.Xna.Framework.Vector2;
+using Point = System.Drawing.Point;
 using ButtonState = Microsoft.Xna.Framework.Input.ButtonState;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
 
@@ -28,6 +30,13 @@ namespace EvoNet.Controls
     {
         public EvoSimControl()
         {
+            MouseWheel += EvoSimControl_MouseWheel;
+        }
+
+        private void EvoSimControl_MouseWheel(object sender, MouseEventArgs e)
+        {
+            Vector2 mousePos = new Vector2(e.X, e.Y);
+            inputManager.Zoom(e.Delta / 120.0f, mousePos);
         }
 
 
@@ -77,7 +86,6 @@ namespace EvoNet.Controls
 
 
             inputManager = new InputManager();
-            inputManager.Initialize(gameConfiguration, sim, simRenderer);
 
             modules.Add(inputManager);
 
@@ -100,14 +108,8 @@ namespace EvoNet.Controls
             sim.Initialize(sim);
             simRenderer.Initialize(Content, GraphicsDevice, spriteBatch);
 
+            inputManager.Initialize(gameConfiguration, sim, simRenderer);
 
-            float viewportWidth = GraphicsDevice.Viewport.Width;
-            float tileMapWidth = sim.TileMap.GetWorldWidth();
-            float viewportHeight = GraphicsDevice.Viewport.Height;
-            float tileMapHeight = sim.TileMap.GetWorldHeight();
-            simRenderer.Camera.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
-
-            simRenderer.Camera.Translation = new Microsoft.Xna.Framework.Vector2(tileMapWidth / 2, 0);
         }
 
         protected override void Update(GameTime gameTime)
