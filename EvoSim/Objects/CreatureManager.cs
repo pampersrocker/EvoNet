@@ -302,13 +302,22 @@ namespace EvoNet.Objects
 
         public void Serialize(string filename, string graveYardFilenamePrefix)
         {
-            SerializeListToFile(filename, creatures);
 
-            string graveYardFilenameWithDate = string.Format("{0}_{1}.dat", graveYardFilenamePrefix, DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss"));
-            string directory =  graveYardFilenameWithDate.Replace(Path.GetFileName(graveYardFilenameWithDate), "");
-            Directory.CreateDirectory(directory);
-            SerializeListToFile(graveYardFilenameWithDate, graveyard);
-            graveyard.Clear();
+            List<Creature> asyncGraveYardCopy = graveyard;
+            graveyard = new List<Creature>(asyncGraveYardCopy.Count);
+            List<Creature> savingCreatures = new List<Creature>(creatures);
+            
+            WaitCallback worker = (state) =>
+            {
+                SerializeListToFile(filename, savingCreatures);
+
+                string graveYardFilenameWithDate = string.Format("{0}_{1}.dat", graveYardFilenamePrefix, DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss"));
+                string directory = graveYardFilenameWithDate.Replace(Path.GetFileName(graveYardFilenameWithDate), "");
+                Directory.CreateDirectory(directory);
+                SerializeListToFile(graveYardFilenameWithDate, asyncGraveYardCopy);
+                asyncGraveYardCopy.Clear();
+            };
+            ThreadPool.QueueUserWorkItem(worker);
         }
     }
 }
