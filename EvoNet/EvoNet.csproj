@@ -101,8 +101,6 @@
     <Compile Include="Rendering\SpritebatchExtensions.cs" />
     <Compile Include="Rendering\TileMapRenderer.cs" />
     <Compile Include="Rendering\XNAConversions.cs" />
-    <Compile Include="WinFormsContentLoading\ContentBuilder.cs" />
-    <Compile Include="WinFormsContentLoading\ErrorLogger.cs" />
     <Compile Include="WinFormsGraphicsDevice\GraphicsDeviceControl.cs">
       <SubType>Component</SubType>
     </Compile>
