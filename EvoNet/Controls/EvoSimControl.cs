@@ -112,6 +112,12 @@ namespace EvoNet.Controls
 
         }
 
+        public void Serialize(bool waitForCompletion = false)
+        {
+            sim.TileMap.SerializeToFile("tilemap.dat");
+            sim.CreatureManager.Serialize("creatures.dat", "graveyard/graveyard", waitForCompletion);
+        }
+
         protected override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -125,8 +131,7 @@ namespace EvoNet.Controls
             if (inputManager.EnableFastForward)
             {
                 DateTime startFastForward = DateTime.UtcNow;
-                // Target 60 fps per second
-                while ((DateTime.UtcNow - startFastForward).TotalSeconds < 0.015f)
+                while ((DateTime.UtcNow - startFastForward) < gameTime.ElapsedGameTime)
                 {
                     foreach (var module in modules)
                     {
@@ -143,8 +148,8 @@ namespace EvoNet.Controls
             if ((DateTime.UtcNow - lastSerializationTime).TotalSeconds > 10)
             {
                 lastSerializationTime = DateTime.UtcNow;
-                sim.TileMap.SerializeToFile("tilemap.dat");
-                sim.CreatureManager.Serialize("creatures.dat", "graveyard/graveyard");
+                Serialize();
+
 
             }
         }
