@@ -16,11 +16,13 @@ using EvoSim.Tasks;
 
 namespace EvoNet.Objects
 {
+    [Serializable]
     public class CreatureManager : UpdateModule
     {
         public static int AmountOfCores = Environment.ProcessorCount;
         public const int COLLISIONGRIDSIZE = 300;
-        private static  List<Creature>[,] CollisionGrid = new List<Creature>[COLLISIONGRIDSIZE, COLLISIONGRIDSIZE];
+        [NonSerialized]
+        private static List<Creature>[,] CollisionGrid = new List<Creature>[COLLISIONGRIDSIZE, COLLISIONGRIDSIZE];
 
         public static float[] AverageAgeOfLastCreatures = new float[128];
         private int indexForAverageAgeOfLastCreatures = 0;
@@ -35,9 +37,8 @@ namespace EvoNet.Objects
             get { return creatures; }
         }
 
+        [NonSerialized]
         private List<Creature> graveyard = new List<Creature>();
-        private List<Creature> CreaturesToKill = new List<Creature>();
-        private List<Creature> CreaturesToSpawn = new List<Creature>();
 
         public List<float> AliveCreaturesRecord = new List<float>();
         public List<float> AverageDeathAgeRecord = new List<float>();
@@ -45,32 +46,14 @@ namespace EvoNet.Objects
         public Creature OldestCreatureAlive;
         public Creature SelectedCreature;
 
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        private void MergeCreaturesAndSpawnCreatures()
-        {
-            foreach (Creature c in CreaturesToSpawn)
-            {
-                creatures.Add(c);
-            }
-            CreaturesToSpawn.Clear();
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        private void RemoveCreaturesFromDeathList()
-        {
-            foreach (Creature c in CreaturesToKill)
-            {
-                AddDeathAge(c.Age);
-                graveyard.Add(c);
-                creatures.Remove(c);
-            }
-            CreaturesToKill.Clear();
-        }
-
         public override void Initialize(Simulation inGame)
         {
             base.Initialize(inGame);
+
+            if (graveyard == null)
+            {
+                graveyard = new List<Creature>();
+            }
 
             GenerateCollisionGrid();
 
@@ -81,7 +64,7 @@ namespace EvoNet.Objects
         {
             ThreadTaskGroup spawnCreaturesGroup = new ThreadTaskGroup();
             spawnCreaturesGroup.AddTask(new SimpleSimulationTask(simulation,
-                (Simulation sim, float time) => 
+                (Simulation sim, float time) =>
                 {
                     while (creatures.Count < sim.SimulationConfiguration.MinCreatures)
                     {
@@ -89,7 +72,10 @@ namespace EvoNet.Objects
                             sim.RandomWorldPosition(),
                             Simulation.RandomFloat() * Mathf.PI * 2,
                             this);
-                        creatures.Add(justSpawned);
+                        lock (this)
+                        {
+                            creatures.Add(justSpawned);
+                        }
                     }
                 }));
             //spawnCreaturesGroup.AddDependency(simulation.TileMap.growGroup);
@@ -130,8 +116,8 @@ namespace EvoNet.Objects
             ThreadTaskGroup cleanupAndStatisticsGroup = new ThreadTaskGroup();
             cleanupAndStatisticsGroup.AddDependency(collisionGroup);
             simulation.TaskManager.AddGroup(cleanupAndStatisticsGroup);
-            cleanupAndStatisticsGroup.AddTask(new SimpleSimulationTask(simulation, 
-                (Simulation sim, float time) => 
+            cleanupAndStatisticsGroup.AddTask(new SimpleSimulationTask(simulation,
+                (Simulation sim, float time) =>
                 {
                     ResetCollisionGrid();
                 }));
@@ -205,9 +191,9 @@ namespace EvoNet.Objects
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void ResetCollisionGrid()
         {
-            for(int i = 0; i<COLLISIONGRIDSIZE; i++)
+            for (int i = 0; i < COLLISIONGRIDSIZE; i++)
             {
-                for(int k = 0; k<COLLISIONGRIDSIZE; k++)
+                for (int k = 0; k < COLLISIONGRIDSIZE; k++)
                 {
                     CollisionGrid[i, k].Clear();
                 }
@@ -216,12 +202,13 @@ namespace EvoNet.Objects
 
         private void HandleCollision()
         {
-            for(int i = 0; i< AmountOfCores; i++)
+            for (int i = 0; i < AmountOfCores; i++)
             {
                 int upperBound = creatures.Count * (i + 1) / AmountOfCores;
                 if (upperBound > creatures.Count) upperBound = creatures.Count;
                 int lowerBound = creatures.Count * i / AmountOfCores;
-                MultithreadingHelper.StartWork((object state)=>{
+                MultithreadingHelper.StartWork((object state) =>
+                {
                     for (int k = lowerBound; k < upperBound; k++)
                     {
                         creatures[k].HandleCollisions();
@@ -242,7 +229,7 @@ namespace EvoNet.Objects
         public void AddDeathAge(float age)
         {
             AverageAgeOfLastCreatures[indexForAverageAgeOfLastCreatures++] = age;
-            if(indexForAverageAgeOfLastCreatures >= AverageAgeOfLastCreatures.Length)
+            if (indexForAverageAgeOfLastCreatures >= AverageAgeOfLastCreatures.Length)
             {
                 indexForAverageAgeOfLastCreatures = 0;
                 AverageAgeOfLastCreaturesAccurate = true;
@@ -252,41 +239,58 @@ namespace EvoNet.Objects
         public float CalculateAverageAgeOfLastDeadCreatures()
         {
             float ageAverage = 0;
-            for(int i = 0; i<AverageAgeOfLastCreatures.Length; i++)
+            for (int i = 0; i < AverageAgeOfLastCreatures.Length; i++)
             {
                 ageAverage += AverageAgeOfLastCreatures[i];
             }
             return ageAverage / AverageAgeOfLastCreatures.Length;
         }
 
-        public void Deserialize(string fileName)
+        public static CreatureManager Deserialize(string fileName, Simulation sim)
         {
             try
             {
+                CreatureManager manager = null;
                 IFormatter formatter = new BinaryFormatter();
-                Stream stream = new FileStream(fileName,
+                using (Stream stream = new FileStream(fileName,
                                          FileMode.Open,
-                                         FileAccess.Read, FileShare.None);
+                                         FileAccess.Read, FileShare.None))
+                {
+                    try
+                    {
+                        manager = formatter.Deserialize(stream) as CreatureManager;
+                    }
+                    catch (Exception)
+                    {
+                        return null;
+                    }
+                };
 
-                creatures = formatter.Deserialize(stream) as List<Creature>;
-                
-                stream.Close();
+                if (manager == null)
+                {
+                    return null;
+                }
+                manager.Initialize(sim);
+
                 long id = 0;
-                foreach (Creature creature in creatures)
+                foreach (Creature creature in manager.Creatures)
                 {
                     if (creature.Id > id)
                     {
                         id = creature.Id;
                     }
-                    creature.SetupManager(this);
+                    creature.SetupManager(manager);
                 }
                 Creature.currentId = id + 1;
+                return manager;
 
             }
             catch (FileNotFoundException)
             {
 
             }
+
+            return null;
         }
 
         private void SerializeListToFile(string filename, List<Creature> creatures)
@@ -300,24 +304,38 @@ namespace EvoNet.Objects
             stream.Close();
         }
 
-        public void Serialize(string filename, string graveYardFilenamePrefix)
+        public void Serialize(string filename, string graveYardFilenamePrefix, bool waitForCompletion = false)
         {
 
             List<Creature> asyncGraveYardCopy = graveyard;
             graveyard = new List<Creature>(asyncGraveYardCopy.Count);
-            List<Creature> savingCreatures = new List<Creature>(creatures);
-            
+
+            bool done = false;
+
             WaitCallback worker = (state) =>
             {
-                SerializeListToFile(filename, savingCreatures);
-
+                IFormatter formatter = new BinaryFormatter();
+                using (Stream stream = new FileStream(filename,
+                                         FileMode.Create,
+                                         FileAccess.Write, FileShare.None))
+                {
+                    lock (this)
+                    {
+                        formatter.Serialize(stream, this);
+                    }
+                }
                 string graveYardFilenameWithDate = string.Format("{0}_{1}.dat", graveYardFilenamePrefix, DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss"));
                 string directory = graveYardFilenameWithDate.Replace(Path.GetFileName(graveYardFilenameWithDate), "");
                 Directory.CreateDirectory(directory);
                 SerializeListToFile(graveYardFilenameWithDate, asyncGraveYardCopy);
                 asyncGraveYardCopy.Clear();
+                done = true;
             };
             ThreadPool.QueueUserWorkItem(worker);
+            while (waitForCompletion && !done)
+            {
+                Thread.Yield();
+            }
         }
     }
 }

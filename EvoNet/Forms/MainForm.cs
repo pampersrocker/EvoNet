@@ -81,5 +81,10 @@ namespace EvoNet.Forms
             }
             //FoodGraph.Refresh();
         }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            evoSimControl1.Serialize(true);
+        }
     }
 }

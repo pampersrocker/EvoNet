@@ -30,12 +30,18 @@ namespace EvoSim.Tasks
                     foreach (Creature creature in creatureTask.CreaturesToKill)
                     {
                         sim.CreatureManager.Graveyard.Add(creature);
-                        sim.CreatureManager.Creatures.Remove(creature);
+                        lock (sim.CreatureManager)
+                        {
+                            sim.CreatureManager.Creatures.Remove(creature);
+                        }
                     }
                     creatureTask.CreaturesToKill.Clear();
-                    foreach (Creature creature in creatureTask.CreaturesToSpawn)
+                    lock (sim.CreatureManager)
                     {
-                        sim.CreatureManager.Creatures.Add(creature);
+                        foreach (Creature creature in creatureTask.CreaturesToSpawn)
+                        {
+                            sim.CreatureManager.Creatures.Add(creature);
+                        }
                     }
                     creatureTask.CreaturesToSpawn.Clear();
                 }
