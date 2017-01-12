@@ -15,6 +15,7 @@ using Color = Microsoft.Xna.Framework.Color;
 using Microsoft.Xna.Framework.Content;
 using Graph;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace EvoNet.Controls
 {
@@ -76,132 +77,8 @@ namespace EvoNet.Controls
             Effect = manager.Load<Effect>("Color");
         }
 
-        List<VertexPosition2> vertexAreaCache = new List<VertexPosition2>();
-        List<VertexPosition2> vertexLineCache = new List<VertexPosition2>();
-        List<int> indexCache = new List<int>();
-
-        private void DrawGraph(IGraphValueList graph)
+        private void DrawCache(IGraphValueList graph, ref GraphCache cache)
         {
-            if (graph.Count <= 1)
-            {
-                return;
-            }
-
-            GraphCache cache;
-
-            bool needsRedraw = true;
-            if (graphCaches.TryGetValue(graph, out cache))
-            {
-                if (cache.NumElements == graph.Count)
-                {
-                    needsRedraw = false;
-                }
-            }
-
-
-            if (needsRedraw)
-            {
-                int CurrentVertexIndex = 0;
-                Func<IGraphValue, decimal> GetY = (value) => { return value.DisplayValue; };
-                Func<IGraphValue, decimal> GetX = (value) => { return value.DisplayPosition; };
-                decimal maxY = graph.Max(GetY);
-                decimal minY = graph.Min(GetY);
-                decimal maxX = graph.Max(GetX);
-                decimal minX = graph.Min(GetX);
-
-                Func<decimal, float> GetRelativeY = (decimal alpha) =>
-                {
-                    if(minY == maxY)
-                    {
-                        return 0.0f;
-                    }
-                    return ((float)((alpha - minY) / (maxY - minY)) - 0.5f) * 2.0f;
-                };
-
-                Func<decimal, float> GetRelativeX = (decimal alpha) =>
-                {
-                    return ((float)((alpha - minX) / (maxX - minX)) - 0.5f) * 2.0f;
-                };
-
-                vertexAreaCache.Clear();
-                vertexLineCache.Clear();
-                indexCache.Clear();
-
-                VertexPosition2 upperPoint = new VertexPosition2();
-                VertexPosition2 lowerPoint = new VertexPosition2();
-
-                upperPoint.Position = new Vector2(-1, GetRelativeY(graph[0].DisplayValue));
-                lowerPoint.Position = new Vector2(-1, -1);
-
-                vertexAreaCache.Add(upperPoint);
-                vertexAreaCache.Add(lowerPoint);
-
-                float lineWidth = (5.0f / Height) / 2.0f;
-                Vector2 lineWidthOffset = new Vector2(0.0f, lineWidth/2.0f);
-
-                vertexLineCache.Add(new VertexPosition2(upperPoint.Position + lineWidthOffset));
-                vertexLineCache.Add(new VertexPosition2(upperPoint.Position - lineWidthOffset));
-
-                CurrentVertexIndex = 2;
-
-                Vector2 lastUpperPoint;
-
-                for (int GraphIndex = 1; GraphIndex < graph.Count; GraphIndex++)
-                {
-                    float x = GetRelativeX(graph[GraphIndex].DisplayPosition);
-                    float y = GetRelativeY(graph[GraphIndex].DisplayValue);
-
-                    lastUpperPoint = upperPoint.Position;
-
-                    upperPoint.Position = new Vector2(x, y);
-                    lowerPoint.Position = new Vector2(x, -1);
-                    vertexAreaCache.Add(upperPoint);
-                    vertexAreaCache.Add(lowerPoint);
-
-                    // Calculate orthogonal vector of direction from last point to this one,
-                    // so the line keeps its thickness along slopes
-                    // Without this sloped graphs would get very thin
-                    Vector2 dirFromLastPoint = upperPoint.Position - lastUpperPoint;
-                    dirFromLastPoint.Normalize();
-                    Vector2 orthogonalDir = new Vector2(-dirFromLastPoint.Y, dirFromLastPoint.X);
-
-                    vertexLineCache.Add(new VertexPosition2(upperPoint.Position + orthogonalDir * lineWidth));
-                    vertexLineCache.Add(new VertexPosition2(upperPoint.Position - orthogonalDir * lineWidth));
-
-                    // Counter Clockwise Tris get culled in our current setting
-                    // So draw 2 triangles in clockwise order
-                    // -2---+0
-                    //  |   /|
-                    //  |  / |
-                    //  | /  |
-                    //  |/   |
-                    // -1---+1
-                    int LastUpperPoint = CurrentVertexIndex - 2;
-                    int LastLowerPoint = CurrentVertexIndex - 1;
-                    int CurrentUpperPoint = CurrentVertexIndex;
-                    int CurrentLowerPoint = CurrentVertexIndex + 1;
-                    indexCache.Add(LastUpperPoint);
-                    indexCache.Add(CurrentUpperPoint);
-                    indexCache.Add(LastLowerPoint);
-
-                    indexCache.Add(LastLowerPoint);
-                    indexCache.Add(CurrentUpperPoint);
-                    indexCache.Add(CurrentLowerPoint);
-
-                    CurrentVertexIndex += 2;
-
-                }
-                cache.VertexLineBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPosition2), CurrentVertexIndex, BufferUsage.WriteOnly);
-                cache.VertexLineBuffer.SetData(vertexLineCache.ToArray());
-
-                cache.VertexAreaBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPosition2), CurrentVertexIndex, BufferUsage.WriteOnly);
-                cache.VertexAreaBuffer.SetData(vertexAreaCache.ToArray());
-                cache.IndexAreaBuffer = new IndexBuffer(GraphicsDevice, IndexElementSize.ThirtyTwoBits, indexCache.Count, BufferUsage.WriteOnly);
-                cache.IndexAreaBuffer.SetData(indexCache.ToArray());
-
-                cache.NumElements = graph.Count;
-                graphCaches[graph] = cache;
-            }
             Effect.Parameters["Color"].SetValue(
                 new Vector4(
                     graph.Color.R / 255.0f,
@@ -226,6 +103,146 @@ namespace EvoNet.Controls
             {
                 pass.Apply();
                 GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, cache.VertexLineBuffer.VertexCount, 0, cache.IndexAreaBuffer.IndexCount / 3);
+            }
+        }
+
+        private void CreateCache(IGraphValueList graph)
+        {
+            GraphCache cache;
+            int CurrentVertexIndex = 0;
+            Func<IGraphValue, decimal> GetY = (value) => { return value.DisplayValue; };
+            Func<IGraphValue, decimal> GetX = (value) => { return value.DisplayPosition; };
+            decimal maxY = graph.Max(GetY);
+            decimal minY = graph.Min(GetY);
+            decimal maxX = graph.Max(GetX);
+            decimal minX = graph.Min(GetX);
+
+            Func<decimal, float> GetRelativeY = (decimal alpha) =>
+            {
+                if (minY == maxY)
+                {
+                    return 0.0f;
+                }
+                return ((float)((alpha - minY) / (maxY - minY)) - 0.5f) * 2.0f;
+            };
+
+            Func<decimal, float> GetRelativeX = (decimal alpha) =>
+            {
+                return ((float)((alpha - minX) / (maxX - minX)) - 0.5f) * 2.0f;
+            };
+
+            VertexPosition2 upperPoint = new VertexPosition2();
+            VertexPosition2 lowerPoint = new VertexPosition2();
+
+            upperPoint.Position = new Vector2(-1, GetRelativeY(graph[0].DisplayValue));
+            lowerPoint.Position = new Vector2(-1, -1);
+
+            VertexPosition2[] vertexAreaBufferData = new VertexPosition2[graph.Count * 2];
+            VertexPosition2[] vertexLineBufferData = new VertexPosition2[graph.Count * 2];
+            int[] indexBufferData = new int[(graph.Count - 1) * 6];
+            int CurrentIndexBufferIndex = 0;
+
+            vertexAreaBufferData[CurrentVertexIndex] = upperPoint;
+            vertexAreaBufferData[CurrentVertexIndex+1] = lowerPoint;
+
+            float lineWidth = (5.0f / Height) / 2.0f;
+            Vector2 lineWidthOffset = new Vector2(0.0f, lineWidth / 2.0f);
+
+            vertexLineBufferData[CurrentVertexIndex] = new VertexPosition2(upperPoint.Position + lineWidthOffset);
+            vertexLineBufferData[CurrentVertexIndex + 1] = new VertexPosition2(upperPoint.Position - lineWidthOffset);
+
+            CurrentVertexIndex = 2;
+
+            Vector2 lastUpperPoint;
+
+            for (int GraphIndex = 1; GraphIndex < graph.Count; GraphIndex++)
+            {
+                float x = GetRelativeX(graph[GraphIndex].DisplayPosition);
+                float y = GetRelativeY(graph[GraphIndex].DisplayValue);
+
+                lastUpperPoint = upperPoint.Position;
+
+                upperPoint.Position = new Vector2(x, y);
+                lowerPoint.Position = new Vector2(x, -1);
+                vertexAreaBufferData[CurrentVertexIndex] = upperPoint;
+                vertexAreaBufferData[CurrentVertexIndex + 1] = lowerPoint;
+
+                // Calculate orthogonal vector of direction from last point to this one,
+                // so the line keeps its thickness along slopes
+                // Without this sloped graphs would get very thin
+                Vector2 dirFromLastPoint = upperPoint.Position - lastUpperPoint;
+                if(GraphIndex + 1 < graph.Count)
+                {
+                    dirFromLastPoint += new Vector2(GetRelativeX(graph[GraphIndex + 1].DisplayPosition), GetRelativeY(graph[GraphIndex + 1].DisplayValue)) - upperPoint.Position;
+                    dirFromLastPoint /= 2;
+                }
+                dirFromLastPoint.Normalize();
+                Vector2 orthogonalDir = new Vector2(-dirFromLastPoint.Y, dirFromLastPoint.X);
+
+                vertexLineBufferData[CurrentVertexIndex] = (new VertexPosition2(upperPoint.Position + orthogonalDir * lineWidth));
+                vertexLineBufferData[CurrentVertexIndex + 1] = (new VertexPosition2(upperPoint.Position - orthogonalDir * lineWidth));
+
+                // Counter Clockwise Tris get culled in our current setting
+                // So draw 2 triangles in clockwise order
+                // -2---+0
+                //  |   /|
+                //  |  / |
+                //  | /  |
+                //  |/   |
+                // -1---+1
+                int LastUpperPoint = CurrentVertexIndex - 2;
+                int LastLowerPoint = CurrentVertexIndex - 1;
+                int CurrentUpperPoint = CurrentVertexIndex;
+                int CurrentLowerPoint = CurrentVertexIndex + 1;
+                indexBufferData[CurrentIndexBufferIndex]=LastUpperPoint;
+                indexBufferData[CurrentIndexBufferIndex+1]=CurrentUpperPoint;
+                indexBufferData[CurrentIndexBufferIndex+2]=LastLowerPoint;
+                indexBufferData[CurrentIndexBufferIndex+3]=LastLowerPoint;
+                indexBufferData[CurrentIndexBufferIndex+4]=CurrentUpperPoint;
+                indexBufferData[CurrentIndexBufferIndex+5]=CurrentLowerPoint;
+
+                CurrentIndexBufferIndex += 6;
+                CurrentVertexIndex += 2;
+
+            }
+            cache.VertexLineBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPosition2), CurrentVertexIndex, BufferUsage.WriteOnly);
+            cache.VertexLineBuffer.SetData(vertexLineBufferData);
+
+            cache.VertexAreaBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPosition2), CurrentVertexIndex, BufferUsage.WriteOnly);
+            cache.VertexAreaBuffer.SetData(vertexAreaBufferData);
+            cache.IndexAreaBuffer = new IndexBuffer(GraphicsDevice, IndexElementSize.ThirtyTwoBits, indexBufferData.Length, BufferUsage.WriteOnly);
+            cache.IndexAreaBuffer.SetData(indexBufferData);
+
+            cache.NumElements = graph.Count;
+            graphCaches[graph] = cache;
+        }
+
+        private void DrawGraph(IGraphValueList graph)
+        {
+            if (graph.Count <= 1)
+            {
+                return;
+            }
+
+            GraphCache cache;
+
+            bool needsRedraw = true;
+            if (graphCaches.TryGetValue(graph, out cache))
+            {
+                if (cache.NumElements == graph.Count)
+                {
+                    needsRedraw = false;
+                }
+            }
+
+
+            if (needsRedraw)
+            {
+                CreateCache(graph);
+            }
+            if (graphCaches.TryGetValue(graph, out cache))
+            {
+                DrawCache(graph, ref cache);
             }
         }
 
