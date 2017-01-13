@@ -54,42 +54,42 @@ namespace EvoNet.Rendering
         private void DrawGeneralStats()
         {
             spriteBatch.Begin();
-            Primitives2D.FillRectangle(spriteBatch, new Rectangle(0, 0, 300, 600), AdditionalColors.TRANSPARENTBLACK);
-            spriteBatch.DrawString(Fonts.FontArial, "#: " + manager.Creatures.Count, new Vector2(20, 20), Color.Red);
-            spriteBatch.DrawString(Fonts.FontArial, "D: " + manager.numberOfDeaths, new Vector2(20, 40), Color.Red);
-            spriteBatch.DrawString(Fonts.FontArial, "max(G): " + Creature.maximumGeneration, new Vector2(20, 60), Color.Red);
-            spriteBatch.DrawString(Fonts.FontArial, "Y: " + manager.year, new Vector2(20, 80), Color.Red);
-            if (Creature.oldestCreatureEver != null)
-            {
-                spriteBatch.DrawString(Fonts.FontArial, "LS: " + Creature.oldestCreatureEver.Age + " g: " + Creature.oldestCreatureEver.Generation, new Vector2(20, 100), Color.Red);
-            }
-            if (manager.OldestCreatureAlive != null)
-            {
-                spriteBatch.DrawString(Fonts.FontArial, "LSA: " + manager.OldestCreatureAlive.Age + " g: " + manager.OldestCreatureAlive.Generation, new Vector2(20, 120), Color.Red);
-            }
-            if (manager.AverageAgeOfLastCreaturesAccurate)
-            {
-                float averageDeathAge = manager.CalculateAverageAgeOfLastDeadCreatures();
-                manager.AverageDeathAgeRecord.Add(averageDeathAge);
-                spriteBatch.DrawString(Fonts.FontArial, "AvgDA: " + averageDeathAge, new Vector2(20, 140), Color.Red);
-            }
-
-            if (true)
-            {
-                spriteBatch.DrawString(Fonts.FontArial, "Graph rendering disabled", new Vector2(20, 180), Color.Red);
-                spriteBatch.DrawString(Fonts.FontArial, "during fast forward!", new Vector2(20, 200), Color.Red);
-            }
-            else
-            {
-                spriteBatch.DrawString(Fonts.FontArial, "Creatures Alive Graph ", new Vector2(20, 180), Color.Red);
-                GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 200, 260, 100), Color.Blue, manager.AliveCreaturesRecord, Fonts.FontArial, true);
-                spriteBatch.DrawString(Fonts.FontArial, "Average Age on Death Graph ", new Vector2(20, 320), Color.Red);
-                if (manager.AverageAgeOfLastCreaturesAccurate)
-                    GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 340, 260, 100), Color.Red, manager.AverageDeathAgeRecord, Fonts.FontArial, true);
-                spriteBatch.DrawString(Fonts.FontArial, "Food Available Graph ", new Vector2(20, 460), Color.Red);
-                GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 480, 260, 100), Color.Green, manager.simulation.TileMap.FoodRecord, Fonts.FontArial, true);
-
-            }
+            //Primitives2D.FillRectangle(spriteBatch, new Rectangle(0, 0, 300, 600), AdditionalColors.TRANSPARENTBLACK);
+            //spriteBatch.DrawString(Fonts.FontArial, "#: " + manager.Creatures.Count, new Vector2(20, 20), Color.Red);
+            //spriteBatch.DrawString(Fonts.FontArial, "D: " + manager.numberOfDeaths, new Vector2(20, 40), Color.Red);
+            //spriteBatch.DrawString(Fonts.FontArial, "max(G): " + Creature.maximumGeneration, new Vector2(20, 60), Color.Red);
+            //spriteBatch.DrawString(Fonts.FontArial, "Y: " + manager.year, new Vector2(20, 80), Color.Red);
+            //if (Creature.oldestCreatureEver != null)
+            //{
+            //    spriteBatch.DrawString(Fonts.FontArial, "LS: " + Creature.oldestCreatureEver.Age + " g: " + Creature.oldestCreatureEver.Generation, new Vector2(20, 100), Color.Red);
+            //}
+            //if (manager.OldestCreatureAlive != null)
+            //{
+            //    spriteBatch.DrawString(Fonts.FontArial, "LSA: " + manager.OldestCreatureAlive.Age + " g: " + manager.OldestCreatureAlive.Generation, new Vector2(20, 120), Color.Red);
+            //}
+            //if (manager.AverageAgeOfLastCreaturesAccurate)
+            //{
+            //    float averageDeathAge = manager.CalculateAverageAgeOfLastDeadCreatures();
+            //    manager.AverageDeathAgeRecord.Add(averageDeathAge);
+            //    spriteBatch.DrawString(Fonts.FontArial, "AvgDA: " + averageDeathAge, new Vector2(20, 140), Color.Red);
+            //}
+            //
+            //if (true)
+            //{
+            //    spriteBatch.DrawString(Fonts.FontArial, "Graph rendering disabled", new Vector2(20, 180), Color.Red);
+            //    spriteBatch.DrawString(Fonts.FontArial, "during fast forward!", new Vector2(20, 200), Color.Red);
+            //}
+            //else
+            //{
+            //    spriteBatch.DrawString(Fonts.FontArial, "Creatures Alive Graph ", new Vector2(20, 180), Color.Red);
+            //    GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 200, 260, 100), Color.Blue, manager.AliveCreaturesRecord, Fonts.FontArial, true);
+            //    spriteBatch.DrawString(Fonts.FontArial, "Average Age on Death Graph ", new Vector2(20, 320), Color.Red);
+            //    if (manager.AverageAgeOfLastCreaturesAccurate)
+            //        GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 340, 260, 100), Color.Red, manager.AverageDeathAgeRecord, Fonts.FontArial, true);
+            //    spriteBatch.DrawString(Fonts.FontArial, "Food Available Graph ", new Vector2(20, 460), Color.Red);
+            //    GraphRenderer.RenderGraph(spriteBatch, new Rectangle(20, 480, 260, 100), Color.Green, manager.simulation.TileMap.FoodRecord, Fonts.FontArial, true);
+            //
+            //}
 
             selectedCreature = manager.SelectedCreature;
 

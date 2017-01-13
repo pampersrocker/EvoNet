@@ -30,7 +30,21 @@ namespace EvoNet.Forms
 
         private void EvoSimControl1_OnUpdate(Microsoft.Xna.Framework.GameTime obj)
         {
-
+            string status = "#: {0} D: {1} max(G): {2} Y: {3} LS: {4} LSA: {5} AvgDA: {6}";
+            status = string.Format(
+                status,
+                CreatureManager.Creatures.Count,
+                CreatureManager.numberOfDeaths,
+                Creature.maximumGeneration,
+                CreatureManager.year,
+                Creature.oldestCreatureEver != null ?
+                    Creature.oldestCreatureEver.Age :
+                    0,
+                CreatureManager.OldestCreatureAlive != null ?
+                    CreatureManager.OldestCreatureAlive.Age :
+                    0,
+                CreatureManager.CalculateAverageAgeOfLastDeadCreatures());
+            toolStripStatusLabel1.Text = status;
         }
 
         GraphValueList foodValueList = new GraphValueList();
