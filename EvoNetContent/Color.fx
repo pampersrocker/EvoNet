@@ -3,7 +3,7 @@ float4 Color;
 
 struct VertexShaderInput
 {
-	float4 Position : POSITION0;
+	float2 Position : POSITION0;
 };
 
 struct VertexShaderOutput
@@ -15,14 +15,14 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 {
 	VertexShaderOutput output;
 
-	output.Position = input.Position;
+	output.Position = float4(input.Position, 0, 1);
 
 	return output;
 }
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
-	return float4(pow(Color.rgb, 1.0f/2.2f), Color.a);
+	return Color;
 }
 
 technique Technique1

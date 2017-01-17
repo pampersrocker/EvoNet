@@ -3,19 +3,11 @@ using EvoNet.Rendering;
 using EvoSim;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace EvoNet.Input
 {
-
-
-
     public class InputManager : UpdateModule
     {
 
@@ -46,14 +38,13 @@ namespace EvoNet.Input
             camera = renderer.Camera;
             this.renderer = renderer;
 
-
             float viewportWidth = renderer.GraphicsDevice.Viewport.Width;
             float tileMapWidth = sim.TileMap.GetWorldWidth();
             float viewportHeight = renderer.GraphicsDevice.Viewport.Height;
             float tileMapHeight = sim.TileMap.GetWorldHeight();
             renderer.Camera.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
             renderer.Camera.MinScale = renderer.Camera.Scale;
-            renderer.Camera.Translation = new Microsoft.Xna.Framework.Vector2(tileMapWidth / 2, 0);
+            renderer.Camera.Translation = new Vector2(tileMapWidth / 2, 0);
 
         }
 
@@ -65,16 +56,8 @@ namespace EvoNet.Input
 
         protected override void Update(float gameTime)
         {
-
-            //if (!game.IsActive)
-            //{
-            //    scrollWheelValue = Mouse.GetState().ScrollWheelValue;
-            //    return;
-            //}
             KeyboardState keyboardState = Keyboard.GetState();
             MouseState mouseState = Mouse.GetState();
-
-
 
             DoMovement(gameTime, keyboardState, mouseState);
 
@@ -93,7 +76,7 @@ namespace EvoNet.Input
                 float tileMapHeight = simulation.TileMap.GetWorldHeight();
                 camera.Scale = Mathf.Min(viewportWidth / tileMapWidth, viewportHeight / tileMapHeight);
 
-                camera.Translation = new Microsoft.Xna.Framework.Vector2(tileMapWidth / 2, 0);
+                camera.Translation = new Vector2(tileMapWidth / 2, 0);
             }
 
             oldSpaceDown = spaceDown;
@@ -113,7 +96,7 @@ namespace EvoNet.Input
             Vector2 mousePositionAfterScale = Vector2.Transform(mousePos, Matrix.Invert(camera.Matrix));
 
             // Adjust screen position with respect to scale to achieve zoom to Mouse cursor functionality
-            camera.Move((mousePositionAfterScale - mousePositionBeforeScale));
+            camera.Move(mousePositionAfterScale - mousePositionBeforeScale);
         }
 
         private void DoMovement(float gameTime, KeyboardState keyboardState, MouseState mouseState)
@@ -176,9 +159,8 @@ namespace EvoNet.Input
 
             if (camera != null)
             {
-                camera.Move(new Microsoft.Xna.Framework.Vector2(movement.X, movement.Y));
+                camera.Move(new Vector2(movement.X, movement.Y));
             }
-
 
             if (mouseState.RightButton == ButtonState.Pressed)
             {
@@ -199,13 +181,9 @@ namespace EvoNet.Input
 
             int deltaScrollWheelValue = mouseState.ScrollWheelValue - scrollWheelValue;
 
-            
-
             float zoomFactor = (deltaScrollWheelValue / 120.0f);
 
             Zoom(zoomFactor, new Vector2(mouseState.X, mouseState.Y));
-
-            
         }
     }
 }

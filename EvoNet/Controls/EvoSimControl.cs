@@ -131,7 +131,8 @@ namespace EvoNet.Controls
             if (inputManager.EnableFastForward)
             {
                 DateTime startFastForward = DateTime.UtcNow;
-                while ((DateTime.UtcNow - startFastForward) < gameTime.ElapsedGameTime)
+                double clampedElapsedTime = Math.Min(gameTime.ElapsedGameTime.TotalSeconds, 0.033);
+                while ((DateTime.UtcNow - startFastForward).TotalSeconds < clampedElapsedTime)
                 {
                     foreach (var module in modules)
                     {

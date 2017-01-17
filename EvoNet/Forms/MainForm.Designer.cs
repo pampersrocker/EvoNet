@@ -33,10 +33,15 @@
             this.fileToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.graphsTab = new System.Windows.Forms.TabPage();
+            this.networkTab = new System.Windows.Forms.TabPage();
+            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showStatisticsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.evoSimControl1 = new EvoNet.Controls.EvoSimControl();
             this.NumberOfCreaturesAliveGraph = new EvoNet.Controls.GraphControl();
             this.menuStrip1.SuspendLayout();
@@ -45,12 +50,15 @@
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            this.tabControl1.SuspendLayout();
+            this.graphsTab.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem1});
+            this.fileToolStripMenuItem1,
+            this.viewToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(932, 24);
@@ -83,6 +91,12 @@
             this.statusStrip1.TabIndex = 3;
             this.statusStrip1.Text = "statusStrip1";
             // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(118, 17);
+            this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
+            // 
             // timer1
             // 
             this.timer1.Enabled = true;
@@ -94,7 +108,6 @@
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 24);
             this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
             // splitContainer1.Panel1
             // 
@@ -102,16 +115,59 @@
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.NumberOfCreaturesAliveGraph);
+            this.splitContainer1.Panel2.Controls.Add(this.tabControl1);
             this.splitContainer1.Size = new System.Drawing.Size(932, 564);
-            this.splitContainer1.SplitterDistance = 424;
+            this.splitContainer1.SplitterDistance = 697;
             this.splitContainer1.TabIndex = 5;
             // 
-            // toolStripStatusLabel1
+            // tabControl1
             // 
-            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(118, 17);
-            this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
+            this.tabControl1.Controls.Add(this.graphsTab);
+            this.tabControl1.Controls.Add(this.networkTab);
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl1.Location = new System.Drawing.Point(0, 0);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(231, 564);
+            this.tabControl1.TabIndex = 4;
+            // 
+            // graphsTab
+            // 
+            this.graphsTab.Controls.Add(this.NumberOfCreaturesAliveGraph);
+            this.graphsTab.Location = new System.Drawing.Point(4, 22);
+            this.graphsTab.Name = "graphsTab";
+            this.graphsTab.Padding = new System.Windows.Forms.Padding(3);
+            this.graphsTab.Size = new System.Drawing.Size(223, 538);
+            this.graphsTab.TabIndex = 0;
+            this.graphsTab.Text = "Graphs";
+            this.graphsTab.UseVisualStyleBackColor = true;
+            // 
+            // networkTab
+            // 
+            this.networkTab.Location = new System.Drawing.Point(4, 22);
+            this.networkTab.Name = "networkTab";
+            this.networkTab.Padding = new System.Windows.Forms.Padding(3);
+            this.networkTab.Size = new System.Drawing.Size(223, 538);
+            this.networkTab.TabIndex = 1;
+            this.networkTab.Text = "Network";
+            this.networkTab.UseVisualStyleBackColor = true;
+            // 
+            // viewToolStripMenuItem
+            // 
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.showStatisticsToolStripMenuItem});
+            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.viewToolStripMenuItem.Text = "&View";
+            // 
+            // showStatisticsToolStripMenuItem
+            // 
+            this.showStatisticsToolStripMenuItem.Checked = true;
+            this.showStatisticsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.showStatisticsToolStripMenuItem.Name = "showStatisticsToolStripMenuItem";
+            this.showStatisticsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.showStatisticsToolStripMenuItem.Text = "&Show Statistics";
+            this.showStatisticsToolStripMenuItem.Click += new System.EventHandler(this.showStatisticsToolStripMenuItem_Click);
             // 
             // evoSimControl1
             // 
@@ -121,7 +177,7 @@
             this.evoSimControl1.IgnoreFocus = true;
             this.evoSimControl1.Location = new System.Drawing.Point(0, 0);
             this.evoSimControl1.Name = "evoSimControl1";
-            this.evoSimControl1.Size = new System.Drawing.Size(932, 424);
+            this.evoSimControl1.Size = new System.Drawing.Size(697, 564);
             this.evoSimControl1.TabIndex = 2;
             this.evoSimControl1.Text = "evoSimControl1";
             // 
@@ -130,9 +186,9 @@
             this.NumberOfCreaturesAliveGraph.Activated = true;
             this.NumberOfCreaturesAliveGraph.Dock = System.Windows.Forms.DockStyle.Fill;
             this.NumberOfCreaturesAliveGraph.IgnoreFocus = true;
-            this.NumberOfCreaturesAliveGraph.Location = new System.Drawing.Point(0, 0);
+            this.NumberOfCreaturesAliveGraph.Location = new System.Drawing.Point(3, 3);
             this.NumberOfCreaturesAliveGraph.Name = "NumberOfCreaturesAliveGraph";
-            this.NumberOfCreaturesAliveGraph.Size = new System.Drawing.Size(932, 136);
+            this.NumberOfCreaturesAliveGraph.Size = new System.Drawing.Size(217, 532);
             this.NumberOfCreaturesAliveGraph.TabIndex = 3;
             this.NumberOfCreaturesAliveGraph.Text = "graphControl1";
             // 
@@ -146,7 +202,7 @@
             this.Controls.Add(this.statusStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
-            this.Text = "MainForm";
+            this.Text = "EvoNet";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -156,6 +212,8 @@
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            this.tabControl1.ResumeLayout(false);
+            this.graphsTab.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -173,5 +231,10 @@
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private Controls.GraphControl NumberOfCreaturesAliveGraph;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage graphsTab;
+        private System.Windows.Forms.TabPage networkTab;
+        private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showStatisticsToolStripMenuItem;
     }
 }

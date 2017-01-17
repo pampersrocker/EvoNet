@@ -36,7 +36,7 @@ namespace EvoNet.Rendering
                     }
                 }
             }
-            
+
             return null;
         }
 
@@ -62,7 +62,7 @@ namespace EvoNet.Rendering
                 {
                     nameOffset = new Vector2(10, 10);
                 }
-                DrawLayer(spriteBatch, network.Neurons[layerIndex], strongestConnection, mouseNeuron, nameOffset, layerIndex == network.Neurons.Count -1);
+                DrawLayer(spriteBatch, network.Neurons[layerIndex], strongestConnection, mouseNeuron, nameOffset, layerIndex != network.Neurons.Count -1);
             }
             //DrawLayer(spriteBatch, network.FirstHiddenLayer, strongestConnection, mouseNeuron);
             //DrawLayer(spriteBatch, network.InputNeurons, strongestConnection, mouseNeuron, new Vector2(-10, -10), true);

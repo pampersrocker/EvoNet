@@ -162,10 +162,10 @@ namespace WinFormsGraphicsDevice
                 gametime = new GameTime();
                 starttime = DateTime.Now;
                 currentframetime = DateTime.Now;
-                this.DrawTimer = new Timer();
-                this.DrawTimer.Enabled = true;
-                this.DrawTimer.Interval = 16;
-                this.DrawTimer.Tick += new System.EventHandler(this.DrawTimer_Tick);
+                DrawTimer = new Timer();
+                DrawTimer.Enabled = true;
+                DrawTimer.Interval = 16;
+                DrawTimer.Tick += new EventHandler(DrawTimer_Tick);
                 Initialize();
                 initialized = true;
             }
@@ -256,7 +256,7 @@ namespace WinFormsGraphicsDevice
             {
                 GraphicsDevice.Viewport = viewport;
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 return ex.ToString();
             }
@@ -279,7 +279,7 @@ namespace WinFormsGraphicsDevice
                 Rectangle sourceRectangle = new Rectangle(0, 0, ClientSize.Width,
                                                                 ClientSize.Height);
 
-                GraphicsDevice.Present(sourceRectangle, null, this.Handle);
+                GraphicsDevice.Present(sourceRectangle, null, Handle);
             }
             catch
             {

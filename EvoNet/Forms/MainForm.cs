@@ -100,5 +100,11 @@ namespace EvoNet.Forms
         {
             evoSimControl1.Serialize(true);
         }
+
+        private void showStatisticsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            splitContainer1.Panel2Collapsed = !splitContainer1.Panel2Collapsed;
+            showStatisticsToolStripMenuItem.Checked = !splitContainer1.Panel2Collapsed;
+        }
     }
 }

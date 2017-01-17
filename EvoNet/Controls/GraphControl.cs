@@ -110,12 +110,27 @@ namespace EvoNet.Controls
         {
             GraphCache cache;
             int CurrentVertexIndex = 0;
+            int graphCount = graph.Count;
+            int startIndex = Math.Max(graph.Count - 10000, 0);
+            int elementCount = graphCount - startIndex;
+            if (elementCount <= 0)
+            {
+                return;
+            }
             Func<IGraphValue, decimal> GetY = (value) => { return value.DisplayValue; };
             Func<IGraphValue, decimal> GetX = (value) => { return value.DisplayPosition; };
-            decimal maxY = graph.Max(GetY);
-            decimal minY = graph.Min(GetY);
-            decimal maxX = graph.Max(GetX);
-            decimal minX = graph.Min(GetX);
+            decimal maxY = graph[startIndex].DisplayValue;
+            decimal minY = graph[startIndex].DisplayValue;
+            decimal maxX = graph[startIndex].DisplayPosition;
+            decimal minX = graph[startIndex].DisplayPosition;
+
+            for(int elementIndex = startIndex; elementIndex < graphCount; elementIndex++)
+            {
+                maxY = Math.Max(maxY, graph[elementIndex].DisplayValue);
+                minY = Math.Min(minY, graph[elementIndex].DisplayValue);
+                maxX = Math.Max(maxX, graph[elementIndex].DisplayPosition);
+                minX = Math.Min(minX, graph[elementIndex].DisplayPosition);
+            }
 
             Func<decimal, float> GetRelativeY = (decimal alpha) =>
             {
@@ -134,16 +149,16 @@ namespace EvoNet.Controls
             VertexPosition2 upperPoint = new VertexPosition2();
             VertexPosition2 lowerPoint = new VertexPosition2();
 
-            upperPoint.Position = new Vector2(-1, GetRelativeY(graph[0].DisplayValue));
+            upperPoint.Position = new Vector2(-1, GetRelativeY(graph.ElementAt(0).DisplayValue));
             lowerPoint.Position = new Vector2(-1, -1);
 
-            VertexPosition2[] vertexAreaBufferData = new VertexPosition2[graph.Count * 2];
-            VertexPosition2[] vertexLineBufferData = new VertexPosition2[graph.Count * 2];
-            int[] indexBufferData = new int[(graph.Count - 1) * 6];
+            VertexPosition2[] vertexAreaBufferData = new VertexPosition2[((graphCount - startIndex)+1) * 2];
+            VertexPosition2[] vertexLineBufferData = new VertexPosition2[((graphCount - startIndex)+1) * 2];
+            int[] indexBufferData = new int[((graphCount - startIndex)) * 6];
             int CurrentIndexBufferIndex = 0;
 
             vertexAreaBufferData[CurrentVertexIndex] = upperPoint;
-            vertexAreaBufferData[CurrentVertexIndex+1] = lowerPoint;
+            vertexAreaBufferData[CurrentVertexIndex + 1] = lowerPoint;
 
             float lineWidth = (5.0f / Height) / 2.0f;
             Vector2 lineWidthOffset = new Vector2(0.0f, lineWidth / 2.0f);
@@ -155,10 +170,10 @@ namespace EvoNet.Controls
 
             Vector2 lastUpperPoint;
 
-            for (int GraphIndex = 1; GraphIndex < graph.Count; GraphIndex++)
+            for (int GraphIndex = startIndex; GraphIndex < graphCount; GraphIndex++)
             {
-                float x = GetRelativeX(graph[GraphIndex].DisplayPosition);
-                float y = GetRelativeY(graph[GraphIndex].DisplayValue);
+                float x = GetRelativeX(graph.ElementAt(GraphIndex).DisplayPosition);
+                float y = GetRelativeY(graph.ElementAt(GraphIndex).DisplayValue);
 
                 lastUpperPoint = upperPoint.Position;
 
@@ -171,9 +186,11 @@ namespace EvoNet.Controls
                 // so the line keeps its thickness along slopes
                 // Without this sloped graphs would get very thin
                 Vector2 dirFromLastPoint = upperPoint.Position - lastUpperPoint;
-                if(GraphIndex + 1 < graph.Count)
+                if (GraphIndex + 1 < graphCount)
                 {
-                    dirFromLastPoint += new Vector2(GetRelativeX(graph[GraphIndex + 1].DisplayPosition), GetRelativeY(graph[GraphIndex + 1].DisplayValue)) - upperPoint.Position;
+                    dirFromLastPoint += new Vector2(
+                        GetRelativeX(graph.ElementAt(GraphIndex + 1).DisplayPosition),
+                        GetRelativeY(graph.ElementAt(GraphIndex + 1).DisplayValue)) - upperPoint.Position;
                     dirFromLastPoint /= 2;
                 }
                 dirFromLastPoint.Normalize();
@@ -194,12 +211,12 @@ namespace EvoNet.Controls
                 int LastLowerPoint = CurrentVertexIndex - 1;
                 int CurrentUpperPoint = CurrentVertexIndex;
                 int CurrentLowerPoint = CurrentVertexIndex + 1;
-                indexBufferData[CurrentIndexBufferIndex]=LastUpperPoint;
-                indexBufferData[CurrentIndexBufferIndex+1]=CurrentUpperPoint;
-                indexBufferData[CurrentIndexBufferIndex+2]=LastLowerPoint;
-                indexBufferData[CurrentIndexBufferIndex+3]=LastLowerPoint;
-                indexBufferData[CurrentIndexBufferIndex+4]=CurrentUpperPoint;
-                indexBufferData[CurrentIndexBufferIndex+5]=CurrentLowerPoint;
+                indexBufferData[CurrentIndexBufferIndex] = LastUpperPoint;
+                indexBufferData[CurrentIndexBufferIndex + 1] = CurrentUpperPoint;
+                indexBufferData[CurrentIndexBufferIndex + 2] = LastLowerPoint;
+                indexBufferData[CurrentIndexBufferIndex + 3] = LastLowerPoint;
+                indexBufferData[CurrentIndexBufferIndex + 4] = CurrentUpperPoint;
+                indexBufferData[CurrentIndexBufferIndex + 5] = CurrentLowerPoint;
 
                 CurrentIndexBufferIndex += 6;
                 CurrentVertexIndex += 2;
@@ -213,7 +230,7 @@ namespace EvoNet.Controls
             cache.IndexAreaBuffer = new IndexBuffer(GraphicsDevice, IndexElementSize.ThirtyTwoBits, indexBufferData.Length, BufferUsage.WriteOnly);
             cache.IndexAreaBuffer.SetData(indexBufferData);
 
-            cache.NumElements = graph.Count;
+            cache.NumElements = graphCount;
             graphCaches[graph] = cache;
         }
 
@@ -238,7 +255,11 @@ namespace EvoNet.Controls
 
             if (needsRedraw)
             {
-                CreateCache(graph);
+                WaitCallback worker = (state) =>
+                    {
+                        CreateCache(graph);
+                    };
+                ThreadPool.QueueUserWorkItem(worker);
             }
             if (graphCaches.TryGetValue(graph, out cache))
             {
@@ -257,6 +278,8 @@ namespace EvoNet.Controls
                 GraphicsDevice.Reset(pp);
             }
             GraphicsDevice.Clear(Color.White);
+            GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
             foreach (IGraphValueList graph in graphs.Values)
             {
                 DrawGraph(graph);
