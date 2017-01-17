@@ -26,7 +26,7 @@ namespace EvoNet.AI
             nn.AddInputNeuron(in2);
             nn.AddInputNeuron(in3);
 
-            nn.GenerateHiddenNeurons(3);
+            nn.GenerateHiddenNeurons(3, 1);
 
             nn.AddOutputNeuron(out1);
             nn.AddOutputNeuron(out2);

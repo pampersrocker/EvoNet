@@ -13,39 +13,130 @@ namespace EvoNet.AI
     public class NeuronalNetwork
     {
         private bool fullMeshGenerated = false;
-        private List<Neuron> inputNeurons = new List<Neuron>();
+
+        List<List<Neuron>> neurons = new List<List<Neuron>>();
+
+        public List<List<Neuron>> Neurons
+        {
+            get
+            {
+                return neurons;
+            }
+        }
+
+        public NeuronalNetwork()
+        {
+            // Add list for Input and output layer
+            neurons.Add(new List<Neuron>());
+            neurons.Add(new List<Neuron>());
+        }
+
         public List<Neuron> InputNeurons
         {
-            get { return inputNeurons; }
+            get
+            {
+                if (neurons.Count > 0)
+                {
+                    return neurons[0];
+                }
+                else
+                {
+                    return null;
+                }
+            }
         }
-        private List<Neuron> hiddenNeurons = new List<Neuron>();
-        public List<Neuron> HiddenNeurons
+
+        public List<Neuron> FirstHiddenLayer
         {
-            get { return hiddenNeurons; }
+            get
+            {
+                if (neurons.Count > 2)
+                {
+                    return neurons[1];
+                }
+                else
+
+                {
+                    return null;
+                }
+            }
         }
-        private List<Neuron> outputNeurons = new List<Neuron>();
+
+        public List<Neuron> LastHiddenLayer
+        {
+            get
+            {
+                if (neurons.Count > 2)
+                {
+                    return neurons[neurons.Count - 2];
+                }
+                else
+
+                {
+                    return null;
+                }
+            }
+        }
+
         public List<Neuron> OutputNeurons
         {
-            get { return outputNeurons; }
+            get
+            {
+                if (neurons.Count > 1)
+                {
+                    return neurons.Last();
+                }
+                else
+                {
+                    return null;
+                }
+            }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="layerIndex">Zero based index of hidden layers</param>
+        public List<Neuron> GetHiddenLayer(int layerIndex)
+        {
+            if (layerIndex < HiddenLayerCount && layerIndex >= 0)
+            {
+                return neurons[layerIndex + 1];
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public int HiddenLayerCount { get { return neurons.Count - 2; } }
+
+        
 
         public void AddInputNeuron(InputNeuron neuron)
         {
-            inputNeurons.Add(neuron);
+            InputNeurons.Add(neuron);
         }
-        public void AddHiddenNeuron(WorkingNeuron neuron)
+        public void AddHiddenNeuron(WorkingNeuron neuron, int Layer)
         {
-            hiddenNeurons.Add(neuron);
+            if (Layer+1 > 0 && Layer+1 < neurons.Count)
+            {
+                neurons[Layer+1].Add(neuron);
+            }
+            else
+            {
+                throw new ArgumentException("Layer needs to be within the hidden layer", "Layer");
+            }
         }
-        public void AddOutputNeuron(WorkingNeuron neuron)
+        public void AddOutputNeuron(Neuron neuron)
         {
-            outputNeurons.Add(neuron);
+            OutputNeurons.Add(neuron);
         }
 
         public void AddInputNeuronAndMesh(InputNeuron neuron)
         {
-            inputNeurons.Add(neuron);
-            foreach(WorkingNeuron wn in hiddenNeurons)
+            InputNeurons.Add(neuron);
+            foreach (WorkingNeuron wn in FirstHiddenLayer)
             {
                 wn.AddNeuronConnection(new Connection(neuron, 0));
             }
@@ -53,27 +144,32 @@ namespace EvoNet.AI
 
         public void AddOutputNeuronAndMesh(WorkingNeuron neuron)
         {
-            outputNeurons.Add(neuron);
-            foreach(WorkingNeuron wn in hiddenNeurons)
+            OutputNeurons.Add(neuron);
+            foreach (WorkingNeuron wn in LastHiddenLayer)
             {
                 neuron.AddNeuronConnection(new Connection(wn, 0));
             }
         }
 
+        public void AddHiddenLayer(List<Neuron> layer)
+        {
+            neurons.Insert(neurons.Count - 1, layer);
+        }
+
         public void RemoveInputNeuron(InputNeuron neuron)
         {
-            inputNeurons.Remove(neuron);
-            foreach(WorkingNeuron wn in hiddenNeurons)
+            InputNeurons.Remove(neuron);
+            foreach (WorkingNeuron wn in neurons[1])
             {
                 List<Connection> connectionsToRemove = new List<Connection>();
-                foreach(Connection c in wn.GetConnections())
+                foreach (Connection c in wn.GetConnections())
                 {
                     if (c.entryNeuron == neuron)
                     {
                         connectionsToRemove.Add(c);
                     }
                 }
-                foreach(Connection c in connectionsToRemove)
+                foreach (Connection c in connectionsToRemove)
                 {
                     wn.GetConnections().Remove(c);
                 }
@@ -82,19 +178,19 @@ namespace EvoNet.AI
 
         public void RemoveOutputNeuron(WorkingNeuron neuron)
         {
-            outputNeurons.Remove(neuron);
+            OutputNeurons.Remove(neuron);
         }
 
         public InputNeuron GetInputNeuronFromIndex(int index)
         {
-            return (InputNeuron)inputNeurons[index];
+            return (InputNeuron)InputNeurons[index];
         }
 
         public InputNeuron GetInputNeuronFromName(String name)
         {
-            foreach(InputNeuron neuron in inputNeurons)
+            foreach (InputNeuron neuron in InputNeurons)
             {
-                if(name == neuron.GetName())
+                if (name == neuron.GetName())
                 {
                     return neuron;
                 }
@@ -102,31 +198,31 @@ namespace EvoNet.AI
             throw new NullReferenceException();
         }
 
-        public WorkingNeuron GetHiddenNeuronFromIndex(int index)
+        public WorkingNeuron GetHiddenNeuronFromIndex(int index, int Layer)
         {
-            return (WorkingNeuron)hiddenNeurons[index];
+            return (WorkingNeuron)neurons[Layer][index];
         }
 
-        public WorkingNeuron GetHiddenNeuronFromName(String name)
+        public WorkingNeuron GetHiddenNeuronFromName(string name, int Layer)
         {
-            foreach(WorkingNeuron wn in hiddenNeurons)
+            foreach (WorkingNeuron wn in neurons[Layer])
             {
-                if(name == wn.GetName())
+                if (name == wn.GetName())
                 {
                     return wn;
                 }
             }
-            throw new NullReferenceException();
+            return null;
         }
 
         public WorkingNeuron GetOutputNeuronFromIndex(int index)
         {
-            return (WorkingNeuron)outputNeurons[index];
+            return (WorkingNeuron)OutputNeurons[index];
         }
 
         public WorkingNeuron GetOutputNeuronFromName(String name)
         {
-            foreach (WorkingNeuron wn in outputNeurons)
+            foreach (WorkingNeuron wn in OutputNeurons)
             {
                 if (name == wn.GetName())
                 {
@@ -136,124 +232,113 @@ namespace EvoNet.AI
             throw new NullReferenceException();
         }
 
-        public void GenerateHiddenNeurons(int amount)
+        public void GenerateHiddenNeurons(int amount, int numLayers)
         {
-            for(int i = 0; i < amount; i++)
+            for (int layerIndex = 0; layerIndex < numLayers; layerIndex++)
             {
-                hiddenNeurons.Add(new WorkingNeuron());
+                List<Neuron> newNeurons = new List<Neuron>(amount);
+                for (int i = 0; i < amount; i++)
+                {
+                    newNeurons.Add(new WorkingNeuron());
+                }
+                neurons.Insert(neurons.Count - 1, newNeurons); 
             }
         }
 
         public void GenerateFullMesh()
         {
             fullMeshGenerated = true;
-            foreach (WorkingNeuron wn in hiddenNeurons)
+            for (int layerIndex = 1; layerIndex < neurons.Count; layerIndex++)
             {
-                foreach (InputNeuron input in inputNeurons)
+                foreach (WorkingNeuron wn in neurons[layerIndex])
                 {
-                    wn.AddNeuronConnection(input, 1);
-                }
-            }
-
-            foreach (WorkingNeuron wn in outputNeurons)
-            {
-                foreach (WorkingNeuron wn2 in hiddenNeurons)
-                {
-                    wn.AddNeuronConnection(wn2, 1);
+                    foreach (Neuron previous in neurons[layerIndex-1])
+                    {
+                        wn.AddNeuronConnection(previous, 1);
+                    }
                 }
             }
         }
 
         public void Invalidate()
         {
-            foreach(WorkingNeuron wn in hiddenNeurons)
+            for (int layerIndex = 1; layerIndex < neurons.Count; layerIndex++)
             {
-                wn.Invalidate();
-            }
-            foreach(WorkingNeuron wn in outputNeurons)
-            {
-                wn.Invalidate();
+                foreach (WorkingNeuron wn in neurons[layerIndex])
+                {
+                    if (wn != null)
+                    {
+                        wn.Invalidate();
+                    }
+                }
             }
         }
 
         public void RandomizeAllWeights()
         {
-            foreach (WorkingNeuron wn in hiddenNeurons)
+            for (int layerIndex = 1; layerIndex < neurons.Count; layerIndex++)
             {
-                wn.RandomizeWeights();
-            }
-            foreach (WorkingNeuron wn in outputNeurons)
-            {
-                wn.RandomizeWeights();
+                foreach (WorkingNeuron wn in neurons[layerIndex])
+                {
+                    wn.RandomizeWeights();
+                }
             }
         }
 
         public void RandomMutation(float MutationRate)
         {
-            int index = Simulation.RandomInt(hiddenNeurons.Count + outputNeurons.Count);
-            if(index < hiddenNeurons.Count)
-            {
-                ((WorkingNeuron)hiddenNeurons[index]).RandomMutation(MutationRate);
-            }
-            else
-            {
-                ((WorkingNeuron)outputNeurons[index - hiddenNeurons.Count]).RandomMutation(MutationRate);
-            }
+            int layer = Simulation.RandomInt(1, neurons.Count);
+            int index = Simulation.RandomInt(neurons[layer].Count);
+            ((WorkingNeuron)neurons[layer][index]).RandomMutation(MutationRate);
         }
 
         public NeuronalNetwork CloneFullMesh()
         {
-            //TODO make this mess pretty
-            if (!this.fullMeshGenerated)
+            if (!fullMeshGenerated)
             {
                 throw new NeuronalNetworkNotFullmeshedException();
             }
             NeuronalNetwork copy = new NeuronalNetwork();
-            foreach (InputNeuron input in inputNeurons)
+            foreach (InputNeuron input in InputNeurons)
             {
                 copy.AddInputNeuron((InputNeuron)input.NameCopy());
             }
-            foreach (WorkingNeuron wn in hiddenNeurons)
+            for (int layerIndex=0; layerIndex<HiddenLayerCount; layerIndex++)
             {
-                copy.AddHiddenNeuron((WorkingNeuron)wn.NameCopy());
+                List<Neuron> newLayer = new List<Neuron>();
+                foreach (WorkingNeuron wn in neurons[layerIndex+1])
+                {
+                    newLayer.Add(wn.NameCopy());
+                }
+                copy.AddHiddenLayer(newLayer);
             }
-            foreach (WorkingNeuron wn in outputNeurons)
+            foreach (Neuron output in OutputNeurons)
             {
-                copy.AddOutputNeuron((WorkingNeuron)wn.NameCopy());
+                copy.AddOutputNeuron(output.NameCopy());
             }
 
             copy.GenerateFullMesh();
 
-            for (int i = 0; i < hiddenNeurons.Count; i++)
+            for (int layerIndex = 1; layerIndex < neurons.Count; layerIndex++)
             {
-                List<Connection> connectionsOrginal = ((WorkingNeuron)hiddenNeurons[i]).GetConnections();
-                List<Connection> connectionsCopy = ((WorkingNeuron)copy.hiddenNeurons[i]).GetConnections();
-                if (connectionsOrginal.Count != connectionsCopy.Count)
+                for (int neuronIndex = 0; neuronIndex < neurons[layerIndex].Count; neuronIndex++)
                 {
-                    throw new NotSameAmountOfNeuronsException();
-                }
-                for (int k = 0; k < connectionsOrginal.Count; k++)
-                {
-                    connectionsCopy[k].weight = connectionsOrginal[k].weight;
-                }
-            }
-            for (int i = 0; i < outputNeurons.Count; i++)
-            {
-                List<Connection> connectionsOrginal = ((WorkingNeuron)outputNeurons[i]).GetConnections();
-                List<Connection> connectionsCopy = ((WorkingNeuron)copy.outputNeurons[i]).GetConnections();
-                if (connectionsOrginal.Count != connectionsCopy.Count)
-                {
-                    throw new NotSameAmountOfNeuronsException();
-                }
-                for (int k = 0; k < connectionsOrginal.Count; k++)
-                {
-                    connectionsCopy[k].weight = connectionsOrginal[k].weight;
+                    List<Connection> connectionsOrginal = ((WorkingNeuron)neurons[layerIndex][neuronIndex]).GetConnections();
+                    List<Connection> connectionsCopy = ((WorkingNeuron)copy.neurons[layerIndex][neuronIndex]).GetConnections();
+                    if (connectionsOrginal.Count != connectionsCopy.Count)
+                    {
+                        throw new NotSameAmountOfNeuronsException();
+                    }
+                    for (int k = 0; k < connectionsOrginal.Count; k++)
+                    {
+                        connectionsCopy[k].weight = connectionsOrginal[k].weight;
+                    }
                 }
             }
 
             return copy;
         }
 
-        
+
     }
 }

@@ -373,7 +373,7 @@ namespace EvoNet.Objects
                 brain.AddInputNeuron(inMemory[i]);
             }
 
-            brain.GenerateHiddenNeurons(10);
+            brain.GenerateHiddenNeurons(10, manager.simulation.SimulationConfiguration.NumberOfNeuronLayers);
 
             brain.AddOutputNeuron(outBirth);
             brain.AddOutputNeuron(outRotate);
@@ -514,7 +514,7 @@ namespace EvoNet.Objects
 
         private void MutateConnections()
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 10 * brain.HiddenLayerCount; i++)
             {
                 brain.RandomMutation(0.1f);
             }

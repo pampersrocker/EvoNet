@@ -105,7 +105,7 @@ namespace EvoNet.Rendering
                 spriteBatch.DrawString(Fonts.FontArial, "S: " + (selectedCreature.Energy > 100 ? "Alive" : "Dead"), new Vector2(820, 150), Color.Red);
                 DrawCreature(selectedCreature, selectedCreature.Pos.ToXNA() * -1 + new Vector2(1050, 70));
                 networkRenderer.Network = selectedCreature.Brain;
-                networkRenderer.Draw(spriteBatch, new Rectangle(950, 160, 200, (int)(250 + selectedCreature.AmountOfMemory * NeuralNetworkRenderer.NEURONSIZE)));
+                networkRenderer.Draw(spriteBatch, new Rectangle(950, 160, 400, (int)(250 + selectedCreature.AmountOfMemory * NeuralNetworkRenderer.NEURONSIZE)));
             }
 
             spriteBatch.End();
