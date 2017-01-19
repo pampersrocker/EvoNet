@@ -56,7 +56,7 @@ namespace EvoNet.Rendering
                 Vector2? nameOffset = null;
                 if (layerIndex == 0)
                 {
-                    nameOffset = new Vector2(10, -10);
+                    nameOffset = new Vector2(-10, -10);
                 }
                 else if (layerIndex == network.Neurons.Count-1)
                 {
@@ -73,7 +73,7 @@ namespace EvoNet.Rendering
             float yMin = rect.Y + NEURONSIZE / 2;
             float yMax = rect.Y + rect.Height - NEURONSIZE / 2;
             float xMin = rect.X;
-            float widthPerLayer = (float)rect.Width / (float)network.Neurons.Count;
+            float widthPerLayer = rect.Width / ((float)network.Neurons.Count-1);
             for (int layerIndex = 0; layerIndex < network.Neurons.Count; layerIndex++)
             {
                 CalculateNeuronsRederPositionLayer(network.Neurons[layerIndex], rect.X + widthPerLayer * layerIndex, yMin, yMax);
@@ -187,10 +187,6 @@ namespace EvoNet.Rendering
                 }
             }
             return strongestConnection;
-        }
-        public void Initialize(ContentManager content, GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
-        {
-            throw new NotImplementedException();
         }
     }
 }

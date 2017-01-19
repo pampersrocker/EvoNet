@@ -32,6 +32,8 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showStatisticsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
@@ -40,10 +42,9 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.graphsTab = new System.Windows.Forms.TabPage();
             this.networkTab = new System.Windows.Forms.TabPage();
-            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.showStatisticsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.evoSimControl1 = new EvoNet.Controls.EvoSimControl();
             this.NumberOfCreaturesAliveGraph = new EvoNet.Controls.GraphControl();
+            this.networkRenderControl1 = new EvoNet.Controls.NetworkRenderControl();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -52,6 +53,7 @@
             this.splitContainer1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.graphsTab.SuspendLayout();
+            this.networkTab.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -80,6 +82,23 @@
             this.exitToolStripMenuItem1.Size = new System.Drawing.Size(134, 22);
             this.exitToolStripMenuItem1.Text = "E&xit";
             this.exitToolStripMenuItem1.Click += new System.EventHandler(this.exitToolStripMenuItem1_Click);
+            // 
+            // viewToolStripMenuItem
+            // 
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.showStatisticsToolStripMenuItem});
+            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.viewToolStripMenuItem.Text = "&View";
+            // 
+            // showStatisticsToolStripMenuItem
+            // 
+            this.showStatisticsToolStripMenuItem.Checked = true;
+            this.showStatisticsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.showStatisticsToolStripMenuItem.Name = "showStatisticsToolStripMenuItem";
+            this.showStatisticsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.showStatisticsToolStripMenuItem.Text = "&Show Statistics";
+            this.showStatisticsToolStripMenuItem.Click += new System.EventHandler(this.showStatisticsToolStripMenuItem_Click);
             // 
             // statusStrip1
             // 
@@ -144,6 +163,7 @@
             // 
             // networkTab
             // 
+            this.networkTab.Controls.Add(this.networkRenderControl1);
             this.networkTab.Location = new System.Drawing.Point(4, 22);
             this.networkTab.Name = "networkTab";
             this.networkTab.Padding = new System.Windows.Forms.Padding(3);
@@ -151,23 +171,6 @@
             this.networkTab.TabIndex = 1;
             this.networkTab.Text = "Network";
             this.networkTab.UseVisualStyleBackColor = true;
-            // 
-            // viewToolStripMenuItem
-            // 
-            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.showStatisticsToolStripMenuItem});
-            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-            this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-            this.viewToolStripMenuItem.Text = "&View";
-            // 
-            // showStatisticsToolStripMenuItem
-            // 
-            this.showStatisticsToolStripMenuItem.Checked = true;
-            this.showStatisticsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.showStatisticsToolStripMenuItem.Name = "showStatisticsToolStripMenuItem";
-            this.showStatisticsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.showStatisticsToolStripMenuItem.Text = "&Show Statistics";
-            this.showStatisticsToolStripMenuItem.Click += new System.EventHandler(this.showStatisticsToolStripMenuItem_Click);
             // 
             // evoSimControl1
             // 
@@ -192,6 +195,18 @@
             this.NumberOfCreaturesAliveGraph.TabIndex = 3;
             this.NumberOfCreaturesAliveGraph.Text = "graphControl1";
             // 
+            // networkRenderControl1
+            // 
+            this.networkRenderControl1.Activated = true;
+            this.networkRenderControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.networkRenderControl1.IgnoreFocus = true;
+            this.networkRenderControl1.Location = new System.Drawing.Point(3, 3);
+            this.networkRenderControl1.Name = "networkRenderControl1";
+            this.networkRenderControl1.Simulation = null;
+            this.networkRenderControl1.Size = new System.Drawing.Size(217, 532);
+            this.networkRenderControl1.TabIndex = 0;
+            this.networkRenderControl1.Text = "networkRenderControl1";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -204,6 +219,7 @@
             this.Name = "MainForm";
             this.Text = "EvoNet";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+            this.Shown += new System.EventHandler(this.MainForm_Shown);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
@@ -214,6 +230,7 @@
             this.splitContainer1.ResumeLayout(false);
             this.tabControl1.ResumeLayout(false);
             this.graphsTab.ResumeLayout(false);
+            this.networkTab.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -236,5 +253,6 @@
         private System.Windows.Forms.TabPage networkTab;
         private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showStatisticsToolStripMenuItem;
+        private Controls.NetworkRenderControl networkRenderControl1;
     }
 }

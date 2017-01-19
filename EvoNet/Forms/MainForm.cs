@@ -106,5 +106,10 @@ namespace EvoNet.Forms
             splitContainer1.Panel2Collapsed = !splitContainer1.Panel2Collapsed;
             showStatisticsToolStripMenuItem.Checked = !splitContainer1.Panel2Collapsed;
         }
+
+        private void MainForm_Shown(object sender, EventArgs e)
+        {
+            networkRenderControl1.Simulation = evoSimControl1.sim;
+        }
     }
 }
