@@ -31,12 +31,18 @@ namespace EvoNet.Controls
         public EvoSimControl()
         {
             MouseWheel += EvoSimControl_MouseWheel;
+            MouseEnter += EvoSimControl_MouseEnter;
         }
 
         private void EvoSimControl_MouseWheel(object sender, MouseEventArgs e)
         {
             Vector2 mousePos = new Vector2(e.X, e.Y);
             inputManager.Zoom(e.Delta / 120.0f, mousePos);
+        }
+
+        private void EvoSimControl_MouseEnter(object sender, EventArgs e)
+        {
+            this.Focus();
         }
 
 
