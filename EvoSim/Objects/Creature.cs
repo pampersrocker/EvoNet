@@ -247,6 +247,26 @@ namespace EvoNet.Objects
             }
         }
 
+        private object amountOfHiddenLock = new object();
+        private int amountOfHidden_ = 1;
+        public int AmountOfHidden
+        {
+            get
+            {
+                lock (amountOfHiddenLock)
+                {
+                    return amountOfHidden_;
+                }
+            }
+            set
+            {
+                lock (amountOfHiddenLock)
+                {
+                    amountOfHidden_ = value;
+                }
+            }
+        }
+
         private object oscilationLock = new object();
         private float oscilationValue_;
         private float OscilationValue
@@ -373,7 +393,7 @@ namespace EvoNet.Objects
                 brain.AddInputNeuron(inMemory[i]);
             }
 
-            brain.GenerateHiddenNeurons(10, manager.simulation.SimulationConfiguration.NumberOfNeuronLayers);
+            brain.GenerateHiddenNeurons(AmountOfHidden, manager.simulation.SimulationConfiguration.NumberOfNeuronLayers);
 
             brain.AddOutputNeuron(outBirth);
             brain.AddOutputNeuron(outRotate);
@@ -415,6 +435,7 @@ namespace EvoNet.Objects
 
             AmountOfMemory = mother.AmountOfMemory;
             amountOfFeelers = mother.AmountOfFeelers;
+            AmountOfHidden = mother.AmountOfHidden;
             inMemory = new InputNeuron[AmountOfMemory];
             outMemory = new WorkingNeuron[AmountOfMemory];
 
@@ -422,19 +443,22 @@ namespace EvoNet.Objects
             SetupVariablesFromBrain();
 
             
-            if(Simulation.RandomFloat() > 0.01f)
-            {
-                MutateConnections();
-            }
-            else
+            if(Simulation.RandomFloat() < 0.01f)
             {
                 MutateMemory();
             }
 
-            if(Simulation.RandomFloat() < 0.1f)
+            if(Simulation.RandomFloat() < 0.01f && AmountOfFeelers < 5)
             {
                 AddFeeler();
             }
+
+            if (Simulation.RandomFloat() < 0.01f && AmountOfHidden < 40)
+            {
+                AddHiddenNeuron();
+            }
+
+            MutateConnections();
 
             MutateColor(mother);
             GenerateColorInv();
@@ -496,6 +520,12 @@ namespace EvoNet.Objects
                 outMemory = newOutputNeurons;
                 AmountOfMemory++;
             }
+        }
+
+        private void AddHiddenNeuron()
+        {
+            brain.AddHiddenNeuronToLayerAndMesh(1);
+            AmountOfHidden++;
         }
 
         private void AddFeeler()
