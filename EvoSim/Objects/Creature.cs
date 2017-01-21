@@ -248,7 +248,7 @@ namespace EvoNet.Objects
         }
 
         private object amountOfHiddenLock = new object();
-        private int amountOfHidden_ = 1;
+        private int amountOfHidden_ = 10;
         public int AmountOfHidden
         {
             get
