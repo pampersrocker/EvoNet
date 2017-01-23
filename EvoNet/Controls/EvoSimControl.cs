@@ -86,6 +86,7 @@ namespace EvoNet.Controls
 
 
             inputManager = new InputManager();
+            inputManager.PositionProvider = this;
 
             modules.Add(inputManager);
 

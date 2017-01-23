@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using EvoNet.AI;
 using Microsoft.Xna.Framework.Input;
+using EvoNet.Providers;
 
 namespace EvoNet.Rendering
 {
@@ -22,9 +23,15 @@ namespace EvoNet.Rendering
         }
         public const float NEURONSIZE = 15;
 
+        public IMousePositionProvider PositionProvider { get; set; }
+
         private Neuron GetNeuronUnderMouse()
         {
-            MouseState ms = Mouse.GetState();
+            Vector2 ms = new Vector2(0,0);
+            if (PositionProvider != null)
+            {
+                ms = PositionProvider.GetMousePosition();
+            }
 
             for (int layerIndex = 0; layerIndex < network.Neurons.Count; layerIndex++)
             {

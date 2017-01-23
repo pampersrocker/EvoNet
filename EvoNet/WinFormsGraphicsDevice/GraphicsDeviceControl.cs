@@ -13,6 +13,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using EvoNet.Providers;
 #endregion
 
 namespace WinFormsGraphicsDevice
@@ -28,7 +29,7 @@ namespace WinFormsGraphicsDevice
     /// a Windows Form. Derived classes can override the Initialize and Draw
     /// methods to add their own drawing code.
     /// </summary>
-    public class GraphicsDeviceControl : Control
+    public class GraphicsDeviceControl : Control, IMousePositionProvider
     {
         Timer DrawTimer;
         bool ignoreFocus = false;
@@ -389,6 +390,11 @@ namespace WinFormsGraphicsDevice
         /// </summary>
         protected virtual void Draw(GameTime gameTime) { }
 
+        public Vector2 GetMousePosition()
+        {
+            System.Drawing.Point Position = PointToClient(MousePosition);
+            return new Vector2(Position.X, Position.Y);
+        }
 
         #endregion
     }

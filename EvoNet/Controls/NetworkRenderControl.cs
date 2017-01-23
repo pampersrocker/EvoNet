@@ -35,6 +35,7 @@ namespace EvoNet.Controls
 
             renderer = new NeuralNetworkRenderer();
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            renderer.PositionProvider = this;
         }
 
         protected override void Update(GameTime gameTime)

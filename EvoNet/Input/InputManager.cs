@@ -1,4 +1,5 @@
 ﻿using EvoNet.Configuration;
+using EvoNet.Providers;
 using EvoNet.Rendering;
 using EvoSim;
 using Microsoft.Xna.Framework;
@@ -18,6 +19,8 @@ namespace EvoNet.Input
         bool oldSpaceDown = false;
         Vector2 oldMousePosition = Vector2.Zero;
         int scrollWheelValue;
+
+        public IMousePositionProvider PositionProvider;
 
         SimulationRenderer renderer;
 
@@ -58,6 +61,11 @@ namespace EvoNet.Input
         {
             KeyboardState keyboardState = Keyboard.GetState();
             MouseState mouseState = Mouse.GetState();
+            Vector2 mousePosition = Vector2.Zero;
+            if (PositionProvider != null)
+            {
+                mousePosition = PositionProvider.GetMousePosition();
+            }
 
             DoMovement(gameTime, keyboardState, mouseState);
 
