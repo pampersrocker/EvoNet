@@ -151,6 +151,20 @@ namespace EvoNet.AI
             }
         }
 
+        public void AddHiddenNeuronToLayerAndMesh(int layer)
+        {
+            WorkingNeuron neuron = new WorkingNeuron();
+            neurons[layer].Add(neuron);
+            foreach(Neuron n in neurons[layer - 1])
+            {
+                neuron.AddNeuronConnection(new Connection(n, 0));
+            }
+            foreach (WorkingNeuron n in neurons[layer + 1])
+            {
+                n.AddNeuronConnection(new Connection(neuron, 0));
+            }
+        }
+
         public void AddHiddenLayer(List<Neuron> layer)
         {
             neurons.Insert(neurons.Count - 1, layer);
