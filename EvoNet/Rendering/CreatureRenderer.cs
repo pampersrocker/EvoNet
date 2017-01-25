@@ -48,7 +48,7 @@ namespace EvoNet.Rendering
             }
             spriteBatch.End();
 
-            DrawGeneralStats();
+            //DrawGeneralStats();
         }
 
         private void DrawGeneralStats()
@@ -119,6 +119,8 @@ namespace EvoNet.Rendering
             }
             spriteBatch.Draw(bodyTex, new Rectangle((int)(c.Pos.X + offset.X - Creature.CREATURESIZE / 2), (int)(c.Pos.Y + offset.Y - Creature.CREATURESIZE / 2), Creature.CREATURESIZE, Creature.CREATURESIZE), c.Color_inv.ToXNA());
             spriteBatch.Draw(bodyTex, new Rectangle((int)(c.Pos.X + offset.X - (Creature.CREATURESIZE - 4) / 2), (int)(c.Pos.Y + offset.Y - (Creature.CREATURESIZE - 4) / 2), Creature.CREATURESIZE - 4, Creature.CREATURESIZE - 4), c.Color.ToXNA());
+            var displayString = string.Format("id:{0}\nG:{1}", c.Id, c.Generation);
+            spriteBatch.DrawString(Fonts.FontArialSmall, displayString, c.Pos.ToXNA() + offset - Fonts.FontArialSmall.MeasureString(displayString) / 2, Color.White);
             for(int i = 0; i<c.AmountOfFeelers; i++)
             {
                 spriteBatch.Draw(feelerTex, new Rectangle((int)(c.Feelers[i].FeelerPos.X + offset.X - 5), (int)(c.Feelers[i].FeelerPos.Y + offset.Y - 5), 10, 10), c.Feelers[i].TimeSinceLastAttack > Feeler.TIMEBETWEENATTACKS ? Color.Blue : Color.Red);

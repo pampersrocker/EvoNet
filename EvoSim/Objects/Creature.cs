@@ -469,6 +469,57 @@ namespace EvoNet.Objects
             }
         }
 
+        public Creature(Creature mother, Creature father, CreatureManager manager) :
+            this(manager)
+        {
+            id = currentId++;
+            motherId = mother.id;
+            generation = mother.generation + 1;
+            if (generation > _maximumGeneration)
+            {
+                _maximumGeneration = generation;
+            }
+            pos = mother.pos;
+            viewAngle = Simulation.RandomFloat() * Mathf.PI * 2;
+            brain = mother.brain.CloneFullMesh();
+            brain.MixNetwork(father.brain);
+
+            AmountOfMemory = mother.AmountOfMemory;
+            amountOfFeelers = mother.AmountOfFeelers;
+            AmountOfHidden = mother.AmountOfHidden;
+            inMemory = new InputNeuron[AmountOfMemory];
+            outMemory = new WorkingNeuron[AmountOfMemory];
+
+            SetupFeelers(true);
+            SetupVariablesFromBrain();
+
+
+            if (Simulation.RandomFloat() < 0.01f)
+            {
+                MutateMemory();
+            }
+
+            if (Simulation.RandomFloat() < 0.01f && AmountOfFeelers < 5)
+            {
+                AddFeeler();
+            }
+
+            if (Simulation.RandomFloat() < 0.01f && AmountOfHidden < 40)
+            {
+                AddHiddenNeuron();
+            }
+
+            MutateConnections();
+
+            MutateColor(mother);
+            GenerateColorInv();
+
+            if (manager.SelectedCreature == null || manager.SelectedCreature.Energy < 100)
+            {
+                manager.SelectedCreature = this;
+            }
+        }
+
         private void SetupFeelers(bool isChild)
         {
             feelers = new Feeler[amountOfFeelers];
@@ -792,7 +843,15 @@ namespace EvoNet.Objects
 
         public void GiveBirth()
         {
-            Creature child = new Creature(this, Manager);
+            Creature father = this;
+            foreach (Creature toTest in Manager.Creatures)
+            {
+                if (toTest.Generation > father.Generation)
+                {
+                    father = toTest;
+                }
+            }
+            Creature child = new Creature(this, father, Manager);
             childIds.Add(child.id);
             currentTask.AddCreature(child);
             Energy -= STARTENERGY;

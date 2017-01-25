@@ -9,9 +9,36 @@ using System.Threading.Tasks;
 
 namespace EvoNet.AI
 {
+    
+
     [Serializable]
     public class NeuronalNetwork
     {
+        public struct NetworkIndex
+        {
+            public NetworkIndex(int layer, int neuron, int connection)
+            {
+                LayerIndex = layer;
+                NeuronIndex = neuron;
+                ConnectionIndex = connection;
+            }
+
+            public static bool operator ==(NetworkIndex a, NetworkIndex b)
+            {
+                return a.ConnectionIndex == b.ConnectionIndex &&
+                    a.LayerIndex == b.LayerIndex &&
+                    a.NeuronIndex == b.NeuronIndex;
+            }
+
+            public static bool operator !=(NetworkIndex a, NetworkIndex b)
+            {
+                return !(a == b);
+            }
+
+            public int LayerIndex { get; set; }
+            public int NeuronIndex { get; set; }
+            public int ConnectionIndex { get; set; }
+        }
         private bool fullMeshGenerated = false;
 
         List<List<Neuron>> neurons = new List<List<Neuron>>();
@@ -304,6 +331,62 @@ namespace EvoNet.AI
             int layer = Simulation.RandomInt(1, neurons.Count);
             int index = Simulation.RandomInt(neurons[layer].Count);
             ((WorkingNeuron)neurons[layer][index]).RandomMutation(MutationRate);
+        }
+
+        public Connection GetConnection(NetworkIndex index)
+        {
+            WorkingNeuron neuron = neurons[index.LayerIndex][index.NeuronIndex] as WorkingNeuron;
+            if (neuron != null)
+            {
+                return neuron.GetConnections()[index.ConnectionIndex];
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Mixes two networks together, meaning taking 50% of the 
+        /// otherNetwork connections and set the weights of those in this network
+        /// </summary>
+        /// <param name="otherNetwork">The network to be mixed in</param>
+        public void MixNetwork(NeuronalNetwork otherNetwork)
+        {
+            List<NetworkIndex> mixIndices = new List<NetworkIndex>();
+            int totalCount = 0;
+            var maxLayerIndex = Math.Min(neurons.Count, otherNetwork.neurons.Count);
+            for (int layerIndex = 1; layerIndex < maxLayerIndex; layerIndex++)
+            {
+
+                int maxNeuronIndex = Math.Min(neurons[layerIndex].Count, otherNetwork.neurons[layerIndex].Count);
+                for (int neuronIndex = 0; neuronIndex < maxNeuronIndex; neuronIndex++)
+                {
+                    totalCount += Math.Min(
+                        ((WorkingNeuron)neurons[layerIndex][neuronIndex]).GetConnections().Count,
+                        ((WorkingNeuron)otherNetwork.neurons[layerIndex][neuronIndex]).GetConnections().Count);
+                }
+            }
+            while (mixIndices.Count < totalCount / 2)
+            {
+                NetworkIndex index = new NetworkIndex();
+                do
+                {
+                    index.LayerIndex = Simulation.RandomInt(1, maxLayerIndex);
+                    index.NeuronIndex = Simulation.RandomInt(Math.Min(neurons[index.LayerIndex].Count, otherNetwork.neurons[index.LayerIndex].Count));
+                    index.ConnectionIndex = Simulation.RandomInt(Math.Min(
+                        ((WorkingNeuron)neurons[index.LayerIndex][index.NeuronIndex]).GetConnections().Count,
+                        ((WorkingNeuron)otherNetwork.neurons[index.LayerIndex][index.NeuronIndex]).GetConnections().Count));
+                } while (mixIndices.Contains(index));
+                mixIndices.Add(index);
+            }
+
+            foreach (NetworkIndex index in mixIndices)
+            {
+                Connection toBeChanged = GetConnection(index);
+                Connection toBeUsed = otherNetwork.GetConnection(index);
+                toBeChanged.weight = toBeUsed.weight;
+            }
         }
 
         public NeuronalNetwork CloneFullMesh()

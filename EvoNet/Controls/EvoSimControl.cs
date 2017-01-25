@@ -97,6 +97,7 @@ namespace EvoNet.Controls
             modules.Add(inputManager);
 
             Fonts.FontArial = Content.Load<SpriteFont>("Arial");
+            Fonts.FontArialSmall = Content.Load<SpriteFont>("ArialSmall");
 
             lastSerializationTime = DateTime.UtcNow;
 
