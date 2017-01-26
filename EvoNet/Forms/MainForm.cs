@@ -36,13 +36,13 @@ namespace EvoNet.Forms
                 CreatureManager.Creatures.Count,
                 CreatureManager.numberOfDeaths,
                 Creature.maximumGeneration,
-                CreatureManager.year,
-                Creature.oldestCreatureEver != null ?
+                (CreatureManager.Tick * CreatureManager.FixedUpdateTime).ToString("0.00"),
+                (Creature.oldestCreatureEver != null ?
                     Creature.oldestCreatureEver.Age :
-                    0,
-                CreatureManager.OldestCreatureAlive != null ?
+                    0).ToString("0.00"),
+                (CreatureManager.OldestCreatureAlive != null ?
                     CreatureManager.OldestCreatureAlive.Age :
-                    0,
+                    0).ToString("0.00"),
                 CreatureManager.CalculateAverageAgeOfLastDeadCreatures());
             toolStripStatusLabel1.Text = status;
         }

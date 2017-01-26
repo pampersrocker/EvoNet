@@ -28,7 +28,7 @@ namespace EvoNet.Objects
         private int indexForAverageAgeOfLastCreatures = 0;
         public bool AverageAgeOfLastCreaturesAccurate = false;
 
-        public float year = 0;
+        public long Tick = 0;
         public int numberOfDeaths = 0;
 
         private List<Creature> creatures = new List<Creature>();
@@ -126,7 +126,7 @@ namespace EvoNet.Objects
                 (Simulation sim, float time) =>
                 {
                     // Collect some statistics
-                    year += time;
+                    Tick++;
                     AliveCreaturesRecord.Add(creatures.Count);
                 }));
             cleanupAndStatisticsGroup.AddTask(new SimpleSimulationTask(simulation,

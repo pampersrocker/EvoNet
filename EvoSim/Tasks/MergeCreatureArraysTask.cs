@@ -33,6 +33,7 @@ namespace EvoSim.Tasks
                         lock (sim.CreatureManager)
                         {
                             sim.CreatureManager.Creatures.Remove(creature);
+                            sim.CreatureManager.AddDeathAge(creature.Age);
                         }
                     }
                     creatureTask.CreaturesToKill.Clear();
