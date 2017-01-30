@@ -13,6 +13,7 @@ using EvoNet.Rendering;
 using EvoNet.Objects;
 using EvoSim;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Content;
 
 namespace EvoNet.Controls
 {
@@ -24,8 +25,10 @@ namespace EvoNet.Controls
         }
 
         NeuralNetworkRenderer renderer;
+        CreatureRenderer creatureRender;
 
         public Simulation Simulation{get;set;}
+        public ContentManager Content { get; private set; }
 
         private SpriteBatch spriteBatch;
 
@@ -36,6 +39,8 @@ namespace EvoNet.Controls
             renderer = new NeuralNetworkRenderer();
             spriteBatch = new SpriteBatch(GraphicsDevice);
             renderer.PositionProvider = this;
+            Content = new ContentManager(Services, "Content");
+
         }
 
         protected override void Update(GameTime gameTime)
@@ -45,10 +50,17 @@ namespace EvoNet.Controls
             if (Simulation != null && Simulation.CreatureManager != null && Simulation.CreatureManager.SelectedCreature != null)
             {
                 renderer.Network = Simulation.CreatureManager.SelectedCreature.Brain;
+
             }
             else
             {
                 renderer.Network = null;
+            }
+
+            if (creatureRender == null && Simulation != null)
+            {
+                creatureRender = new CreatureRenderer(Simulation.CreatureManager);
+                creatureRender.Initialize(Content, GraphicsDevice, spriteBatch);
             }
         }
 
@@ -57,8 +69,12 @@ namespace EvoNet.Controls
             base.Draw(gameTime);
 
             GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.CornflowerBlue);
+            if (creatureRender != null)
+            {
+                creatureRender.DrawGeneralStats(new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height / 4));
+            }
             spriteBatch.Begin();
-            renderer.Draw(spriteBatch, new Microsoft.Xna.Framework.Rectangle(150, 0, Width-300, Height));
+            renderer.Draw(spriteBatch, new Microsoft.Xna.Framework.Rectangle(150, Height/4, Width-400, Height-Height/4));
             spriteBatch.End();
         }
     }

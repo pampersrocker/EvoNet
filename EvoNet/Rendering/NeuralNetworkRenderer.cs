@@ -67,7 +67,7 @@ namespace EvoNet.Rendering
                 }
                 else if (layerIndex == network.Neurons.Count-1)
                 {
-                    nameOffset = new Vector2(10, 10);
+                    nameOffset = new Vector2(10, -10);
                 }
                 DrawLayer(spriteBatch, network.Neurons[layerIndex], strongestConnection, mouseNeuron, nameOffset, layerIndex != network.Neurons.Count -1);
             }

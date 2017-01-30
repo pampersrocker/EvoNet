@@ -26,7 +26,7 @@ namespace EvoNet.Objects
         public int collisionGridY = 0;
 
         public const int CREATURESIZE = 54;
-        
+
         private int amountOfFeelers = 1;
         private Feeler[] feelers;
 
@@ -115,7 +115,7 @@ namespace EvoNet.Objects
                 return viewAngle;
             }
         }
-        
+
         private float energy_ = 150;
         private object energyLock = new object();
         public float Energy
@@ -187,28 +187,37 @@ namespace EvoNet.Objects
         {
             get { return Manager.simulation; }
         }
-        public const String NAME_IN_BIAS              = "bias";
-        public const String NAME_IN_FOODVALUEPOSITION = "Food Value Position";
-        public const String NAME_IN_FOODVALUEFEELER   = "Food Value Feeler";
-        public const String NAME_IN_OCCLUSIONFEELER   = "Occlusion Feeler";
-        public const String NAME_IN_ENERGY            = "Energy";
-        public const String NAME_IN_AGE               = "Age";
-        public const String NAME_IN_GENETICDIFFERENCE = "Genetic Difference";
-        public const String NAME_IN_WASATTACKED       = "Was Attacked";
-        public const String NAME_IN_WATERONFEELER     = "Water On Feeler";
-        public const String NAME_IN_WATERONCREATURE   = "Water On Creature";
+        public const string NAME_IN_BIAS              = "bias";
+        public const string NAME_IN_FOODVALUEPOSITION = "Food Value Position";
+        public const string NAME_IN_FOODVALUEFEELER   = "Food Value Feeler";
+        public const string NAME_IN_OCCLUSIONFEELER   = "Occlusion Feeler";
+        public const string NAME_IN_ENERGY            = "Energy";
+        public const string NAME_IN_AGE               = "Age";
+        public const string NAME_IN_GENETICDIFFERENCE = "Genetic Difference";
+        public const string NAME_IN_WASATTACKED       = "Was Attacked";
+        public const string NAME_IN_WATERONFEELER     = "Water On Feeler";
+        public const string NAME_IN_WATERONCREATURE   = "Water On Creature";
         //private const String NAME_IN_OSCILATION        = "Oscilation input";
-        public const String NAME_IN_MEMORY            = "Input Memory #";
+        public const string NAME_IN_MEMORY            = "Input Memory #";
 
-        public const String NAME_OUT_BIRTH       = "Birth";
-        public const String NAME_OUT_ROTATE      = "Rotate";
-        public const String NAME_OUT_FORWARD     = "Forward";
-        public const String NAME_OUT_STRAFE      = "Strafe";
-        public const String NAME_OUT_FEELERANGLE = "Feeler Angle";
-        public const String NAME_OUT_ATTACK      = "Attack";
-        public const String NAME_OUT_EAT         = "Eat";
+        public const string NAME_OUT_BIRTH       	        = "Birth";
+        public const string NAME_OUT_ROTATE      	        = "Rotate";
+        public const string NAME_OUT_FORWARD     	        = "Forward";
+        public const string NAME_OUT_STRAFE      	        = "Strafe";
+        public const string NAME_OUT_FEELERANGLE 	        = "Feeler Angle";
+        public const string NAME_OUT_ATTACK      	        = "Attack";
+        public const string NAME_OUT_EAT         	        = "Eat";
+        public const string NAME_OUT_MATE_AGE 	 	        = "Mate Age";
+        public const string NAME_OUT_MATE_ENERGY 	        = "Mate Energy";
+        public const string NAME_OUT_MATE_GENERATION 		= "Mate Generation";
+        public const string NAME_OUT_MATE_GENETICDIFFERENCE = "Mate Genetic Difference";
+        public const string NAME_OUT_MATE_AGE_WEIGHT 	 	        = "Mate Age Weight";
+        public const string NAME_OUT_MATE_ENERGY_WEIGHT 	        = "Mate Energy Weight";
+        public const string NAME_OUT_MATE_GENERATION_WEIGHT 		= "Mate Generation Weight";
+        public const string NAME_OUT_MATE_GENETICDIFFERENCE_WEIGHT = "Mate Genetic Difference Weight";
+
         //private const String NAME_OUT_OSCILATION  = "Oscilation output";
-        public const String NAME_OUT_MEMORY      = "Output Memory #";
+        public const string NAME_OUT_MEMORY      = "Output Memory #";
 
         private InputNeuron inBias              = new InputNeuron();
         private InputNeuron inFoodValuePosition = new InputNeuron();
@@ -224,6 +233,14 @@ namespace EvoNet.Objects
         private WorkingNeuron outForward     = new WorkingNeuron();
         private WorkingNeuron outStrafe      = new WorkingNeuron();
         private WorkingNeuron outEat         = new WorkingNeuron();
+        private WorkingNeuron outMate_Age         = new WorkingNeuron();
+        private WorkingNeuron outMate_Energy         = new WorkingNeuron();
+        private WorkingNeuron outMate_Generation         = new WorkingNeuron();
+        private WorkingNeuron outMate_GeneticDifference = new WorkingNeuron();
+        private WorkingNeuron outMate_Age_Weight         = new WorkingNeuron();
+        private WorkingNeuron outMate_Energy_Weight         = new WorkingNeuron();
+        private WorkingNeuron outMate_Generation_Weight         = new WorkingNeuron();
+        private WorkingNeuron outMate_GeneticDifference_Weight = new WorkingNeuron();
         //private WorkingNeuron outOscilation  = new WorkingNeuron();
         private WorkingNeuron[] outMemory    = null;
 
@@ -325,7 +342,7 @@ namespace EvoNet.Objects
             }
         }
 
-        
+
 
 
         // Temps for deserialization
@@ -371,6 +388,14 @@ namespace EvoNet.Objects
             outForward    .SetName(NAME_OUT_FORWARD);
             outStrafe     .SetName(NAME_OUT_STRAFE);
             outEat        .SetName(NAME_OUT_EAT);
+            outMate_Age.SetName(NAME_OUT_MATE_AGE);
+            outMate_Energy.SetName(NAME_OUT_MATE_ENERGY);
+            outMate_Generation.SetName(NAME_OUT_MATE_GENERATION);
+            outMate_GeneticDifference.SetName(NAME_OUT_MATE_GENETICDIFFERENCE);
+            outMate_Age_Weight.SetName(NAME_OUT_MATE_AGE_WEIGHT);
+            outMate_Energy_Weight.SetName(NAME_OUT_MATE_ENERGY_WEIGHT);
+            outMate_Generation_Weight.SetName(NAME_OUT_MATE_GENERATION_WEIGHT);
+            outMate_GeneticDifference_Weight.SetName(NAME_OUT_MATE_GENETICDIFFERENCE_WEIGHT);
             //outOscilation .SetName(NAME_OUT_OSCILATION);
             outMemory = new WorkingNeuron[AmountOfMemory];
             for(int i = 0; i<AmountOfMemory; i++)
@@ -400,8 +425,16 @@ namespace EvoNet.Objects
             brain.AddOutputNeuron(outForward);
             brain.AddOutputNeuron(outStrafe);
             brain.AddOutputNeuron(outEat);
+            brain.AddOutputNeuron(outMate_Age);
+            brain.AddOutputNeuron(outMate_Energy);
+            brain.AddOutputNeuron(outMate_Generation);
+            brain.AddOutputNeuron(outMate_GeneticDifference);
+            brain.AddOutputNeuron(outMate_Age_Weight);
+            brain.AddOutputNeuron(outMate_Energy_Weight);
+            brain.AddOutputNeuron(outMate_Generation_Weight);
+            brain.AddOutputNeuron(outMate_GeneticDifference_Weight);
             //brain.AddOutputNeuron(outOscilation);
-            for(int i = 0; i < AmountOfMemory; i++)
+            for (int i = 0; i < AmountOfMemory; i++)
             {
                 brain.AddOutputNeuron(outMemory[i]);
             }
@@ -442,7 +475,7 @@ namespace EvoNet.Objects
             SetupFeelers(true);
             SetupVariablesFromBrain();
 
-            
+
             if(Simulation.RandomFloat() < 0.01f)
             {
                 MutateMemory();
@@ -514,7 +547,7 @@ namespace EvoNet.Objects
             MutateColor(mother);
             GenerateColorInv();
 
-            if (manager.SelectedCreature == null || manager.SelectedCreature.Energy < 100)
+            if (manager.SelectedCreature == null || manager.SelectedCreature.Energy <= 100)
             {
                 manager.SelectedCreature = this;
             }
@@ -649,8 +682,18 @@ namespace EvoNet.Objects
             outForward = brain.GetOutputNeuronFromName(NAME_OUT_FORWARD);
             outStrafe = brain.GetOutputNeuronFromName(NAME_OUT_STRAFE);
             outEat = brain.GetOutputNeuronFromName(NAME_OUT_EAT);
+
+            outMate_Age = brain.GetOutputNeuronFromName(NAME_OUT_MATE_AGE);
+            outMate_Energy = brain.GetOutputNeuronFromName(NAME_OUT_MATE_ENERGY);
+            outMate_Generation = brain.GetOutputNeuronFromName(NAME_OUT_MATE_GENERATION);
+            outMate_GeneticDifference = brain.GetOutputNeuronFromName(NAME_OUT_MATE_GENETICDIFFERENCE);
+
+            outMate_Age_Weight = brain.GetOutputNeuronFromName(NAME_OUT_MATE_AGE_WEIGHT);
+            outMate_Energy_Weight = brain.GetOutputNeuronFromName(NAME_OUT_MATE_ENERGY_WEIGHT);
+            outMate_Generation_Weight = brain.GetOutputNeuronFromName(NAME_OUT_MATE_GENERATION_WEIGHT);
+            outMate_GeneticDifference_Weight = brain.GetOutputNeuronFromName(NAME_OUT_MATE_GENETICDIFFERENCE_WEIGHT);
             //outOscilation = brain.GetOutputNeuronFromName(NAME_OUT_OSCILATION);
-            for(int i = 0; i<AmountOfMemory; i++)
+            for (int i = 0; i<AmountOfMemory; i++)
             {
                 outMemory[i] = brain.GetOutputNeuronFromName(NAME_OUT_MEMORY + (i + 1));
             }
@@ -670,7 +713,7 @@ namespace EvoNet.Objects
             }
         }
 
-        
+
 
         public void GenerateColorInv()
         {
@@ -753,7 +796,7 @@ namespace EvoNet.Objects
             {
                 Kill(t);
             }
-            
+
             CalculateCollisionGridPos();
         }
 
@@ -766,7 +809,7 @@ namespace EvoNet.Objects
             currentTask.RemoveCreature(this);
         }
 
-        
+
 
         private void ActRotate(float costMult, float fixedDeltaTime)
         {
@@ -844,13 +887,60 @@ namespace EvoNet.Objects
         public void GiveBirth()
         {
             Creature father = this;
-            foreach (Creature toTest in Manager.Creatures)
+            float fatherDif = float.MaxValue;
+            float mateAgeWeight = (outMate_Age_Weight.GetValue()+1)/2;
+            float mateEnergyWeight = (outMate_Energy_Weight.GetValue()+1)/2;
+            float mateGenerationWeight = (outMate_Generation_Weight.GetValue()+1)/2;
+            float mateDifferenceWeight = (outMate_GeneticDifference_Weight.GetValue()+1)/2;
+            float mateAge = (outMate_Age.GetValue() + 1) / 2;
+            float mateEnergy = (outMate_Energy.GetValue() + 1) / 2;
+            float mateGeneration = (outMate_Generation.GetValue() + 1) / 2;
+            float mateDifference = (outMate_GeneticDifference.GetValue() + 1) / 2;
+
+
+
+            float maxAge = 0;
+            float minAge = 0;
+            float maxEnergy = 0;
+            float minEnergy = 0;
+            float maxGeneration = 0;
+            float minGeneration = 0;
+            float maxDifference = 0;
+            float minDifference = 0;
+
+            manager.Creatures.ForEach((creature) => {
+                var difference = CalculateGeneticDifferencToCreature(creature);
+                maxAge = Mathf.Max(maxAge, creature.Age);
+                maxEnergy = Mathf.Max(maxEnergy, creature.Energy);
+                maxGeneration = Mathf.Max(maxGeneration, creature.Generation);
+                maxDifference = Mathf.Max(maxDifference, difference);
+                minAge = Mathf.Min(minAge, creature.Age);
+                minEnergy = Mathf.Min(minEnergy, creature.Energy);
+                minGeneration = Mathf.Min(minGeneration, creature.Generation);
+                minDifference = Mathf.Min(minDifference, difference);
+            });
+
+
+
+            manager.Creatures.ForEach((creature) =>
             {
-                if (toTest.Generation > father.Generation)
+            	if(creature == this)
+            	{
+            		return;
+            	}
+                //Calculate the closest difference to the desired weighted attributes
+                float difAge = Mathf.Abs((creature.Age - minAge) / (maxAge - minAge) - mateAge) * mateAgeWeight;
+                float difEnergy = Mathf.Abs((creature.Energy - minEnergy) / (maxEnergy - minEnergy) - mateEnergy) * mateEnergyWeight;
+                float difGeneration = Mathf.Abs((creature.Generation - minGeneration) / (maxGeneration - minGeneration) - mateGeneration) * mateGenerationWeight;
+                float difDifference = Mathf.Abs((CalculateGeneticDifferencToCreature(creature) - minDifference) / (maxDifference - minDifference) - mateDifference) * mateDifferenceWeight;
+				float totalDif = difAge + difEnergy + difGeneration + difDifference;
+				if(totalDif < fatherDif)
                 {
-                    father = toTest;
+                    fatherDif = totalDif;
+                    father = creature;
                 }
-            }
+            });
+
             Creature child = new Creature(this, father, Manager);
             childIds.Add(child.id);
             currentTask.AddCreature(child);
@@ -862,7 +952,19 @@ namespace EvoNet.Objects
             return Energy > STARTENERGY + MINIMUMSURVIVALENERGY * 1.1f && Age > MINAGETOGIVEBIRTH;
         }
 
-        
+        private float CalculateGeneticDifferencToCreature(Creature other)
+        {
+            Vector3 vec = new Vector3(
+                Color.R - other.Color.R,
+                Color.G - other.Color.G,
+                Color.B - other.Color.B
+                );
+
+            vec /= 255f;
+            return vec.Length();
+        }
+
+
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void HandleCollisions()

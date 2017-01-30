@@ -75,6 +75,10 @@ namespace EvoNet.Objects
                         lock (this)
                         {
                             creatures.Add(justSpawned);
+                            if (SelectedCreature == null || SelectedCreature.Energy <= 100)
+                            {
+                                SelectedCreature = justSpawned;
+                            }
                         }
                     }
                 }));
