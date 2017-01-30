@@ -321,7 +321,7 @@ namespace EvoNet.AI
             {
                 foreach (WorkingNeuron wn in neurons[layerIndex])
                 {
-                    wn.RandomizeWeights();
+                    wn.RandomizeWeights((neurons.Count-2) /5.0f);
                 }
             }
         }

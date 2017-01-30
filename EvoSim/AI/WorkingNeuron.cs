@@ -17,7 +17,7 @@ namespace EvoNet.AI
         public void RandomMutation(float MutationRate)
         {
             Connection c = connections[Simulation.RandomInt(connections.Count)];
-            c.weight += (float)Simulation.RandomFloat() * 2 * MutationRate - MutationRate;
+            c.weight += Simulation.RandomFloat() * 2 * MutationRate - MutationRate;
         }
 
         public void AddNeuronConnection(Neuron n, float weight)
@@ -40,11 +40,11 @@ namespace EvoNet.AI
             return connections;
         }
 
-        public void RandomizeWeights()
+        public void RandomizeWeights(float factor = 1.0f)
         {
             foreach(Connection c in connections)
             {
-                c.weight = (float)Simulation.RandomFloat() * 2 - 1;
+                c.weight = (Simulation.RandomFloat() * 2*factor - factor);
             }
         }
 
