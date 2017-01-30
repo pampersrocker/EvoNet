@@ -16,7 +16,7 @@ namespace EvoSim.Config
         public int MinCreatures { get; set; }
         public int TileMapSizeX { get; set; }
         public int TileMapSizeY { get; set; }
-        public int NumberOfNeuronLayers { get; internal set; }
+        public int NumberOfNeuronLayers { get; set; }
 
 
         public static SimulationConfiguration DefaultConfig
@@ -29,6 +29,7 @@ namespace EvoSim.Config
                 config.MinCreatures = 50;
                 config.TileMapSizeX = 100;
                 config.TileMapSizeY = 100;
+                config.NumberOfNeuronLayers = 1;
                 return config;
             }
         }
