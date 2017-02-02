@@ -53,14 +53,14 @@ namespace Graph
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics graphics = Graphics.FromImage(buffer);
-            Paint(graphics);
+            PaintGraph(graphics);
             base.OnPaint(e);
         }
 
         public override void Refresh()
         {
             Graphics graphics = Graphics.FromImage(buffer);
-            Paint(graphics);
+            PaintGraph(graphics);
             base.Refresh();
         }
         protected override void OnLoad(EventArgs e)
@@ -69,7 +69,7 @@ namespace Graph
             initialized = true;
         }
 
-        private void Paint(Graphics graphics)
+        private void PaintGraph(Graphics graphics)
         {
             int width = (int)pictureBoxGraph.Width;
             int height = (int)pictureBoxGraph.Height;

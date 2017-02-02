@@ -20,24 +20,23 @@ namespace EvoNet.Objects
 
 
     [Serializable]
-    public class Creature : ISerializable
+    public class Creature
     {
         public int collisionGridX = 0;
         public int collisionGridY = 0;
 
         public const int CREATURESIZE = 54;
 
-        private int amountOfFeelers = 1;
-        private Feeler[] feelers;
+        private List<Feeler> feelers = new List<Feeler>();
 
         public int AmountOfFeelers
         {
             get
             {
-                return amountOfFeelers;
+                return feelers.Count;
             }
         }
-        public Feeler[] Feelers
+        public List<Feeler> Feelers
         {
             get
             {
@@ -418,7 +417,7 @@ namespace EvoNet.Objects
                 brain.AddInputNeuron(inMemory[i]);
             }
 
-            brain.GenerateHiddenNeurons(AmountOfHidden, manager.simulation.SimulationConfiguration.NumberOfNeuronLayers);
+            brain.GenerateHiddenNeurons(AmountOfHidden, manager.simulation.SimulationConfiguration.NumberOfStartNeuronLayers);
 
             brain.AddOutputNeuron(outBirth);
             brain.AddOutputNeuron(outRotate);
@@ -440,7 +439,7 @@ namespace EvoNet.Objects
             }
 
 
-            SetupFeelers(false);
+            SetupFeelers(false, 1);
 
             brain.GenerateFullMesh();
 
@@ -467,12 +466,11 @@ namespace EvoNet.Objects
             this.brain = mother.brain.CloneFullMesh();
 
             AmountOfMemory = mother.AmountOfMemory;
-            amountOfFeelers = mother.AmountOfFeelers;
             AmountOfHidden = mother.AmountOfHidden;
             inMemory = new InputNeuron[AmountOfMemory];
             outMemory = new WorkingNeuron[AmountOfMemory];
 
-            SetupFeelers(true);
+            SetupFeelers(true, mother.AmountOfFeelers);
             SetupVariablesFromBrain();
 
 
@@ -514,16 +512,22 @@ namespace EvoNet.Objects
             }
             pos = mother.pos;
             viewAngle = Simulation.RandomFloat() * Mathf.PI * 2;
-            brain = mother.brain.CloneFullMesh();
-            brain.MixNetwork(father.brain);
+            if(Simulation.SimulationConfiguration.MateBrainPercentage == 1.0f)
+            {
+                brain = father.brain.CloneFullMesh();
+            }
+            else
+            {
+                brain = mother.brain.CloneFullMesh();
+                brain.MixNetwork(father.brain, Simulation.SimulationConfiguration.MateBrainPercentage);
+            }
 
             AmountOfMemory = mother.AmountOfMemory;
-            amountOfFeelers = mother.AmountOfFeelers;
             AmountOfHidden = mother.AmountOfHidden;
             inMemory = new InputNeuron[AmountOfMemory];
             outMemory = new WorkingNeuron[AmountOfMemory];
 
-            SetupFeelers(true);
+            SetupFeelers(true, mother.AmountOfFeelers);
             SetupVariablesFromBrain();
 
 
@@ -536,6 +540,12 @@ namespace EvoNet.Objects
             {
                 AddFeeler();
             }
+
+            if (Simulation.RandomFloat() < Simulation.SimulationConfiguration.AddRemoveLayerPercentage)
+            {
+                MutateHiddenLayer();
+            }
+            
 
             if (Simulation.RandomFloat() < 0.01f && AmountOfHidden < 40)
             {
@@ -553,12 +563,11 @@ namespace EvoNet.Objects
             }
         }
 
-        private void SetupFeelers(bool isChild)
+        private void SetupFeelers(bool isChild, int count)
         {
-            feelers = new Feeler[amountOfFeelers];
-            for(int i = 0; i<amountOfFeelers; i++)
+            for(int i = 0; i<count; i++)
             {
-                feelers[i] = new Feeler(this, i, isChild);
+                feelers.Add(new Feeler(this, i, isChild));
             }
         }
 
@@ -608,22 +617,15 @@ namespace EvoNet.Objects
 
         private void AddHiddenNeuron()
         {
-            brain.AddHiddenNeuronToLayerAndMesh(1);
+            brain.AddHiddenNeuronToLayerAndMesh(Simulation.RandomInt(brain.HiddenLayerCount-1));
             AmountOfHidden++;
         }
 
         private void AddFeeler()
         {
             Feeler newFeeler = new Feeler(this, AmountOfFeelers, true);
-            Feeler[] newFeelers = new Feeler[AmountOfFeelers + 1];
-            for(int i = 0; i<AmountOfFeelers; i++)
-            {
-                newFeelers[i] = feelers[i];
-            }
             newFeeler.AddAndMesh();
-            newFeelers[AmountOfFeelers] = newFeeler;
-            feelers = newFeelers;
-            amountOfFeelers++;
+            Feelers.Add(newFeeler);
         }
 
         private void MutateConnections()
@@ -661,7 +663,7 @@ namespace EvoNet.Objects
 
         private void SetupVariablesFromBrain()
         {
-            for(int i = 0; i<amountOfFeelers; i++)
+            for(int i = 0; i<AmountOfFeelers; i++)
             {
                 feelers[i].SetupVariablesFromBrain(i);
             }
@@ -734,7 +736,7 @@ namespace EvoNet.Objects
 
             inBias.SetValue(1);
             inFoodValuePosition.SetValue(creatureTile.food / TileMap.MAXIMUMFOODPERTILE);
-            for(int i = 0; i<amountOfFeelers; i++)
+            for(int i = 0; i<AmountOfFeelers; i++)
             {
                 feelers[i].ReadSensors(Simulation);
             }
@@ -746,6 +748,7 @@ namespace EvoNet.Objects
 
         }
 
+        [NonSerialized]
         CreatureTask currentTask;
         internal CreatureTask CurrentTask
         {
@@ -770,7 +773,7 @@ namespace EvoNet.Objects
             ActBirth();
             ActFeelerRotate();
             ActEat(costMult, t, fixedDeltaTime);
-            for(int i = 0; i<amountOfFeelers; i++)
+            for(int i = 0; i<AmountOfFeelers; i++)
             {
                 feelers[i].ActAttack(costMult, fixedDeltaTime);
             }
@@ -845,7 +848,7 @@ namespace EvoNet.Objects
 
         private void ActFeelerRotate()
         {
-            for(int i = 0; i<amountOfFeelers; i++)
+            for(int i = 0; i<AmountOfFeelers; i++)
             {
                 feelers[i].ActFeelerRotate();
             }
@@ -884,14 +887,14 @@ namespace EvoNet.Objects
             }
         }
 
-        public void GiveBirth()
+        private Creature FindMate()
         {
             Creature father = this;
             float fatherDif = float.MaxValue;
-            float mateAgeWeight = (outMate_Age_Weight.GetValue()+1)/2;
-            float mateEnergyWeight = (outMate_Energy_Weight.GetValue()+1)/2;
-            float mateGenerationWeight = (outMate_Generation_Weight.GetValue()+1)/2;
-            float mateDifferenceWeight = (outMate_GeneticDifference_Weight.GetValue()+1)/2;
+            float mateAgeWeight = (outMate_Age_Weight.GetValue() + 1) / 2;
+            float mateEnergyWeight = (outMate_Energy_Weight.GetValue() + 1) / 2;
+            float mateGenerationWeight = (outMate_Generation_Weight.GetValue() + 1) / 2;
+            float mateDifferenceWeight = (outMate_GeneticDifference_Weight.GetValue() + 1) / 2;
             float mateAge = (outMate_Age.GetValue() + 1) / 2;
             float mateEnergy = (outMate_Energy.GetValue() + 1) / 2;
             float mateGeneration = (outMate_Generation.GetValue() + 1) / 2;
@@ -908,7 +911,8 @@ namespace EvoNet.Objects
             float maxDifference = 0;
             float minDifference = 0;
 
-            manager.Creatures.ForEach((creature) => {
+            manager.Creatures.ForEach((creature) =>
+            {
                 var difference = CalculateGeneticDifferencToCreature(creature);
                 maxAge = Mathf.Max(maxAge, creature.Age);
                 maxEnergy = Mathf.Max(maxEnergy, creature.Energy);
@@ -924,24 +928,37 @@ namespace EvoNet.Objects
 
             manager.Creatures.ForEach((creature) =>
             {
-            	if(creature == this)
-            	{
-            		return;
-            	}
-                //Calculate the closest difference to the desired weighted attributes
-                float difAge = Mathf.Abs((creature.Age - minAge) / (maxAge - minAge) - mateAge) * mateAgeWeight;
+                if (creature == this)
+                {
+                    return;
+                }
+        //Calculate the closest difference to the desired weighted attributes
+        float difAge = Mathf.Abs((creature.Age - minAge) / (maxAge - minAge) - mateAge) * mateAgeWeight;
                 float difEnergy = Mathf.Abs((creature.Energy - minEnergy) / (maxEnergy - minEnergy) - mateEnergy) * mateEnergyWeight;
                 float difGeneration = Mathf.Abs((creature.Generation - minGeneration) / (maxGeneration - minGeneration) - mateGeneration) * mateGenerationWeight;
                 float difDifference = Mathf.Abs((CalculateGeneticDifferencToCreature(creature) - minDifference) / (maxDifference - minDifference) - mateDifference) * mateDifferenceWeight;
-				float totalDif = difAge + difEnergy + difGeneration + difDifference;
-				if(totalDif < fatherDif)
+                float totalDif = difAge + difEnergy + difGeneration + difDifference;
+                if (totalDif < fatherDif)
                 {
                     fatherDif = totalDif;
                     father = creature;
                 }
             });
+            return father;
+        }
 
-            Creature child = new Creature(this, father, Manager);
+        public void GiveBirth()
+        {
+            Creature child = null;
+            if (Simulation.SimulationConfiguration.UseMate)
+            {
+                Creature mate = FindMate();
+                child = new Creature(this, mate, Manager);
+            }
+            else
+            {
+                child = new Creature(this, Manager);
+            }
             childIds.Add(child.id);
             currentTask.AddCreature(child);
             Energy -= STARTENERGY;
@@ -969,49 +986,10 @@ namespace EvoNet.Objects
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void HandleCollisions()
         {
-            for (int i = 0; i < amountOfFeelers; i++)
+            for (int i = 0; i < AmountOfFeelers; i++)
             {
                 feelers[i].HandleCollisions();
             }
-        }
-
-        public Creature(SerializationInfo info, StreamingContext context)
-        {
-            id = info.GetInt64(nameof(id));
-            pos = info.GetVector2(nameof(pos));
-            viewAngle = info.GetSingle(nameof(viewAngle));
-            Energy = info.GetSingle(nameof(Energy));
-            age = info.GetSingle(nameof(age));
-            generation = info.GetInt32(nameof(generation));
-            Color = info.GetColor(nameof(Color));
-            motherId = info.GetInt64(nameof(motherId));
-            AmountOfMemory = info.GetInt32(nameof(AmountOfMemory));
-            inMemory = new InputNeuron[AmountOfMemory];
-            outMemory = new WorkingNeuron[AmountOfMemory];
-            childIds = info.GetValue(nameof(childIds), typeof(List<long>)) as List<long>;
-            amountOfFeelers = info.GetInt32(nameof(amountOfFeelers));
-            brain = info.GetValue("brain", typeof(NeuronalNetwork)) as NeuronalNetwork;
-
-
-            SetupFeelers(true);
-
-        }
-
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue(nameof(id), id);
-            info.AddVector2(nameof(pos), pos);
-            info.AddValue(nameof(viewAngle), viewAngle);
-            info.AddValue(nameof(Energy), Energy);
-            info.AddValue(nameof(age), age);
-            info.AddValue(nameof(generation), generation);
-            info.AddColor(nameof(Color), Color);
-            info.AddValue(nameof(motherId), motherId);
-            info.AddValue(nameof(AmountOfMemory), AmountOfMemory);
-            info.AddValue(nameof(childIds), childIds);
-            info.AddValue(nameof(amountOfFeelers), amountOfFeelers);
-            info.AddValue(nameof(brain), brain);
         }
 
         public void SetupManager(CreatureManager manager)
@@ -1020,6 +998,15 @@ namespace EvoNet.Objects
             CalculateCollisionGridPos();
             SetupVariablesFromBrain();
 
+        }
+
+        private void MutateHiddenLayer()
+        {
+            bool add = Simulation.RandomFloat() < 0.5f;
+            if (add)
+            {
+                brain.CreateHiddenLayer();
+            }
         }
 
     }

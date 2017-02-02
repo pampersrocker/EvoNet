@@ -16,7 +16,10 @@ namespace EvoSim.Config
         public int MinCreatures { get; set; }
         public int TileMapSizeX { get; set; }
         public int TileMapSizeY { get; set; }
-        public int NumberOfNeuronLayers { get; set; }
+        public int NumberOfStartNeuronLayers { get; set; }
+        public float AddRemoveLayerPercentage { get; set; }
+        public bool UseMate { get; set; }
+        public float MateBrainPercentage { get; set; }
 
 
         public static SimulationConfiguration DefaultConfig
@@ -29,7 +32,9 @@ namespace EvoSim.Config
                 config.MinCreatures = 50;
                 config.TileMapSizeX = 100;
                 config.TileMapSizeY = 100;
-                config.NumberOfNeuronLayers = 1;
+                config.NumberOfStartNeuronLayers = 1;
+                config.UseMate = true;
+                config.MateBrainPercentage = 0.5f;
                 return config;
             }
         }
@@ -71,10 +76,12 @@ namespace EvoSim.Config
             {
                 config.NumCreatureTasks = Environment.ProcessorCount;
             }
-            config.NumberOfNeuronLayers = Math.Max(1, config.NumberOfNeuronLayers);
+            config.NumberOfStartNeuronLayers = Math.Max(1, config.NumberOfStartNeuronLayers);
             config.MinCreatures = Math.Max(1, config.MinCreatures);
             config.TileMapSizeX = Math.Max(1, config.TileMapSizeX);
             config.TileMapSizeY = Math.Max(1, config.TileMapSizeY);
+            config.MateBrainPercentage = Math.Max(0.0f, Math.Min(1.0f, config.MateBrainPercentage));
+            config.AddRemoveLayerPercentage = Math.Max(0.0f, Math.Min(1.0f, config.AddRemoveLayerPercentage));
         }
     }
 }

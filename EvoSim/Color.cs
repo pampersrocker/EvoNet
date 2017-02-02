@@ -1,5 +1,8 @@
+using System;
+
 namespace EvoSim
 {
+    [Serializable]
     public struct Color
     {
     	public byte A;

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace EvoSim
 {
+    [Serializable]
     public struct Vector2
     {
         public float X;

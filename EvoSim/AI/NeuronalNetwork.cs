@@ -180,6 +180,7 @@ namespace EvoNet.AI
 
         public void AddHiddenNeuronToLayerAndMesh(int layer)
         {
+            layer += 1;
             WorkingNeuron neuron = new WorkingNeuron();
             neurons[layer].Add(neuron);
             foreach(Neuron n in neurons[layer - 1])
@@ -321,7 +322,8 @@ namespace EvoNet.AI
             {
                 foreach (WorkingNeuron wn in neurons[layerIndex])
                 {
-                    wn.RandomizeWeights((neurons.Count-2) /5.0f);
+                    // Allow slowly more weight as layer count rises
+                    wn.RandomizeWeights(HiddenLayerCount/(2*Mathf.Sqrt(HiddenLayerCount)) + 0.5f);
                 }
             }
         }
@@ -351,7 +353,8 @@ namespace EvoNet.AI
         /// otherNetwork connections and set the weights of those in this network
         /// </summary>
         /// <param name="otherNetwork">The network to be mixed in</param>
-        public void MixNetwork(NeuronalNetwork otherNetwork)
+        /// <param name="mixRate">Percentage of the otherNetwork to use</param>
+        public void MixNetwork(NeuronalNetwork otherNetwork, float mixRate)
         {
             List<NetworkIndex> mixIndices = new List<NetworkIndex>();
             int totalCount = 0;
@@ -367,7 +370,7 @@ namespace EvoNet.AI
                         ((WorkingNeuron)otherNetwork.neurons[layerIndex][neuronIndex]).GetConnections().Count);
                 }
             }
-            while (mixIndices.Count < totalCount / 2)
+            while (mixIndices.Count < totalCount * mixRate)
             {
                 NetworkIndex index = new NetworkIndex();
                 do
@@ -436,6 +439,35 @@ namespace EvoNet.AI
             return copy;
         }
 
+        public void CreateHiddenLayer()
+        {
+            List<Neuron> newLayer = new List<Neuron>();
+            for (int newNeuronIndex = 0; newNeuronIndex < LastHiddenLayer.Count; newNeuronIndex++)
+            {
+                WorkingNeuron newNeuron = new WorkingNeuron();
+                for (int lastHiddenLayerIndex = 0; lastHiddenLayerIndex < LastHiddenLayer.Count; lastHiddenLayerIndex++)
+                {
+                    float weight = 0.0f;
+                    if (lastHiddenLayerIndex < ((WorkingNeuron)LastHiddenLayer[lastHiddenLayerIndex]).GetConnections().Count)
+                    {
+                        weight = ((WorkingNeuron)LastHiddenLayer[lastHiddenLayerIndex]).GetConnections()[lastHiddenLayerIndex].weight;
+                    }
+                    newNeuron.AddNeuronConnection(LastHiddenLayer[lastHiddenLayerIndex], weight);
+                    
+                }
 
+                for (int outputIndex = 0; outputIndex < OutputNeurons.Count; outputIndex++)
+                {
+                    WorkingNeuron currentOutputNeuron = OutputNeurons[outputIndex] as WorkingNeuron;
+                    for (int connectionIndex = 0; connectionIndex < currentOutputNeuron.GetConnections().Count; connectionIndex++)
+                    {
+                        if(currentOutputNeuron.GetConnections()[connectionIndex].entryNeuron == LastHiddenLayer[newNeuronIndex])
+                        {
+                            currentOutputNeuron.GetConnections()[connectionIndex].entryNeuron = newNeuron;
+                        }
+                    }
+                }
+            }
+        }
     }
 }
