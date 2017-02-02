@@ -452,7 +452,7 @@ namespace EvoNet.AI
                     {
                         weight = ((WorkingNeuron)LastHiddenLayer[lastHiddenLayerIndex]).GetConnections()[lastHiddenLayerIndex].weight;
                     }
-                    newNeuron.AddNeuronConnection(LastHiddenLayer[lastHiddenLayerIndex], weight);
+                    newNeuron.AddNeuronConnection(LastHiddenLayer[lastHiddenLayerIndex], weight * 2);
                     
                 }
 
@@ -465,6 +465,28 @@ namespace EvoNet.AI
                         {
                             currentOutputNeuron.GetConnections()[connectionIndex].entryNeuron = newNeuron;
                         }
+                    }
+                }
+                newLayer.Add(newNeuron);
+            }
+            AddHiddenLayer(newLayer);
+        }
+
+        public void RemoveHiddenLayer()
+        {
+            if (HiddenLayerCount > 1)
+            {
+                neurons.RemoveAt(neurons.Count - 2);
+                for (int outNeuronIndex = 0; outNeuronIndex < OutputNeurons.Count; outNeuronIndex++)
+                {
+                    WorkingNeuron outputNeuron = OutputNeurons[outNeuronIndex] as WorkingNeuron;
+                    if (outputNeuron.GetConnections().Count > LastHiddenLayer.Count)
+                    {
+                        outputNeuron.GetConnections().RemoveRange(LastHiddenLayer.Count, outputNeuron.GetConnections().Count - LastHiddenLayer.Count);
+                    }
+                    for (int connectionIndex = 0; connectionIndex < LastHiddenLayer.Count; connectionIndex++)
+                    {
+                        outputNeuron.GetConnections()[connectionIndex].entryNeuron = LastHiddenLayer[connectionIndex];
                     }
                 }
             }

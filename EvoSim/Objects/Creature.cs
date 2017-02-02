@@ -1006,6 +1006,11 @@ namespace EvoNet.Objects
             if (add)
             {
                 brain.CreateHiddenLayer();
+                manager.SelectedCreature = this;
+            }
+            else
+            {
+                brain.RemoveHiddenLayer();
             }
         }
 
