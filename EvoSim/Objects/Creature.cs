@@ -484,6 +484,11 @@ namespace EvoNet.Objects
                 AddFeeler();
             }
 
+            if (Simulation.RandomFloat() < Simulation.SimulationConfiguration.AddRemoveLayerPercentage)
+            {
+                MutateHiddenLayer();
+            }
+
             if (Simulation.RandomFloat() < 0.01f && AmountOfHidden < 40)
             {
                 AddHiddenNeuron();
