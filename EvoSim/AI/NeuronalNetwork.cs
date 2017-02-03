@@ -484,9 +484,13 @@ namespace EvoNet.AI
                     {
                         outputNeuron.GetConnections().RemoveRange(LastHiddenLayer.Count, outputNeuron.GetConnections().Count - LastHiddenLayer.Count);
                     }
-                    for (int connectionIndex = 0; connectionIndex < LastHiddenLayer.Count; connectionIndex++)
+                    for (int connectionIndex = 0; connectionIndex < LastHiddenLayer.Count && connectionIndex < outputNeuron.GetConnections().Count; connectionIndex++)
                     {
                         outputNeuron.GetConnections()[connectionIndex].entryNeuron = LastHiddenLayer[connectionIndex];
+                    }
+                    for(int connectionIndex = outputNeuron.GetConnections().Count; connectionIndex < LastHiddenLayer.Count; connectionIndex++)
+                    {
+                        outputNeuron.AddNeuronConnection(LastHiddenLayer[connectionIndex], (Simulation.RandomFloat() * 2 * -1));
                     }
                 }
             }

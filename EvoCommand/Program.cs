@@ -90,9 +90,10 @@ namespace EvoCommand
                 }
 
             }
+
             Console.WriteLine("Simulation finished, saving....");
             sim.TileMap.SerializeToFile("tilemap.dat");
-            sim.CreatureManager.Serialize("creatures.dat", "graveyard/graveyard");
+            sim.CreatureManager.Serialize("creatures.dat", "graveyard/graveyard", true);
             sim.Shutdown();
             string finalInfo = FormatStatisticsInfo("Ran simulation for", elapsedTime, sim, Iteration, creaturesUpdateCycles, graveYardSize, saveCount);
             Console.WriteLine(finalInfo);
@@ -107,6 +108,7 @@ namespace EvoCommand
             Console.WriteLine("Cancel Request, waiting for simulation finish");
             Console.CursorVisible = true;
             e.Cancel = true;
+
         }
     }
 }
