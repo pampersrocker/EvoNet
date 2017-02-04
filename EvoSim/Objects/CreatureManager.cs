@@ -289,9 +289,9 @@ namespace EvoNet.Objects
                 return manager;
 
             }
-            catch (FileNotFoundException)
+            catch(IOException)
             {
-
+                // Dir or file not found
             }
 
             return null;
@@ -313,6 +313,10 @@ namespace EvoNet.Objects
 
         public void Serialize(string filename, string graveYardFilenamePrefix, bool waitForCompletion = false)
         {
+            if (saveLock == null)
+            {
+                saveLock = new object();
+            }
             lock (saveLock)
             {
                 List<Creature> asyncGraveYardCopy = graveyard;
@@ -338,7 +342,7 @@ namespace EvoNet.Objects
                             formatter.Serialize(stream, this);
                         }
                     }
-                    File.Copy(fileNameWithDate, filename + ".dat");
+                    File.Copy(fileNameWithDate, filename + ".dat", true);
                     string graveYardFilenameWithDate = string.Format("{0}_{1}.dat", graveYardFilenamePrefix, DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss"));
                     directory = graveYardFilenameWithDate.Replace(Path.GetFileName(graveYardFilenameWithDate), "");
                     Directory.CreateDirectory(directory);
