@@ -308,37 +308,49 @@ namespace EvoNet.Objects
             stream.Close();
         }
 
+        [NonSerialized]
+        private object saveLock = new object();
+
         public void Serialize(string filename, string graveYardFilenamePrefix, bool waitForCompletion = false)
         {
-
-            List<Creature> asyncGraveYardCopy = graveyard;
-            graveyard = new List<Creature>(asyncGraveYardCopy.Count);
-
-            bool done = false;
-
-            WaitCallback worker = (state) =>
+            lock (saveLock)
             {
-                IFormatter formatter = new BinaryFormatter();
-                using (Stream stream = new FileStream(filename,
-                                         FileMode.Create,
-                                         FileAccess.Write, FileShare.None))
+                List<Creature> asyncGraveYardCopy = graveyard;
+                graveyard = new List<Creature>(asyncGraveYardCopy.Count);
+
+                bool done = false;
+
+                WaitCallback worker = (state) =>
                 {
-                    lock (this)
+
+                    IFormatter formatter = new BinaryFormatter();
+                    string fileNameWithDate = string.Format("{0}_{1}.dat", filename, DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss"));
+                    string directory = fileNameWithDate.Replace(Path.GetFileName(fileNameWithDate), "");
+
+                    Directory.CreateDirectory(directory);
+
+                    using (Stream stream = new FileStream(fileNameWithDate,
+                                             FileMode.Create,
+                                             FileAccess.Write, FileShare.None))
                     {
-                        formatter.Serialize(stream, this);
+                        lock (this)
+                        {
+                            formatter.Serialize(stream, this);
+                        }
                     }
+                    File.Copy(fileNameWithDate, filename + ".dat");
+                    string graveYardFilenameWithDate = string.Format("{0}_{1}.dat", graveYardFilenamePrefix, DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss"));
+                    directory = graveYardFilenameWithDate.Replace(Path.GetFileName(graveYardFilenameWithDate), "");
+                    Directory.CreateDirectory(directory);
+                    SerializeListToFile(graveYardFilenameWithDate, asyncGraveYardCopy);
+                    asyncGraveYardCopy.Clear();
+                    done = true;
+                };
+                ThreadPool.QueueUserWorkItem(worker);
+                while (waitForCompletion && !done)
+                {
+                    Thread.Yield();
                 }
-                string graveYardFilenameWithDate = string.Format("{0}_{1}.dat", graveYardFilenamePrefix, DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss"));
-                string directory = graveYardFilenameWithDate.Replace(Path.GetFileName(graveYardFilenameWithDate), "");
-                Directory.CreateDirectory(directory);
-                SerializeListToFile(graveYardFilenameWithDate, asyncGraveYardCopy);
-                asyncGraveYardCopy.Clear();
-                done = true;
-            };
-            ThreadPool.QueueUserWorkItem(worker);
-            while (waitForCompletion && !done)
-            {
-                Thread.Yield();
             }
         }
     }

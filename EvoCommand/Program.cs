@@ -85,7 +85,7 @@ namespace EvoCommand
                     lastSerializationTime = DateTime.UtcNow;
                     graveYardSize += sim.CreatureManager.Graveyard.Count;
                     sim.TileMap.SerializeToFile("tilemap.dat");
-                    sim.CreatureManager.Serialize("creatures.dat", "graveyard/graveyard");
+                    sim.CreatureManager.Serialize("creatures/creatures", "graveyard/graveyard");
                     saveCount++;
                 }
 
@@ -93,7 +93,7 @@ namespace EvoCommand
 
             Console.WriteLine("Simulation finished, saving....");
             sim.TileMap.SerializeToFile("tilemap.dat");
-            sim.CreatureManager.Serialize("creatures.dat", "graveyard/graveyard", true);
+            sim.CreatureManager.Serialize("creatures/creatures", "graveyard/graveyard", true);
             sim.Shutdown();
             string finalInfo = FormatStatisticsInfo("Ran simulation for", elapsedTime, sim, Iteration, creaturesUpdateCycles, graveYardSize, saveCount);
             Console.WriteLine(finalInfo);

@@ -113,7 +113,7 @@ namespace EvoSim
             }
             tileMap.Initialize(this);
 
-            CreatureManager deserialized = CreatureManager.Deserialize("creatures.dat", this);
+            CreatureManager deserialized = CreatureManager.Deserialize("creatures/creatures.dat", this);
             if (deserialized != null)
             {
                 creatureManager = deserialized;

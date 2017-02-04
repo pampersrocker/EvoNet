@@ -123,7 +123,7 @@ namespace EvoNet.Controls
         public void Serialize(bool waitForCompletion = false)
         {
             sim.TileMap.SerializeToFile("tilemap.dat");
-            sim.CreatureManager.Serialize("creatures.dat", "graveyard/graveyard", waitForCompletion);
+            sim.CreatureManager.Serialize("creatures/creatures", "graveyard/graveyard", waitForCompletion);
         }
 
         protected override void Update(GameTime gameTime)
