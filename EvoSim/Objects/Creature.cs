@@ -19,6 +19,8 @@ namespace EvoNet.Objects
 {
 
 
+    
+
     [Serializable]
     public class Creature
     {
@@ -214,19 +216,19 @@ namespace EvoNet.Objects
         //private InputNeuron inOscilation        = new InputNeuron();
         private InputNeuron[] inMemory          = null;
 
-        private WorkingNeuron outBirth       = new WorkingNeuron();
-        private WorkingNeuron outRotate      = new WorkingNeuron();
-        private WorkingNeuron outForward     = new WorkingNeuron();
-        private WorkingNeuron outStrafe      = new WorkingNeuron();
-        private WorkingNeuron outEat         = new WorkingNeuron();
-        private WorkingNeuron outMate_Age         = new WorkingNeuron();
-        private WorkingNeuron outMate_Energy         = new WorkingNeuron();
-        private WorkingNeuron outMate_Generation         = new WorkingNeuron();
-        private WorkingNeuron outMate_GeneticDifference = new WorkingNeuron();
-        private WorkingNeuron outMate_Age_Weight         = new WorkingNeuron();
-        private WorkingNeuron outMate_Energy_Weight         = new WorkingNeuron();
-        private WorkingNeuron outMate_Generation_Weight         = new WorkingNeuron();
-        private WorkingNeuron outMate_GeneticDifference_Weight = new WorkingNeuron();
+        private WorkingNeuron outBirth       = new WorkingNeuron(-1);
+        private WorkingNeuron outRotate      = new WorkingNeuron(-1);
+        private WorkingNeuron outForward     = new WorkingNeuron(-1);
+        private WorkingNeuron outStrafe      = new WorkingNeuron(-1);
+        private WorkingNeuron outEat         = new WorkingNeuron(-1);
+        private WorkingNeuron outMate_Age         = new WorkingNeuron(-1);
+        private WorkingNeuron outMate_Energy         = new WorkingNeuron(-1);
+        private WorkingNeuron outMate_Generation         = new WorkingNeuron(-1);
+        private WorkingNeuron outMate_GeneticDifference = new WorkingNeuron(-1);
+        private WorkingNeuron outMate_Age_Weight         = new WorkingNeuron(-1);
+        private WorkingNeuron outMate_Energy_Weight         = new WorkingNeuron(-1);
+        private WorkingNeuron outMate_Generation_Weight         = new WorkingNeuron(-1);
+        private WorkingNeuron outMate_GeneticDifference_Weight = new WorkingNeuron(-1);
         //private WorkingNeuron outOscilation  = new WorkingNeuron();
         private WorkingNeuron[] outMemory    = null;
 
@@ -386,7 +388,7 @@ namespace EvoNet.Objects
             outMemory = new WorkingNeuron[AmountOfMemory];
             for(int i = 0; i<AmountOfMemory; i++)
             {
-                outMemory[i] = new WorkingNeuron();
+                outMemory[i] = new WorkingNeuron(-1);
                 outMemory[i].SetName(NAME_OUT_MEMORY + (i + 1));
             }
 
@@ -460,31 +462,7 @@ namespace EvoNet.Objects
             SetupFeelers(true, mother.AmountOfFeelers);
             SetupVariablesFromBrain();
 
-
-            if(Simulation.RandomFloat() < 0.01f)
-            {
-                MutateMemory();
-            }
-
-            if(Simulation.RandomFloat() < 0.01f && AmountOfFeelers < 5)
-            {
-                AddFeeler();
-            }
-
-            if (Simulation.RandomFloat() < Simulation.SimulationConfiguration.AddRemoveLayerPercentage)
-            {
-                MutateHiddenLayer();
-            }
-
-            if (Simulation.RandomFloat() < 0.01f && AmountOfHidden < 40)
-            {
-                AddHiddenNeuron();
-            }
-
-            MutateConnections();
-
-            MutateColor(mother);
-            GenerateColorInv();
+            DoMutations(mother);
 
             if(manager.SelectedCreature == null || manager.SelectedCreature.Energy < 100)
             {
@@ -523,6 +501,17 @@ namespace EvoNet.Objects
             SetupVariablesFromBrain();
 
 
+            DoMutations(mother);
+
+
+            if (manager.SelectedCreature == null || manager.SelectedCreature.Energy <= 100)
+            {
+                manager.SelectedCreature = this;
+            }
+        }
+
+        private void DoMutations(Creature mother)
+        {
             if (Simulation.RandomFloat() < 0.01f)
             {
                 MutateMemory();
@@ -537,9 +526,10 @@ namespace EvoNet.Objects
             {
                 MutateHiddenLayer();
             }
-            
 
-            if (Simulation.RandomFloat() < 0.01f && AmountOfHidden < 40)
+
+            if (Simulation.RandomFloat() < Simulation.SimulationConfiguration.AddHiddenNeuronPercentage && 
+                AmountOfHidden < 40 * brain.HiddenLayerCount)
             {
                 AddHiddenNeuron();
             }
@@ -548,11 +538,6 @@ namespace EvoNet.Objects
 
             MutateColor(mother);
             GenerateColorInv();
-
-            if (manager.SelectedCreature == null || manager.SelectedCreature.Energy <= 100)
-            {
-                manager.SelectedCreature = this;
-            }
         }
 
         private void SetupFeelers(bool isChild, int count)
@@ -587,7 +572,7 @@ namespace EvoNet.Objects
             {
                 //Add a memory neuron
                 InputNeuron newIn = new InputNeuron();
-                WorkingNeuron newOut = new WorkingNeuron();
+                WorkingNeuron newOut = new WorkingNeuron(-1);
                 newIn.SetName(NAME_IN_MEMORY + (AmountOfMemory + 1));
                 newOut.SetName(NAME_OUT_MEMORY + (AmountOfMemory + 1));
                 brain.AddInputNeuronAndMesh(newIn);
@@ -609,7 +594,17 @@ namespace EvoNet.Objects
 
         private void AddHiddenNeuron()
         {
-            brain.AddHiddenNeuronToLayerAndMesh(Simulation.RandomInt(brain.HiddenLayerCount-1));
+            int index = 0;
+            int count = brain.Neurons[1].Count;
+            for (int hiddenIndex =1; hiddenIndex < brain.HiddenLayerCount; hiddenIndex++)
+            {
+                if (brain.Neurons[hiddenIndex+1].Count < count)
+                {
+                    index = hiddenIndex;
+                    count = brain.Neurons[hiddenIndex + 1].Count;
+                }
+            }
+            brain.AddHiddenNeuronToLayerAndMesh(index);
             AmountOfHidden++;
         }
 

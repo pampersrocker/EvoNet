@@ -70,7 +70,7 @@ namespace EvoNet.AI
 
         public override Neuron NameCopy()
         {
-            WorkingNeuron clone = new WorkingNeuron();
+            WorkingNeuron clone = new WorkingNeuron(Layer);
             clone.SetName(GetName());
             return clone;
         }
@@ -86,8 +86,8 @@ namespace EvoNet.AI
             return strongest;
         }
 
-        public WorkingNeuron() : 
-            base()
+        public WorkingNeuron(int Layer) : 
+            base(Layer)
         {
 
         }

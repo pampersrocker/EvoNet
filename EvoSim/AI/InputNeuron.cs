@@ -28,7 +28,7 @@ namespace EvoNet.AI
         }
 
         public InputNeuron() :
-            base()
+            base(0)
         {
 
         }

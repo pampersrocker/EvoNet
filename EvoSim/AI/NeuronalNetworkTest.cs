@@ -18,9 +18,9 @@ namespace EvoNet.AI
             InputNeuron in2 = new InputNeuron();
             InputNeuron in3 = new InputNeuron();
 
-            WorkingNeuron out1 = new WorkingNeuron();
-            WorkingNeuron out2 = new WorkingNeuron();
-            WorkingNeuron out3 = new WorkingNeuron();
+            WorkingNeuron out1 = new WorkingNeuron(0);
+            WorkingNeuron out2 = new WorkingNeuron(0);
+            WorkingNeuron out3 = new WorkingNeuron(0);
 
             nn.AddInputNeuron(in1);
             nn.AddInputNeuron(in2);

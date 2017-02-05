@@ -313,7 +313,7 @@ namespace EvoNet.Objects
         [NonSerialized]
         private object saveLock = new object();
 
-        public void Serialize(string filename, string graveYardFilenamePrefix, bool waitForCompletion = false)
+        public void Serialize(string filename, string graveYardFilenamePrefix,bool createBackup = true, bool waitForCompletion = false)
         {
             if (saveLock == null)
             {
@@ -335,7 +335,7 @@ namespace EvoNet.Objects
 
                     Directory.CreateDirectory(directory);
 
-                    using (Stream stream = new FileStream(fileNameWithDate,
+                    using (Stream stream = new FileStream(filename + ".dat",
                                              FileMode.Create,
                                              FileAccess.Write, FileShare.None))
                     {
@@ -344,7 +344,10 @@ namespace EvoNet.Objects
                             formatter.Serialize(stream, this);
                         }
                     }
-                    File.Copy(fileNameWithDate, filename + ".dat", true);
+                    if (createBackup)
+                    {
+                        File.Copy(filename + ".dat", fileNameWithDate, true);
+                    }
                     if (simulation.SimulationConfiguration.UseGraveyard)
                     {
                         string graveYardFilenameWithDate = string.Format("{0}_{1}.dat", graveYardFilenamePrefix, DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss"));

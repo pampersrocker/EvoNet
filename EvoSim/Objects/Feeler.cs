@@ -32,8 +32,8 @@ namespace EvoSim.Objects
         private InputNeuron inWaterOnFeeler = new InputNeuron();
         private InputNeuron inGeneticDifference = new InputNeuron();
 
-        private WorkingNeuron outFeelerAngle = new WorkingNeuron();
-        private WorkingNeuron outAttack = new WorkingNeuron();
+        private WorkingNeuron outFeelerAngle = new WorkingNeuron(-1);
+        private WorkingNeuron outAttack = new WorkingNeuron(-1);
 
         private Creature feelerCreature = null;
         private Creature owner = null;

@@ -35,9 +35,15 @@ namespace EvoNet.AI
             this.name = name;
         }
 
-        public Neuron()
+        private int layer;
+        public int Layer
         {
+            get { return layer; }
+        }
 
+        public Neuron(int Layer)
+        {
+            layer = Layer;
         }
 
         public Neuron(SerializationInfo info, StreamingContext context)
