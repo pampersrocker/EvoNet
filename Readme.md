@@ -16,7 +16,7 @@ On this world live creatues, which taught themselves to move, eat and reproduce.
 
 ## Project Setup
 
-This project uses [MonoGame](http://www.monogame.net/), for installation instructions see http://www.monogame.net/downloads/ .
+This project uses [XNA 4.0 Refresh](https://blogs.msdn.microsoft.com/uk_faculty_connection/2015/11/02/installing-xna-with-visual-studio-2015/).
 
 In addition some libraries are referenced using [NuGet](https://www.nuget.org/).
 
