@@ -66,6 +66,8 @@ namespace EvoNet.Controls
         public SimulationRenderer simRenderer;
 
         private ContentManager contentManager;
+        private DateTime lastBackup;
+
         public ContentManager Content
         {
             get { return contentManager; }
@@ -100,7 +102,7 @@ namespace EvoNet.Controls
             Fonts.FontArialSmall = Content.Load<SpriteFont>("ArialSmall");
 
             lastSerializationTime = DateTime.UtcNow;
-
+            lastBackup = lastSerializationTime;
             LoadContent();
         }
 
@@ -120,10 +122,10 @@ namespace EvoNet.Controls
 
         }
 
-        public void Serialize(bool waitForCompletion = false)
+        public void Serialize(bool doBackup, bool waitForCompletion = false)
         {
             sim.TileMap.SerializeToFile("tilemap.dat");
-            sim.CreatureManager.Serialize("creatures/creatures", "graveyard/graveyard", waitForCompletion);
+            sim.CreatureManager.Serialize("creatures/creatures", "graveyard/graveyard",doBackup, waitForCompletion);
         }
 
         protected override void Update(GameTime gameTime)
@@ -153,11 +155,17 @@ namespace EvoNet.Controls
                 }
             }
 
-            // Save progress every minute
-            if ((DateTime.UtcNow - lastSerializationTime).TotalSeconds > 10)
+            // Save progress every 10 seconds
+            if (sim.SimulationConfiguration.DoRuntimeSave && 
+                (DateTime.UtcNow - lastSerializationTime).TotalSeconds > 10)
             {
+                bool doBackup = (DateTime.UtcNow - lastBackup).TotalMinutes > 10;
+                if (doBackup)
+                {
+                    lastBackup = DateTime.UtcNow;
+                }
                 lastSerializationTime = DateTime.UtcNow;
-                Serialize();
+                Serialize(doBackup);
 
 
             }

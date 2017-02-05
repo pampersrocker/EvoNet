@@ -167,6 +167,8 @@ namespace EvoNet.Objects
             }
         }
 
+        public long MaxGeneration { get; set; }
+
         [MethodImpl(MethodImplOptions.Synchronized)]
         public static void AddToCollisionGrid(int x, int y, Creature c)
         {
@@ -343,10 +345,13 @@ namespace EvoNet.Objects
                         }
                     }
                     File.Copy(fileNameWithDate, filename + ".dat", true);
-                    string graveYardFilenameWithDate = string.Format("{0}_{1}.dat", graveYardFilenamePrefix, DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss"));
-                    directory = graveYardFilenameWithDate.Replace(Path.GetFileName(graveYardFilenameWithDate), "");
-                    Directory.CreateDirectory(directory);
-                    SerializeListToFile(graveYardFilenameWithDate, asyncGraveYardCopy);
+                    if (simulation.SimulationConfiguration.UseGraveyard)
+                    {
+                        string graveYardFilenameWithDate = string.Format("{0}_{1}.dat", graveYardFilenamePrefix, DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss"));
+                        directory = graveYardFilenameWithDate.Replace(Path.GetFileName(graveYardFilenameWithDate), "");
+                        Directory.CreateDirectory(directory);
+                        SerializeListToFile(graveYardFilenameWithDate, asyncGraveYardCopy);
+                    }
                     asyncGraveYardCopy.Clear();
                     done = true;
                 };

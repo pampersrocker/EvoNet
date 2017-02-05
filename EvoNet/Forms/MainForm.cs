@@ -35,7 +35,7 @@ namespace EvoNet.Forms
                 status,
                 CreatureManager.Creatures.Count,
                 CreatureManager.numberOfDeaths,
-                Creature.maximumGeneration,
+                CreatureManager.MaxGeneration,
                 (CreatureManager.Tick * CreatureManager.FixedUpdateTime).ToString("0.00"),
                 (Creature.oldestCreatureEver != null ?
                     Creature.oldestCreatureEver.Age :
@@ -98,7 +98,7 @@ namespace EvoNet.Forms
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            evoSimControl1.Serialize(true);
+            evoSimControl1.Serialize(true, true);
         }
 
         private void showStatisticsToolStripMenuItem_Click(object sender, EventArgs e)

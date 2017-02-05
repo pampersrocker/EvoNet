@@ -44,19 +44,6 @@ namespace EvoNet.Objects
             }
         }
 
-
-        private static int _maximumGeneration = 1;
-        public static int maximumGeneration
-        {
-
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            get
-            {
-                return _maximumGeneration;
-            }
-            set { _maximumGeneration = value; }
-        }
-
         private static Creature _oldestCreatureEver = null; //dummy creature
         public static Creature oldestCreatureEver
         {
@@ -457,9 +444,9 @@ namespace EvoNet.Objects
             id = currentId++;
             motherId = mother.id;
             generation = mother.generation + 1;
-            if(generation > _maximumGeneration)
+            if(generation > manager.MaxGeneration)
             {
-                _maximumGeneration = generation;
+                manager.MaxGeneration = generation;
             }
             this.pos = mother.pos;
             this.viewAngle = Simulation.RandomFloat() * Mathf.PI * 2;
@@ -511,9 +498,9 @@ namespace EvoNet.Objects
             id = currentId++;
             motherId = mother.id;
             generation = mother.generation + 1;
-            if (generation > _maximumGeneration)
+            if (generation > manager.MaxGeneration)
             {
-                _maximumGeneration = generation;
+                manager.MaxGeneration = generation;
             }
             pos = mother.pos;
             viewAngle = Simulation.RandomFloat() * Mathf.PI * 2;

@@ -103,7 +103,7 @@ namespace EvoSim
                 {
                     for (int y = 0; y < tileMap.Height; y++)
                     {
-                        tileMap.SetTileType(x, y, heightMap[x, y] > 0.5 ? TileType.Land : TileType.Water);
+                        tileMap.SetTileType(x, y, heightMap[x, y] > SimulationConfiguration.WaterPercentage ? TileType.Land : TileType.Water);
                     }
                 }
 

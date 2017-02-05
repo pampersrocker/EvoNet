@@ -29,7 +29,8 @@ namespace EvoSim.Tasks
                     sim.CreatureManager.numberOfDeaths += creatureTask.CreaturesToKill.Count;
                     foreach (Creature creature in creatureTask.CreaturesToKill)
                     {
-                        if (creature.Generation > 1 || creature.Children.Count > 1)
+                        if (sim.SimulationConfiguration.UseGraveyard && 
+                            creature.Generation > 1 || creature.Children.Count > 1)
                         {
                             sim.CreatureManager.Graveyard.Add(creature);
                         }

@@ -20,6 +20,10 @@ namespace EvoSim.Config
         public float AddRemoveLayerPercentage { get; set; }
         public bool UseMate { get; set; }
         public float MateBrainPercentage { get; set; }
+        public float WaterPercentage { get; set; }
+        public bool DoRuntimeSave { get; set; }
+        public bool UseGraveyard { get; set; }
+        public float AddHiddenNeuronPercentage { get; set; }
 
 
         public static SimulationConfiguration DefaultConfig
@@ -34,8 +38,12 @@ namespace EvoSim.Config
                 config.TileMapSizeY = 100;
                 config.NumberOfStartNeuronLayers = 1;
                 config.UseMate = true;
-                config.MateBrainPercentage = 0.5f;
+                config.MateBrainPercentage = 0.05f;
                 config.AddRemoveLayerPercentage = 0.05f;
+                config.WaterPercentage = 0.3f;
+                config.DoRuntimeSave = true;
+                config.UseGraveyard = true;
+                config.AddHiddenNeuronPercentage = 0.01f;
                 return config;
             }
         }
@@ -83,6 +91,7 @@ namespace EvoSim.Config
             config.TileMapSizeY = Math.Max(1, config.TileMapSizeY);
             config.MateBrainPercentage = Math.Max(0.0f, Math.Min(1.0f, config.MateBrainPercentage));
             config.AddRemoveLayerPercentage = Math.Max(0.0f, Math.Min(1.0f, config.AddRemoveLayerPercentage));
+            config.WaterPercentage = Math.Max(0.0f, Math.Min(1.0f, config.WaterPercentage));
         }
     }
 }

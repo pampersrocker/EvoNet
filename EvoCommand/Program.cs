@@ -1,4 +1,5 @@
-﻿using EvoSim;
+﻿using EvoNet.Objects;
+using EvoSim;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,8 @@ namespace EvoCommand
                 "{3:n0} Simulation Iterations ({4:#,000.00}/s).\n" +
                 "{5:n0} creature updates ({6:#,000.00}/s).\n" +
                 "{7:n0} Creatures lived their live and are put on the graveyard ({8:#,000.00} deaths/s).\n" +
-                "Saved {9} times.\n",
+                "Saved {9} times.\n"+
+                "Maximum Generation: {10}\n",
                 stringPrefix,
                 time,
                 sim.TotalElapsedSimulationTime,
@@ -30,7 +32,8 @@ namespace EvoCommand
                 creaturesUpdateCycles / time.TotalSeconds,
                 graveYardSize + sim.CreatureManager.Graveyard.Count,
                 (graveYardSize + sim.CreatureManager.Graveyard.Count) / time.TotalSeconds,
-                saveCount
+                saveCount,
+                sim.CreatureManager.MaxGeneration
             );
             return statisticsInfo;
         }
@@ -45,6 +48,7 @@ namespace EvoCommand
             DateTime lastUpdate = DateTime.UtcNow;
             DateTime lastSerializationTime = DateTime.UtcNow;
             DateTime lastConsoleUpdate = DateTime.UtcNow;
+            DateTime lastBackup = DateTime.UtcNow;
             long Iteration = 0;
             TimeSpan elapsedTime = new TimeSpan();
             long creaturesUpdateCycles = 0;
@@ -79,21 +83,31 @@ namespace EvoCommand
                         "Press Ctrl+C to stop the simulation."
                     );
                 }
-                // Save progress every 10 seconds
-                if ((now - lastSerializationTime).TotalSeconds > 10)
+                if (sim.SimulationConfiguration.DoRuntimeSave)
                 {
-                    lastSerializationTime = DateTime.UtcNow;
-                    graveYardSize += sim.CreatureManager.Graveyard.Count;
-                    sim.TileMap.SerializeToFile("tilemap.dat");
-                    sim.CreatureManager.Serialize("creatures/creatures", "graveyard/graveyard");
-                    saveCount++;
+
+                    // Save progress every 10 seconds
+                    if ((now - lastSerializationTime).TotalSeconds > 10)
+                    {
+                        bool doBackup = (now - lastBackup).TotalMinutes > 10;
+                        if (doBackup)
+                        {
+                            lastBackup = now;
+                        }
+                        lastSerializationTime = DateTime.UtcNow;
+                        graveYardSize += sim.CreatureManager.Graveyard.Count;
+                        sim.TileMap.SerializeToFile("tilemap.dat");
+                        sim.CreatureManager.Serialize("creatures/creatures", "graveyard/graveyard",doBackup);
+                        
+                        saveCount++;
+                    }
                 }
 
             }
 
             Console.WriteLine("Simulation finished, saving....");
             sim.TileMap.SerializeToFile("tilemap.dat");
-            sim.CreatureManager.Serialize("creatures/creatures", "graveyard/graveyard", true);
+            sim.CreatureManager.Serialize("creatures/creatures", "graveyard/graveyard",true, true);
             sim.Shutdown();
             string finalInfo = FormatStatisticsInfo("Ran simulation for", elapsedTime, sim, Iteration, creaturesUpdateCycles, graveYardSize, saveCount);
             Console.WriteLine(finalInfo);

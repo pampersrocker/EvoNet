@@ -261,7 +261,7 @@ namespace EvoNet.Controls
                         {
                             CreateCache(graph);
                         }
-                        catch (System.Exception ex)
+                        catch (Exception)
                         {
                         	
                         }
