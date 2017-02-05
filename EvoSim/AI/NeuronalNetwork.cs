@@ -450,7 +450,7 @@ namespace EvoNet.AI
                     float weight = 0.0f;
                     if (lastHiddenLayerIndex < ((WorkingNeuron)LastHiddenLayer[lastHiddenLayerIndex]).GetConnections().Count)
                     {
-                        weight = ((WorkingNeuron)LastHiddenLayer[lastHiddenLayerIndex]).GetConnections()[lastHiddenLayerIndex].weight;
+                        weight = ((WorkingNeuron)LastHiddenLayer[newNeuronIndex]).GetConnections()[lastHiddenLayerIndex].weight;
                     }
                     newNeuron.AddNeuronConnection(LastHiddenLayer[lastHiddenLayerIndex], weight * 2);
                     
