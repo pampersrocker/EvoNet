@@ -39,8 +39,8 @@ namespace EvoSim.Config
                 config.NumberOfStartNeuronLayers = 1;
                 config.UseMate = true;
                 config.MateBrainPercentage = 0.05f;
-                config.AddRemoveLayerPercentage = 0.05f;
-                config.WaterPercentage = 0.3f;
+                config.AddRemoveLayerPercentage = 0.01f;
+                config.WaterPercentage = 0.5f;
                 config.DoRuntimeSave = true;
                 config.UseGraveyard = true;
                 config.AddHiddenNeuronPercentage = 0.01f;
