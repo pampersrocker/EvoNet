@@ -257,7 +257,14 @@ namespace EvoNet.Controls
             {
                 WaitCallback worker = (state) =>
                     {
-                        CreateCache(graph);
+                        try
+                        {
+                            CreateCache(graph);
+                        }
+                        catch (System.Exception ex)
+                        {
+                        	
+                        }
                     };
                 ThreadPool.QueueUserWorkItem(worker);
             }
