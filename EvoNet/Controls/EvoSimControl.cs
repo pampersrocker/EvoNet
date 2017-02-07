@@ -135,10 +135,13 @@ namespace EvoNet.Controls
 
             foreach (var module in modules)
             {
-                module.NotifyTick((float)gameTime.ElapsedGameTime.TotalSeconds);
+                if (!inputManager.Paused || !module.WantsFastForward)
+                {
+                    module.NotifyTick((float)gameTime.ElapsedGameTime.TotalSeconds);
+                }
             }
-
-            if (inputManager.EnableFastForward)
+            
+            if (!inputManager.Paused && inputManager.EnableFastForward)
             {
                 DateTime startFastForward = DateTime.UtcNow;
                 double clampedElapsedTime = Math.Min(gameTime.ElapsedGameTime.TotalSeconds, 0.033);

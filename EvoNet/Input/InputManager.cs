@@ -17,6 +17,7 @@ namespace EvoNet.Input
 
         bool rightMouseDown = false;
         bool oldSpaceDown = false;
+        bool oldEnterDown = false;
         Vector2 oldMousePosition = Vector2.Zero;
         int scrollWheelValue;
 
@@ -25,6 +26,7 @@ namespace EvoNet.Input
         SimulationRenderer renderer;
 
         public bool EnableFastForward { get; private set; }
+        public bool Paused { get; private set; }
 
         public override bool WantsFastForward
         {
@@ -76,6 +78,13 @@ namespace EvoNet.Input
                 EnableFastForward = !EnableFastForward;
             }
 
+            bool enterDown = keyboardState.IsKeyDown(Keys.Enter);
+
+            if (!oldEnterDown && enterDown)
+            {
+                Paused = !Paused;
+            }
+
             if (keyboardState.IsKeyDown(Keys.R))
             {
                 float viewportWidth = renderer.GraphicsDevice.Viewport.Width;
@@ -88,6 +97,7 @@ namespace EvoNet.Input
             }
 
             oldSpaceDown = spaceDown;
+            oldEnterDown = enterDown;
             scrollWheelValue = mouseState.ScrollWheelValue;
 
             oldMousePosition = new Vector2(mouseState.X, mouseState.Y);
