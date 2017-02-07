@@ -35,6 +35,7 @@ namespace EvoSim.Objects
         private WorkingNeuron outFeelerAngle = new WorkingNeuron(-1);
         private WorkingNeuron outAttack = new WorkingNeuron(-1);
 
+        [NonSerialized]
         private Creature feelerCreature = null;
         private Creature owner = null;
 

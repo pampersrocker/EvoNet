@@ -87,6 +87,11 @@ namespace Graph
 			values.RemoveAt(index);
 		}
 
+        public void RemoveRange(int index, int count)
+        {
+            values.RemoveRange(index, count);
+        }
+
 		public IGraphValue this[int index]
 		{
 			get

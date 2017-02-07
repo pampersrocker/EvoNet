@@ -111,7 +111,7 @@ namespace EvoNet.Controls
             GraphCache cache;
             int CurrentVertexIndex = 0;
             int graphCount = graph.Count;
-            int startIndex = Math.Max(graph.Count - 10000, 0);
+            int startIndex = 0;
             int elementCount = graphCount - startIndex;
             if (elementCount <= 0)
             {
@@ -124,7 +124,7 @@ namespace EvoNet.Controls
             decimal maxX = graph[startIndex].DisplayPosition;
             decimal minX = graph[startIndex].DisplayPosition;
 
-            for(int elementIndex = startIndex; elementIndex < graphCount; elementIndex++)
+            for (int elementIndex = startIndex; elementIndex < graphCount; elementIndex++)
             {
                 maxY = Math.Max(maxY, graph[elementIndex].DisplayValue);
                 minY = Math.Min(minY, graph[elementIndex].DisplayValue);
@@ -152,8 +152,8 @@ namespace EvoNet.Controls
             upperPoint.Position = new Vector2(-1, GetRelativeY(graph.ElementAt(0).DisplayValue));
             lowerPoint.Position = new Vector2(-1, -1);
 
-            VertexPosition2[] vertexAreaBufferData = new VertexPosition2[((graphCount - startIndex)+1) * 2];
-            VertexPosition2[] vertexLineBufferData = new VertexPosition2[((graphCount - startIndex)+1) * 2];
+            VertexPosition2[] vertexAreaBufferData = new VertexPosition2[((graphCount - startIndex) + 1) * 2];
+            VertexPosition2[] vertexLineBufferData = new VertexPosition2[((graphCount - startIndex) + 1) * 2];
             int[] indexBufferData = new int[((graphCount - startIndex)) * 6];
             int CurrentIndexBufferIndex = 0;
 
@@ -232,14 +232,18 @@ namespace EvoNet.Controls
 
             cache.NumElements = graphCount;
             GraphCache oldCache;
-            if (graphCaches.TryGetValue(graph, out oldCache))
+            lock (this)
             {
-                graphCaches.Remove(graph);
-                oldCache.IndexAreaBuffer?.Dispose();
-                oldCache.VertexAreaBuffer?.Dispose();
-                oldCache.VertexLineBuffer?.Dispose();
+                if (graphCaches.TryGetValue(graph, out oldCache))
+                {
+                    graphCaches.Remove(graph);
+                    oldCache.IndexAreaBuffer?.Dispose();
+                    oldCache.VertexAreaBuffer?.Dispose();
+                    oldCache.VertexLineBuffer?.Dispose();
+                }
+                graphCaches[graph] = cache;
             }
-            graphCaches[graph] = cache;
+
         }
 
         private void DrawGraph(IGraphValueList graph)
@@ -252,13 +256,13 @@ namespace EvoNet.Controls
             GraphCache cache;
 
             bool needsRedraw = true;
-            if (graphCaches.TryGetValue(graph, out cache))
-            {
-                if (cache.NumElements == graph.Count)
-                {
-                    needsRedraw = false;
-                }
-            }
+            //if (graphCaches.TryGetValue(graph, out cache))
+            //{
+            //    if (cache.NumElements == graph.Count)
+            //    {
+            //        needsRedraw = false;
+            //    }
+            //}
 
 
             if (needsRedraw)
@@ -276,15 +280,17 @@ namespace EvoNet.Controls
                     };
                 ThreadPool.QueueUserWorkItem(worker);
             }
-            if (graphCaches.TryGetValue(graph, out cache))
+            lock (this)
             {
-                DrawCache(graph, ref cache);
+                if (graphCaches.TryGetValue(graph, out cache))
+                {
+                    DrawCache(graph, ref cache);
+                }
             }
         }
 
         protected override void Draw(GameTime gameTime)
         {
-
             //GraphicsDevice.RasterizerState.MultiSampleAntiAlias = true;
             PresentationParameters pp = GraphicsDevice.PresentationParameters;
             if (pp.MultiSampleCount < 4)

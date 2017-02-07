@@ -18,6 +18,8 @@ namespace EvoNet.Configuration
 
         public float ScaleFactor { get; set; }
 
+        public long GraphCount { get; set; }
+
 
         public static GameConfig DefaultConfig
         {
@@ -30,6 +32,7 @@ namespace EvoNet.Configuration
                 config.MoveRightKeys = new List<Keys> { Keys.D, Keys.Right };
                 config.MovementSensitivity = 100.0f;
                 config.ScaleFactor = 0.1f;
+                config.GraphCount = 10000;
                 return config;
             }
         }
@@ -42,12 +45,19 @@ namespace EvoNet.Configuration
                 Deserializer yamlDeserializer = new Deserializer();
                 GameConfig deserialized = yamlDeserializer.Deserialize<GameConfig>(sourceText);
                 CheckLoadedConfig(deserialized);
+                SerializerBuilder builder = new SerializerBuilder();
+                builder.EmitDefaults();
+                Serializer yamlSerializer = builder.Build();
+                string serialized = yamlSerializer.Serialize(deserialized);
+                File.WriteAllText("Config.cfg", serialized);
                 return deserialized;
             }
             else
             {
                 // Write out default config if there is no config for easier adjustment
-                Serializer yamlSerializer = new Serializer();
+                SerializerBuilder builder = new SerializerBuilder();
+                builder.EmitDefaults();
+                Serializer yamlSerializer = builder.Build();
                 string serialized = yamlSerializer.Serialize(DefaultConfig);
                 File.WriteAllText("Config.cfg", serialized);
                 return DefaultConfig;
@@ -56,6 +66,10 @@ namespace EvoNet.Configuration
 
         public static void CheckLoadedConfig(GameConfig config)
         {
+            if (config.GraphCount == 0)
+            {
+                config.GraphCount = 10000;
+            }
         }
     }
 }

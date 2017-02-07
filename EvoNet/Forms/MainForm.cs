@@ -79,6 +79,14 @@ namespace EvoNet.Forms
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            if (lastFoodIndex == 0)
+            {
+                lastFoodIndex = (int)Math.Max(0, TileMap.FoodRecord.Count - evoSimControl1.gameConfiguration.GraphCount);
+            }
+            if (lastCreatureIndex == 0)
+            {
+                lastCreatureIndex = (int)Math.Max(0, CreatureManager.AliveCreaturesRecord.Count - evoSimControl1.gameConfiguration.GraphCount);
+            }
             while (lastFoodIndex < TileMap.FoodRecord.Count)
             {
                 fictionalDateForFood += TimeSpan.FromSeconds(TileMap.FixedUpdateTime);
@@ -92,6 +100,14 @@ namespace EvoNet.Forms
                 float Value = CreatureManager.AliveCreaturesRecord[lastCreatureIndex];
                 lastCreatureIndex++;
                 numberCreaturesAlive.Add(new GraphTimeDoubleValue(fictionalDateForCreatures, Value));
+            }
+            if (foodValueList.Count > evoSimControl1.gameConfiguration.GraphCount)
+            {
+                foodValueList.RemoveRange(0, (int)(foodValueList.Count - evoSimControl1.gameConfiguration.GraphCount));
+            }
+            if (numberCreaturesAlive.Count > evoSimControl1.gameConfiguration.GraphCount)
+            {
+                numberCreaturesAlive.RemoveRange(0, (int)(numberCreaturesAlive.Count - evoSimControl1.gameConfiguration.GraphCount));
             }
             //FoodGraph.Refresh();
         }
