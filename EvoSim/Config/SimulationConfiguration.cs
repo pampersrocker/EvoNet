@@ -57,8 +57,10 @@ namespace EvoSim.Config
                 Deserializer yamlDeserializer = new Deserializer();
                 SimulationConfiguration deserialized = yamlDeserializer.Deserialize<SimulationConfiguration>(sourceText);
                 CheckLoadedConfig(deserialized);
-                // Write config with updated values
-                Serializer yamlSerializer = new Serializer();
+                // Write config with updated values 
+                SerializerBuilder builder = new SerializerBuilder();
+                builder.EmitDefaults();
+                Serializer yamlSerializer = builder.Build();
                 string serialized = yamlSerializer.Serialize(deserialized);
                 File.WriteAllText("Simulation.cfg", serialized);
                 return deserialized;
@@ -66,7 +68,9 @@ namespace EvoSim.Config
             else
             {
                 // Write out default config if there is no config for easier adjustment
-                Serializer yamlSerializer = new Serializer();
+                SerializerBuilder builder = new SerializerBuilder();
+                builder.EmitDefaults();
+                Serializer yamlSerializer = builder.Build();
                 string serialized = yamlSerializer.Serialize(DefaultConfig);
                 File.WriteAllText("Simulation.cfg", serialized);
                 return DefaultConfig;
