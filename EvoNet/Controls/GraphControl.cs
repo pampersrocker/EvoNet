@@ -231,6 +231,14 @@ namespace EvoNet.Controls
             cache.IndexAreaBuffer.SetData(indexBufferData);
 
             cache.NumElements = graphCount;
+            GraphCache oldCache;
+            if (graphCaches.TryGetValue(graph, out oldCache))
+            {
+                graphCaches.Remove(graph);
+                oldCache.IndexAreaBuffer?.Dispose();
+                oldCache.VertexAreaBuffer?.Dispose();
+                oldCache.VertexLineBuffer?.Dispose();
+            }
             graphCaches[graph] = cache;
         }
 
