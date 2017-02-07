@@ -183,6 +183,7 @@
             this.evoSimControl1.Size = new System.Drawing.Size(697, 564);
             this.evoSimControl1.TabIndex = 2;
             this.evoSimControl1.Text = "evoSimControl1";
+            this.evoSimControl1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.evoSimControl1_MouseClick);
             // 
             // NumberOfCreaturesAliveGraph
             // 

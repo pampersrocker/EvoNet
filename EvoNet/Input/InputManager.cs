@@ -1,4 +1,5 @@
 ﻿using EvoNet.Configuration;
+using EvoNet.Objects;
 using EvoNet.Providers;
 using EvoNet.Rendering;
 using EvoSim;
@@ -57,6 +58,26 @@ namespace EvoNet.Input
         {
             base.Initialize(ingame);
             scrollWheelValue = Mouse.GetState().ScrollWheelValue;
+        }
+
+        public void OnMouseClick(Vector2 mousePosition)
+        {
+            Vector2 mousePos = Vector2.Transform(mousePosition, Matrix.Invert(camera.Matrix));
+            float distanceSq = float.MaxValue;
+            Creature closestCreature = null;
+            foreach (Creature creature in simulation.CreatureManager.Creatures)
+            {
+                float distance = (creature.Pos.ToXNA() - mousePos).LengthSquared();
+                if (distance < distanceSq)
+                {
+                    distanceSq = distance;
+                    closestCreature = creature;
+                }
+            }
+            if (closestCreature != null)
+            {
+                simulation.CreatureManager.SelectedCreature = closestCreature;
+            }
         }
 
         protected override void Update(float gameTime)

@@ -180,5 +180,23 @@ namespace EvoNet.Controls
             simRenderer.Draw(gameTime, null);
             base.Draw(gameTime);
         }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // EvoSimControl
+            // 
+            this.ResumeLayout(false);
+
+        }
+
+        public void EvoSimControl_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                inputManager.OnMouseClick(GetMousePosition());
+            }
+        }
     }
 }

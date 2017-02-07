@@ -127,5 +127,10 @@ namespace EvoNet.Forms
         {
             networkRenderControl1.Simulation = evoSimControl1.sim;
         }
+
+        private void evoSimControl1_MouseClick(object sender, MouseEventArgs e)
+        {
+            evoSimControl1.EvoSimControl_MouseClick(sender, e);
+        }
     }
 }
